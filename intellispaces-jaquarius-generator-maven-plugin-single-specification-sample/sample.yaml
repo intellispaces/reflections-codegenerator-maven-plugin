@@ -1,0 +1,12 @@
+intellispaces: "0.0"
+info:
+  title: The empty domain samples
+ontology:
+  spaces:
+    intellispaces.jaquarius.generator.maven.plugin.sample:
+      sid: 72f73a7e-eba8-4338-b4fa-94d9c769e314
+
+  domains:
+    intellispaces.jaquarius.generator.maven.plugin.sample.Empty:
+      description: The empty domain sample
+      did: 9938abbf-2778-402b-8699-61afb0497e80

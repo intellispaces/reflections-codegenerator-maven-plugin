@@ -1,0 +1,8 @@
+package {{$packageName}};
+
+import tech.intellispaces.jaquarius.annotation.Domain;
+
+@Domain("{{$did}}")
+public interface {{$simpleName}} {
+
+}

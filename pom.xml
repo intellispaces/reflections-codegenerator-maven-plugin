@@ -1,0 +1,45 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>tech.intellispaces.parent</groupId>
+        <artifactId>intellispaces-parent-pom</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <groupId>tech.intellispaces.jaquarius</groupId>
+    <artifactId>intellispaces-jaquarius-generator-maven-plugin-parent</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>intellispaces-jaquarius-generator-maven-plugin</module>
+        <module>intellispaces-jaquarius-generator-maven-plugin-model</module>
+        <module>intellispaces-jaquarius-generator-maven-plugin-single-specification-sample</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Intellispaces-->
+            <dependency>
+                <groupId>tech.intellispaces.jaquarius</groupId>
+                <artifactId>intellispaces-jaquarius-core</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.intellispaces.common</groupId>
+                <artifactId>intellispaces-template-engine</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.intellispaces.common</groupId>
+                <artifactId>intellispaces-general-model</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.intellispaces.common</groupId>
+                <artifactId>intellispaces-general</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
