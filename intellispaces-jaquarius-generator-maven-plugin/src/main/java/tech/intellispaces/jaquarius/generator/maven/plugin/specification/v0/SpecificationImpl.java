@@ -2,8 +2,8 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0;
 
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationVersion;
 
-record SpecificationV0Impl(
+record SpecificationImpl(
     SpecificationVersion version,
-    OntologySpecificationV0 ontology
+    OntologySpecification ontology
 ) implements SpecificationV0 {
 }

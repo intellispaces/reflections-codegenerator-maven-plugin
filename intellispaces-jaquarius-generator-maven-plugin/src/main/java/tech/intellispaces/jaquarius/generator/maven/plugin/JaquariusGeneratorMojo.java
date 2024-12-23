@@ -43,7 +43,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
     Specification spec = SpecificationFunctions.read(cfg.settings());
 
-    GenerationFunctions.generate(cfg, spec);
+    GenerationFunctions.generate(spec, cfg);
 
     project.addCompileSourceRoot(cfg.settings().outputDirectory());
   }

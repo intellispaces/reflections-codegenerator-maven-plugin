@@ -8,10 +8,10 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.Spec
 
 public interface GenerationFunctions {
 
-  static void generate(Configuration cfg, Specification spec) throws MojoExecutionException {
+  static void generate(Specification spec, Configuration cfg) throws MojoExecutionException {
     switch (SpecificationVersions.from(spec.version())) {
       case V0_0:
-        GenerationV0Functions.generate(cfg, (SpecificationV0) spec);
+        GenerationFunctionsV0.generate((SpecificationV0) spec, cfg);
         break;
       default:
         throw new MojoExecutionException("Unsupported specification version " + spec.version().naming());

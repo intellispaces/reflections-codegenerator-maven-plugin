@@ -1,8 +1,10 @@
 package {{$packageName}};
 
-import tech.intellispaces.jaquarius.annotation.Domain;
+{{for importedClass : $importedClasses}}
+import {{$importedClass}};
+{{end}}
 
 @Domain("{{$did}}")
-public interface {{$simpleName}} {
+public interface {{$simpleName}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent.get("name")}}{{end}}{{end}} {
 
 }

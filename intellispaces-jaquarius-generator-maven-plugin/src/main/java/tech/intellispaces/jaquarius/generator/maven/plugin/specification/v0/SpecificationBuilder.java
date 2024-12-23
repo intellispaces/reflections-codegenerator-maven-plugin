@@ -2,22 +2,22 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0;
 
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationVersion;
 
-public class SpecificationV0Builder {
+public class SpecificationBuilder {
   private SpecificationVersion version;
-  private OntologySpecificationV0 ontology;
+  private OntologySpecification ontology;
 
-  public SpecificationV0Builder version(SpecificationVersion version) {
+  public SpecificationBuilder version(SpecificationVersion version) {
     this.version = version;
     return this;
   }
 
-  public SpecificationV0Builder ontology(OntologySpecificationV0 ontology) {
+  public SpecificationBuilder ontology(OntologySpecification ontology) {
     this.ontology = ontology;
     return this;
   }
 
   public SpecificationV0 get() {
-    return new SpecificationV0Impl(
+    return new SpecificationImpl(
         version,
         ontology
     );

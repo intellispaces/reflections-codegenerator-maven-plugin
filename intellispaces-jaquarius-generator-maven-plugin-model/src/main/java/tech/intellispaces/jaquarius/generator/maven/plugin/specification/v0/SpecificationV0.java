@@ -4,5 +4,5 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specifi
 
 public interface SpecificationV0 extends Specification {
 
-  OntologySpecificationV0 ontology();
+  OntologySpecification ontology();
 }

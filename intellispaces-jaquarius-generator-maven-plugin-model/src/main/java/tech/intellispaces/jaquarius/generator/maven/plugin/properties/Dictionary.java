@@ -5,9 +5,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import java.util.List;
 
 /**
- * The properties.
+ * The dictionary.
  */
-public interface Properties {
+public interface Dictionary {
 
   /**
    * The path.
@@ -23,11 +23,13 @@ public interface Properties {
    */
   String name();
 
+  boolean hasProperty(String propertyName);
+
   String readString(String propertyName) throws MojoExecutionException;
 
   String readStringNullable(String propertyName) throws MojoExecutionException;
 
-  Properties readProperties(String propertyName) throws MojoExecutionException;
+  Dictionary readProperties(String propertyName) throws MojoExecutionException;
 
-  List<Properties> readLabeledPropertiesList(String propertyName) throws MojoExecutionException;
+  List<Dictionary> readLabeledPropertiesList(String propertyName) throws MojoExecutionException;
 }

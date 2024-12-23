@@ -2,7 +2,7 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0;
 
 import java.util.List;
 
-public interface OntologySpecificationV0 {
+public interface OntologySpecification {
 
-  List<DomainSpecificationV0> domains();
+  List<DomainSpecification> domains();
 }
