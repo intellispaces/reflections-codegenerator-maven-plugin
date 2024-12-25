@@ -5,6 +5,19 @@ import {{$importedClass}};
 {{end}}
 
 @Domain("{{$did}}")
-public interface {{$simpleName}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent.get("name")}}{{end}}{{end}} {
+public interface {{$simpleName}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent."name"}}{{end}}{{end}} {
 
+{{for channel : $channels}}
+{{when eachOf($channel."name".isEmpty(), $channel."allowedTraverse".isEmpty()).isTrue()}}
+  @Channel("{{$channel."cid"}}")
+{{else}}
+  @Channel(
+    value = "{{$channel."cid"}}"
+    {{when $channel."name".isNotEmpty()}}, name = "{{$channel."name"}}" {{end}}
+    {{when $channel."allowedTraverse".isNotEmpty()}}, allowedTraverse = {{$channel."allowedTraverse"}} {{end}}
+  )
+{{end}}
+  {{$channel."target"}} {{$channel."alias"}}({{for qualifier : $channel."qualifiers"}}{{$qualifier."class"}} {{$qualifier."name"}}{{end}});
+
+{{end}}
 }

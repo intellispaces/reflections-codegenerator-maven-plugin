@@ -14,7 +14,7 @@
     <modules>
         <module>intellispaces-jaquarius-generator-maven-plugin</module>
         <module>intellispaces-jaquarius-generator-maven-plugin-model</module>
-        <module>intellispaces-jaquarius-generator-maven-plugin-single-specification-sample</module>
+        <module>intellispaces-jaquarius-generator-maven-plugin-samples</module>
     </modules>
 
     <dependencyManagement>

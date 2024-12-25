@@ -2,22 +2,23 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Settings;
-import tech.intellispaces.jaquarius.generator.maven.plugin.properties.Dictionary;
+import tech.intellispaces.jaquarius.generator.maven.plugin.dictionary.Dictionary;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.SpecificationV0p0ReadFunctions;
 
-public interface SpecificationFunctions {
+public interface SpecificationReadFunctions {
 
-  static Specification read(Settings settings) throws MojoExecutionException {
+  static Specification readSpecification(Settings settings) throws MojoExecutionException {
     String specPath = settings.specificationPath();
     if (specPath.endsWith(".yaml")) {
-      return YamlSpecificationFunctions.read(specPath);
+      return YamlSpecificationReadFunctions.readSpecification(specPath);
     }
     throw new MojoExecutionException("Unsupported specification type of specification file " + specPath);
   }
 
-  static Specification read(Dictionary spec) throws MojoExecutionException {
+  static Specification readSpecification(Dictionary spec) throws MojoExecutionException {
     SpecificationVersion version = readVersion(spec);
     return switch (SpecificationVersions.from(version)) {
-      case V0_0 -> tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.SpecificationFunctions.read(spec);
+      case V0p0 -> SpecificationV0p0ReadFunctions.readSpecification(spec);
     };
   }
 

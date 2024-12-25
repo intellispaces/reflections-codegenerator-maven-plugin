@@ -5,7 +5,7 @@ import tech.intellispaces.general.entity.Enumeration;
 
 public enum SpecificationVersions implements SpecificationVersion, Enumeration<SpecificationVersion> {
 
-  V0_0("0.0");
+  V0p0("0.0");
 
   private final String naming;
 

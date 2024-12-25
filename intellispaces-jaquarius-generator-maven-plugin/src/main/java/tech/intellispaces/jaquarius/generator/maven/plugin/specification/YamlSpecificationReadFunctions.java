@@ -2,23 +2,23 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.yaml.snakeyaml.Yaml;
-import tech.intellispaces.jaquarius.generator.maven.plugin.propeties.Dictionaries;
+import tech.intellispaces.jaquarius.generator.maven.plugin.dictionary.Dictionaries;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Map;
 
-public class YamlSpecificationFunctions {
+public class YamlSpecificationReadFunctions {
   private static final Yaml YAML = new Yaml();
 
-  public static Specification read(String specificationPath) throws MojoExecutionException {
+  public static Specification readSpecification(String specificationPath) throws MojoExecutionException {
     try {
       Map<String, Object> map = YAML.load(new FileInputStream(specificationPath));
-      return SpecificationFunctions.read(Dictionaries.get(map));
+      return SpecificationReadFunctions.readSpecification(Dictionaries.get(map));
     } catch (FileNotFoundException e){
       throw new MojoExecutionException(e);
     }
   }
 
-  private YamlSpecificationFunctions() {}
+  private YamlSpecificationReadFunctions() {}
 }

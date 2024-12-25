@@ -1,10 +1,9 @@
-package tech.intellispaces.jaquarius.generator.maven.plugin.propeties;
+package tech.intellispaces.jaquarius.generator.maven.plugin.dictionary;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import tech.intellispaces.general.collection.CollectionFunctions;
 import tech.intellispaces.general.exception.NotImplementedExceptions;
 import tech.intellispaces.general.text.StringFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.properties.Dictionary;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +27,18 @@ class MapBasedDictionary implements Dictionary {
   @Override
   public String name() {
     return name;
+  }
+
+  @Override
+  public Dictionary traverse(String path) throws MojoExecutionException {
+    if (path == null || path.isEmpty()) {
+      return this;
+    }
+    Dictionary dictionary = this;
+    for (String transition : StringFunctions.splitAndTrim(path, ".")) {
+      dictionary = dictionary.readDictionary(transition);
+    }
+    return dictionary;
   }
 
   @Override
@@ -61,7 +72,7 @@ class MapBasedDictionary implements Dictionary {
 
   @Override
   @SuppressWarnings("unchecked")
-  public Dictionary readProperties(String propertyName) throws MojoExecutionException {
+  public Dictionary readDictionary(String propertyName) throws MojoExecutionException {
     Object value = map.get(propertyName);
     if (value == null) {
       throw new MojoExecutionException("The property '" + joinPath(propertyName) + "' is not found");
@@ -69,15 +80,15 @@ class MapBasedDictionary implements Dictionary {
     if (value instanceof Map) {
       return Dictionaries.get(joinPath(propertyName), propertyName, (Map<String, Object>) value);
     }
-    throw new MojoExecutionException("Value of the property " + joinPath(propertyName) + " is not map");
+    throw new MojoExecutionException("Value of the property " + joinPath(propertyName) + " is not dictionary");
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<Dictionary> readLabeledPropertiesList(String propertyName) throws MojoExecutionException {
+  public List<Dictionary> readDictionaryListNullable(String propertyName) throws MojoExecutionException {
     Object value = map.get(propertyName);
     if (value == null) {
-      throw new MojoExecutionException("The property '" + joinPath(propertyName) + "' is not found");
+      return null;
     }
     if (value instanceof Map) {
       var valueMap = (Map<String, Object>) value;
@@ -89,24 +100,62 @@ class MapBasedDictionary implements Dictionary {
               (Map<String, Object>) e.getValue()
           );
         } else {
-          throw new MojoExecutionException("Value of the property " + joinPath(propertyName, e.getKey()) + " is not map");
+          throw new MojoExecutionException("Value of the property " + joinPath(propertyName, e.getKey()) +
+              " is not map");
         }
       });
     }
     if (value instanceof List<?> valueList) {
-      return CollectionFunctions.mapEach(valueList, v -> {
+      return CollectionFunctions.mapEach(valueList, (v, index) -> {
         if (v instanceof String) {
           return Dictionaries.get(
               joinPath(propertyName, (String) v),
               (String) v,
               Map.of()
           );
+        } else if (v instanceof Map) {
+          var map = (Map<String, Object>) v;
+          return Dictionaries.get(
+              joinPath(propertyName, "[" + index + "]"),
+              "[" + index + "]",
+              map
+          );
         } else {
           throw NotImplementedExceptions.withCode("YTM0NZ");
         }
       });
     }
-    throw new MojoExecutionException("Value of the property " + joinPath(propertyName) + " is not labeled list");
+    throw new MojoExecutionException("Value of the property " + joinPath(propertyName) + " is not list");
+  }
+
+  public List<Dictionary> readDictionaryList(String propertyName) throws MojoExecutionException {
+    List<Dictionary> dictionaries = readDictionaryListNullable(propertyName);
+    if (dictionaries == null) {
+      throw new MojoExecutionException("The property '" + joinPath(propertyName) + "' is not found");
+    }
+    return dictionaries;
+  }
+
+  @Override
+  public List<String> readStringList(String propertyName) throws MojoExecutionException {
+    List<String> list = readStringListNullable(propertyName);
+    if (list == null) {
+      throw new MojoExecutionException("The property '" + joinPath(propertyName) + "' is not found");
+    }
+    return list;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<String> readStringListNullable(String propertyName) throws MojoExecutionException {
+    Object value = map.get(propertyName);
+    if (value == null) {
+      return null;
+    }
+    if (value instanceof List<?>) {
+      return (List<String>) value;
+    }
+    throw new MojoExecutionException("Value of the property " + joinPath(propertyName) + " is not list");
   }
 
   String joinPath(String secondPath) {

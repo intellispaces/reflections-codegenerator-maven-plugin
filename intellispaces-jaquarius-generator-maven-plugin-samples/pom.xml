@@ -7,7 +7,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>intellispaces-jaquarius-generator-maven-plugin-single-specification-sample</artifactId>
+    <artifactId>intellispaces-jaquarius-generator-maven-plugin-samples</artifactId>
     <packaging>jar</packaging>
     <version>0.0.1-SNAPSHOT</version>
 
@@ -25,7 +25,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <inputSpec>${project.basedir}/sample.yaml</inputSpec>
+                    <inputSpec>${project.basedir}/empty_domain.yaml</inputSpec>
                     <packageName>tech</packageName>
                 </configuration>
             </plugin>

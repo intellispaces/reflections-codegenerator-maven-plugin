@@ -7,6 +7,7 @@ public class DomainSpecificationBuilder {
   private String did;
   private String description;
   private List<ParentDomainSpecification> parents = List.of();
+  private List<DomainChannelSpecification> channels;
 
   public DomainSpecificationBuilder label(String label) {
     this.label = label;
@@ -28,12 +29,18 @@ public class DomainSpecificationBuilder {
     return this;
   }
 
+  public DomainSpecificationBuilder channels(List<DomainChannelSpecification> projections) {
+    this.channels = projections;
+    return this;
+  }
+
   public DomainSpecification get() {
     return new DomainSpecificationImpl(
         label,
         did,
         description,
-        parents
+        parents,
+        channels
     );
   }
 }

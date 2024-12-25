@@ -7,26 +7,22 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.ConfigurationFunctions;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.ConfigurationReaderFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationFunctions;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
 
-@Mojo(name = "jaquarius-generator", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+@Mojo(
+    name = "jaquarius-generator",
+    defaultPhase = LifecyclePhase.GENERATE_SOURCES
+)
 public class JaquariusGeneratorMojo extends AbstractMojo {
-
   /**
    * The specification file path.
    */
   @Parameter(property = "inputSpec", required = true)
   private String inputSpec;
-
-  /**
-   * The package name.
-   */
-  @Parameter(property = "packageName")
-  private String packageName;
 
   /**
    * The directory for generated Java source files.
@@ -39,21 +35,25 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException {
-    Configuration cfg = readConfiguration();
-
-    Specification spec = SpecificationFunctions.read(cfg.settings());
-
-    GenerationFunctions.generate(spec, cfg);
-
-    project.addCompileSourceRoot(cfg.settings().outputDirectory());
+    try {
+      Configuration cfg = readConfiguration();
+      Specification spec = SpecificationReadFunctions.readSpecification(cfg.settings());
+      GenerationFunctions.generateArtifacts(spec, cfg);
+      project.addCompileSourceRoot(cfg.settings().outputDirectory());
+    } catch (MojoExecutionException e) {
+      getLog().error("Failed to execute plugin", e);
+      throw e;
+    } catch (Exception e) {
+      getLog().error("Unexpected exception", e);
+      throw new MojoExecutionException("Unexpected exception", e);
+    }
   }
 
-  Configuration readConfiguration() {
+  Configuration readConfiguration() throws MojoExecutionException {
     var settings = SettingsProvider.builder()
         .specificationPath(inputSpec)
-        .packageName(packageName)
         .outputDirectory(outputDirectory)
         .get();
-    return ConfigurationFunctions.read(settings);
+    return ConfigurationReaderFunctions.readConfiguration(project, settings);
   }
 }

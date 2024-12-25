@@ -1,6 +1,4 @@
-package tech.intellispaces.jaquarius.generator.maven.plugin.propeties;
-
-import tech.intellispaces.jaquarius.generator.maven.plugin.properties.Dictionary;
+package tech.intellispaces.jaquarius.generator.maven.plugin.dictionary;
 
 import java.util.Map;
 

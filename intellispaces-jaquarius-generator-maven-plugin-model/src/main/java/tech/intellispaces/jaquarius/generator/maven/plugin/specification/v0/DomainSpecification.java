@@ -11,5 +11,7 @@ public interface DomainSpecification {
   String description();
 
   List<ParentDomainSpecification> parents();
+
+  List<DomainChannelSpecification> channels();
 }
 
