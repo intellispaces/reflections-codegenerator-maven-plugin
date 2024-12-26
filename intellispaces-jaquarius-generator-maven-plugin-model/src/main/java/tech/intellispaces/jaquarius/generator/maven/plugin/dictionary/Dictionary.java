@@ -23,9 +23,13 @@ public interface Dictionary {
    */
   String name();
 
+  List<String> properties();
+
   Dictionary traverse(String path) throws MojoExecutionException;
 
   boolean hasProperty(String propertyName);
+
+  boolean hasValue(String propertyName);
 
   String readString(String propertyName) throws MojoExecutionException;
 

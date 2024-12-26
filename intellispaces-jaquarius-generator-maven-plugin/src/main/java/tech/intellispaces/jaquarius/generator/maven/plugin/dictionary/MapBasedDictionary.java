@@ -5,15 +5,16 @@ import tech.intellispaces.general.collection.CollectionFunctions;
 import tech.intellispaces.general.exception.NotImplementedExceptions;
 import tech.intellispaces.general.text.StringFunctions;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 class MapBasedDictionary implements Dictionary {
   private final String path;
   private final String name;
-  private final Map<String, Object> map;
+  private final LinkedHashMap<String, Object> map;
 
-  MapBasedDictionary(String path, String name, Map<String, Object> map) {
+  MapBasedDictionary(String path, String name, LinkedHashMap<String, Object> map) {
     this.path = path;
     this.name = name;
     this.map = map;
@@ -27,6 +28,11 @@ class MapBasedDictionary implements Dictionary {
   @Override
   public String name() {
     return name;
+  }
+
+  @Override
+  public List<String> properties() {
+    return new ArrayList<>(map.keySet());
   }
 
   @Override
@@ -44,6 +50,11 @@ class MapBasedDictionary implements Dictionary {
   @Override
   public boolean hasProperty(String propertyName) {
     return map.containsKey(propertyName);
+  }
+
+  @Override
+  public boolean hasValue(String propertyName) {
+    return map.get(propertyName) != null;
   }
 
   @Override
@@ -77,8 +88,8 @@ class MapBasedDictionary implements Dictionary {
     if (value == null) {
       throw new MojoExecutionException("The property '" + joinPath(propertyName) + "' is not found");
     }
-    if (value instanceof Map) {
-      return Dictionaries.get(joinPath(propertyName), propertyName, (Map<String, Object>) value);
+    if (value instanceof LinkedHashMap<?,?>) {
+      return Dictionaries.get(joinPath(propertyName), propertyName, (LinkedHashMap<String, Object>) value);
     }
     throw new MojoExecutionException("Value of the property " + joinPath(propertyName) + " is not dictionary");
   }
@@ -90,14 +101,14 @@ class MapBasedDictionary implements Dictionary {
     if (value == null) {
       return null;
     }
-    if (value instanceof Map) {
-      var valueMap = (Map<String, Object>) value;
+    if (value instanceof LinkedHashMap) {
+      var valueMap = (LinkedHashMap<String, Object>) value;
       return CollectionFunctions.mapEach(valueMap.entrySet(), e -> {
-        if (e.getValue() instanceof Map) {
+        if (e.getValue() instanceof LinkedHashMap) {
           return Dictionaries.get(
               joinPath(propertyName, e.getKey()),
               e.getKey(),
-              (Map<String, Object>) e.getValue()
+              (LinkedHashMap<String, Object>) e.getValue()
           );
         } else {
           throw new MojoExecutionException("Value of the property " + joinPath(propertyName, e.getKey()) +
@@ -111,10 +122,10 @@ class MapBasedDictionary implements Dictionary {
           return Dictionaries.get(
               joinPath(propertyName, (String) v),
               (String) v,
-              Map.of()
+              new LinkedHashMap<>()
           );
-        } else if (v instanceof Map) {
-          var map = (Map<String, Object>) v;
+        } else if (v instanceof LinkedHashMap) {
+          var map = (LinkedHashMap<String, Object>) v;
           return Dictionaries.get(
               joinPath(propertyName, "[" + index + "]"),
               "[" + index + "]",

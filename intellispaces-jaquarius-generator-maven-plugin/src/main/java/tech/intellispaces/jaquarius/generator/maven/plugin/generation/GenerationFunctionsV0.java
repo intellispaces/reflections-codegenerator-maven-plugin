@@ -8,6 +8,7 @@ import tech.intellispaces.general.text.StringFunctions;
 import tech.intellispaces.general.type.ClassNameFunctions;
 import tech.intellispaces.jaquarius.annotation.Channel;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.DomainPurpose;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.ChannelQualifiedSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.DomainChannelSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.DomainSpecification;
@@ -147,12 +148,11 @@ public interface GenerationFunctionsV0 {
   }
 
   private static String getDomainClassName(String domainName, Configuration cfg) {
-    String className = cfg.settings().classMapping().get(domainName);
-    if (className != null) {
-      return className;
+    DomainPurpose domainPurpose = cfg.settings().domainPurposes().get(domainName);
+    if (domainPurpose != null) {
+      return domainPurpose.className();
     }
-    String normalName = domainName + "Domain";
-    return getClassName(normalName, cfg);
+    return getClassName(domainName + "Domain", cfg);
   }
 
   private static String getClassName(String entityName, Configuration cfg) {

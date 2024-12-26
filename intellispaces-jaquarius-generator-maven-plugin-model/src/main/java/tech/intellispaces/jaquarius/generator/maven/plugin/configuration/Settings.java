@@ -7,9 +7,11 @@ import java.util.Map;
  */
 public interface Settings {
 
+  String projectPath();
+
   String specificationPath();
 
   String outputDirectory();
 
-  Map<String, String> classMapping();
+  Map<String, DomainPurpose> domainPurposes();
 }

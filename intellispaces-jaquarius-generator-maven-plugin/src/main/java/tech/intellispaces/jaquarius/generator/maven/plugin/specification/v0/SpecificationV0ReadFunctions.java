@@ -6,12 +6,13 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.dictionary.Dictionary
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationVersions;
 
+import java.nio.file.Path;
 import java.util.List;
 
-public interface SpecificationV0p0ReadFunctions {
+public interface SpecificationV0ReadFunctions {
 
-  static Specification readSpecification(Dictionary spec) throws MojoExecutionException {
-    return Specifications.build()
+  static Specification readSpecification(Path path, Dictionary spec) throws MojoExecutionException {
+    return Specifications.build(path)
         .version(SpecificationVersions.V0p0)
         .ontology(readOntology(spec))
         .get();
@@ -29,7 +30,7 @@ public interface SpecificationV0p0ReadFunctions {
       return List.of();
     }
     List<Dictionary> domainDictionaries = ontologyDictionary.readDictionaryList("domains");
-    return CollectionFunctions.mapEach(domainDictionaries, SpecificationV0p0ReadFunctions::readDomain);
+    return CollectionFunctions.mapEach(domainDictionaries, SpecificationV0ReadFunctions::readDomain);
   }
 
   static DomainSpecification readDomain(Dictionary domainDictionary) throws MojoExecutionException {
@@ -49,7 +50,7 @@ public interface SpecificationV0p0ReadFunctions {
       return List.of();
     }
     List<Dictionary> parentDictionaries = domainDictionary.readDictionaryList("parents");
-    return CollectionFunctions.mapEach(parentDictionaries, SpecificationV0p0ReadFunctions::readDomainParent);
+    return CollectionFunctions.mapEach(parentDictionaries, SpecificationV0ReadFunctions::readDomainParent);
   }
 
   static ParentDomainSpecification readDomainParent(Dictionary parentDictionary) {
@@ -63,7 +64,7 @@ public interface SpecificationV0p0ReadFunctions {
       return List.of();
     }
     List<Dictionary> parentProperties = domainDictionary.readDictionaryList("channels");
-    return CollectionFunctions.mapEach(parentProperties, SpecificationV0p0ReadFunctions::readDomainChannel);
+    return CollectionFunctions.mapEach(parentProperties, SpecificationV0ReadFunctions::readDomainChannel);
   }
 
   static DomainChannelSpecification readDomainChannel(
@@ -71,7 +72,7 @@ public interface SpecificationV0p0ReadFunctions {
   ) throws MojoExecutionException {
     return DomainChannelSpecifications.build()
         .targetDomainName(channelDictionary.readString("target.domain.name"))
-        .alias(channelDictionary.readString("alias"))
+        .alias(readName(channelDictionary))
         .cid(channelDictionary.readString("cid"))
         .name(channelDictionary.readStringNullable("name"))
         .allowedTraverses(readAllowedTraverses(channelDictionary))
@@ -86,21 +87,35 @@ public interface SpecificationV0p0ReadFunctions {
       return List.of();
     }
     List<Dictionary> qualifierDictionaries = channelDictionary.readDictionaryList("qualifiers");
-    return CollectionFunctions.mapEach(qualifierDictionaries, SpecificationV0p0ReadFunctions::readChannelQualifier);
+    return CollectionFunctions.mapEach(qualifierDictionaries, SpecificationV0ReadFunctions::readChannelQualifier);
   }
 
   static ChannelQualifiedSpecification readChannelQualifier(
-      Dictionary qualifierProperty
+      Dictionary qualifierDictionary
   ) throws MojoExecutionException {
     return ChannelQualifiedSpecifications.get(
-        qualifierProperty.readString("name"),
-        qualifierProperty.readString("domain.name")
+        readName(qualifierDictionary),
+        qualifierDictionary.readString("domain.name")
     );
   }
 
-  static List<String> readAllowedTraverses(
-      Dictionary channelDictionary
-  ) throws MojoExecutionException {
+  static String readName(Dictionary dictionary) throws MojoExecutionException {
+    String alias = dictionary.readStringNullable("alias");
+    if (alias != null) {
+      return alias;
+    }
+    List<String> properties = dictionary.properties();
+    if (properties.isEmpty()) {
+      throw new MojoExecutionException("Invalid description: " + dictionary.path());
+    }
+    String firstProperty = properties.get(0);
+    if (dictionary.hasValue(firstProperty)) {
+      throw new MojoExecutionException("Invalid description: " + dictionary.path());
+    }
+    return firstProperty;
+  }
+
+  static List<String> readAllowedTraverses(Dictionary channelDictionary) throws MojoExecutionException {
     return channelDictionary.readStringListNullable("allowedTraverses");
   }
 }
