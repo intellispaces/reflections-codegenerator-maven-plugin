@@ -6,6 +6,10 @@ public interface DomainChannelSpecification {
 
   String targetDomainName();
 
+  String targetDomainRef();
+
+  String targetValueRef();
+
   String alias();
 
   String cid();
@@ -14,5 +18,5 @@ public interface DomainChannelSpecification {
 
   List<String> allowedTraverse();
 
-  List<ChannelQualifiedSpecification> qualifiers();
+  List<ValueQualifiedSpecification> valueQualifiers();
 }

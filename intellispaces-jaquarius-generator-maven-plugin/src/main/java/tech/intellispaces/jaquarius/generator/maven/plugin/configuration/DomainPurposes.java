@@ -6,7 +6,7 @@ public enum DomainPurposes implements Enumeration<DomainPurpose>, DomainPurpose 
 
   String("java.lang.String"),
 
-  Integer("java.lang.int"),
+  Integer("java.lang.Integer"),
 
   Domain("tech.intellispaces.general.type.Type");
 

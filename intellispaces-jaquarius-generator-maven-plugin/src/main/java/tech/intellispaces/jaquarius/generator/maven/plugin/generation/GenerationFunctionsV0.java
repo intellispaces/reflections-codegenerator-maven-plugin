@@ -4,12 +4,16 @@ import org.apache.maven.plugin.MojoExecutionException;
 import tech.intellispaces.action.runnable.RunnableAction;
 import tech.intellispaces.action.text.StringActions;
 import tech.intellispaces.general.collection.CollectionFunctions;
+import tech.intellispaces.general.exception.NotImplementedExceptions;
+import tech.intellispaces.general.exception.UnexpectedExceptions;
 import tech.intellispaces.general.text.StringFunctions;
 import tech.intellispaces.general.type.ClassNameFunctions;
 import tech.intellispaces.jaquarius.annotation.Channel;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.DomainPurpose;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.ChannelQualifiedSpecification;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.DomainPurposes;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.GenericQualifierSpecification;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.ValueQualifiedSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.DomainChannelSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.DomainSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.ParentDomainSpecification;
@@ -29,13 +33,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface GenerationFunctionsV0 {
+public class GenerationFunctionsV0 {
 
-  static void generateArtifacts(SpecificationV0 spec, Configuration cfg) throws MojoExecutionException {
+  public static void generateArtifacts(SpecificationV0 spec, Configuration cfg) throws MojoExecutionException {
     generateDomains(spec.ontology().domains(), cfg);
   }
 
-  private static void generateDomains(
+  static void generateDomains(
       List<DomainSpecification> domainSpecs, Configuration cfg
   ) throws MojoExecutionException {
     try {
@@ -51,13 +55,14 @@ public interface GenerationFunctionsV0 {
     }
   }
 
-  private static Map<String, Object> buildDomainTemplateVariables(
+  static Map<String, Object> buildDomainTemplateVariables(
       DomainSpecification domainSpec, String canonicalName, Configuration cfg
   ) {
     MutableImportList imports = ImportLists.get(canonicalName);
     imports.add(tech.intellispaces.jaquarius.annotation.Domain.class);
     return Map.of(
         "did", domainSpec.did(),
+        "qualifiers", buildGenericQualifierDeclarations(domainSpec.genericQualifiers(), imports, cfg),
         "parents", buildParentsTemplateVariables(domainSpec.parents(), imports, cfg),
         "channels", buildDomainChannelTemplateVariables(domainSpec.channels(), imports, cfg),
         "packageName", ClassNameFunctions.getPackageName(canonicalName),
@@ -66,7 +71,15 @@ public interface GenerationFunctionsV0 {
     );
   }
 
-  private static List<Map<String, Object>> buildParentsTemplateVariables(
+  static List<String> buildGenericQualifierDeclarations(
+      List<GenericQualifierSpecification> qualifierSpecs, MutableImportList imports, Configuration cfg
+  ) {
+    return qualifierSpecs.stream()
+        .map(GenericQualifierSpecification::name)
+        .toList();
+  }
+
+  static List<Map<String, Object>> buildParentsTemplateVariables(
       List<ParentDomainSpecification> parentSpecs, MutableImportList imports, Configuration cfg
   ) {
     var parens = new ArrayList<Map<String, Object>>();
@@ -78,18 +91,18 @@ public interface GenerationFunctionsV0 {
     return parens;
   }
 
-  private static List<Map<String, Object>> buildDomainChannelTemplateVariables(
+  static List<Map<String, Object>> buildDomainChannelTemplateVariables(
       List<DomainChannelSpecification> channelSpecs, MutableImportList imports, Configuration cfg
   ) {
     var channels = new ArrayList<Map<String, Object>>();
     for (DomainChannelSpecification channelSpec : channelSpecs) {
       var map = new HashMap<String, Object>();
-      map.put("target", imports.addAndGetSimpleName(getTargetDomainClassName(channelSpec, cfg)));
+      map.put("target", buildChannelTargetDeclaration(channelSpec, imports, cfg));
       map.put("alias", channelSpec.alias());
       map.put("cid", channelSpec.cid());
       map.put("name", channelSpec.name());
       map.put("allowedTraverse", buildAllowedTraverse(channelSpec.allowedTraverse(), imports));
-      map.put("qualifiers", buildChannelQualifiers(channelSpec.qualifiers(), imports, cfg));
+      map.put("valueQualifiers", buildChannelValueQualifiers(channelSpec.valueQualifiers(), imports, cfg));
       channels.add(map);
     }
     if (!channels.isEmpty()) {
@@ -98,14 +111,37 @@ public interface GenerationFunctionsV0 {
     return channels;
   }
 
-  private static List<Map<String, Object>> buildChannelQualifiers(
-      List<ChannelQualifiedSpecification> qualifiers, MutableImportList imports, Configuration cfg
+  static String buildChannelTargetDeclaration(
+      DomainChannelSpecification channelSpec, MutableImportList imports, Configuration cfg
   ) {
-    return CollectionFunctions.mapEach(qualifiers, q -> buildChannelQualifier(q, imports, cfg));
+    if (channelSpec.targetDomainName() != null) {
+      String targetDomainName = channelSpec.targetDomainName();
+      String targetDomainClass = getDomainClassName(channelSpec.targetDomainName(), cfg);
+      String className = imports.addAndGetSimpleName(targetDomainClass);
+      if (!targetDomainName.equals(getDomainDomainName(cfg))) {
+        return className;
+      }
+
+      var sb = new StringBuilder();
+      sb.append(className);
+      sb.append("<");
+      sb.append(channelSpec.targetValueRef());
+      sb.append(">");
+      return sb.toString();
+    } else if (channelSpec.targetDomainRef() != null) {
+      return channelSpec.targetDomainRef();
+    }
+    throw NotImplementedExceptions.withCode("ymDLHA");
   }
 
-  private static Map<String, Object> buildChannelQualifier(
-      ChannelQualifiedSpecification qualifierSpec, MutableImportList imports, Configuration cfg
+  static List<Map<String, Object>> buildChannelValueQualifiers(
+      List<ValueQualifiedSpecification> qualifierSpecs, MutableImportList imports, Configuration cfg
+  ) {
+    return CollectionFunctions.mapEach(qualifierSpecs, qs -> buildChannelValueQualifier(qs, imports, cfg));
+  }
+
+  static Map<String, Object> buildChannelValueQualifier(
+      ValueQualifiedSpecification qualifierSpec, MutableImportList imports, Configuration cfg
   ) {
     var map = new HashMap<String, Object>();
     map.put("name", qualifierSpec.name());
@@ -113,7 +149,7 @@ public interface GenerationFunctionsV0 {
     return map;
   }
 
-  private static String buildAllowedTraverse(List<String> allowedTraverses, MutableImportList imports) {
+  static String buildAllowedTraverse(List<String> allowedTraverses, MutableImportList imports) {
     if (allowedTraverses == null) {
       return null;
     }
@@ -135,19 +171,15 @@ public interface GenerationFunctionsV0 {
     return sb.toString();
   }
 
-  private static String getDomainClassName(DomainSpecification domainSpec, Configuration cfg) {
-    return getDomainClassName(domainSpec.label(), cfg);
+  static String getDomainClassName(DomainSpecification domainSpec, Configuration cfg) {
+    return getClassName(domainSpec.label() + "Domain", cfg);
   }
 
-  private static String getDomainClassName(ParentDomainSpecification parentDomainSpec, Configuration cfg) {
-    return getDomainClassName(parentDomainSpec.label(), cfg);
+  static String getDomainClassName(ParentDomainSpecification parentSpec, Configuration cfg) {
+    return getDomainClassName(parentSpec.label(), cfg);
   }
 
-  private static String getTargetDomainClassName(DomainChannelSpecification channelSpec, Configuration cfg) {
-    return getDomainClassName(channelSpec.targetDomainName(), cfg);
-  }
-
-  private static String getDomainClassName(String domainName, Configuration cfg) {
+  static String getDomainClassName(String domainName, Configuration cfg) {
     DomainPurpose domainPurpose = cfg.settings().domainPurposes().get(domainName);
     if (domainPurpose != null) {
       return domainPurpose.className();
@@ -155,11 +187,19 @@ public interface GenerationFunctionsV0 {
     return getClassName(domainName + "Domain", cfg);
   }
 
-  private static String getClassName(String entityName, Configuration cfg) {
+  static String getClassName(String entityName, Configuration cfg) {
     return entityName.replaceFirst("intellispaces\\.", "tech.intellispaces.jaquarius.");
   }
 
-  private static void write(
+  static String getDomainDomainName(Configuration cfg) {
+    return cfg.settings().domainPurposes().entrySet().stream()
+        .filter(e -> DomainPurposes.Domain.is(e.getValue()))
+        .map(Map.Entry::getKey)
+        .findFirst()
+        .orElseThrow(() -> UnexpectedExceptions.withMessage("Name of the domain domain is not defined"));
+  }
+
+  static void write(
       Configuration cfg, String canonicalName, String source
   ) throws MojoExecutionException {
     Path path = new File(StringFunctions.join(
@@ -174,4 +214,6 @@ public interface GenerationFunctionsV0 {
       throw new MojoExecutionException("Could not write file " + path, e);
     }
   }
+
+  private GenerationFunctionsV0() {}
 }

@@ -6,14 +6,18 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.yaml.snakeyaml.Yaml;
 import tech.intellispaces.general.collection.CollectionFunctions;
+import tech.intellispaces.general.data.Dictionaries;
+import tech.intellispaces.general.data.Dictionary;
 import tech.intellispaces.general.exception.NotImplementedExceptions;
 import tech.intellispaces.general.resource.ResourceFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.dictionary.Dictionaries;
-import tech.intellispaces.jaquarius.generator.maven.plugin.dictionary.Dictionary;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -44,11 +48,24 @@ public interface ConfigurationLoaderFunctions {
   }
 
   static List<Settings> readProjectSettings(MavenProject project) throws MojoExecutionException {
+    var yaml = new Yaml();
+
+    // Try to direct read settings file
+    try {
+      var path = Paths.get(project.getBasedir().toString(),
+          "src/main/resources/META-INF/jaquarius/jaquarius-generator.yaml"
+      );
+      String content = Files.readString(path, StandardCharsets.UTF_8);
+      return List.of(readProjectSetting(yaml.load(content)));
+    } catch (IOException e) {
+//       ignore
+    }
+
+    // Try to read from classpath
     try {
       Enumeration<URL> enumeration = getProjectClassLoader(project).getResources(
           "META-INF/jaquarius/jaquarius-generator.yaml");
       List<URL> urls = CollectionFunctions.toList(enumeration);
-      var yaml = new Yaml();
       return CollectionFunctions.mapEach(urls, url -> readProjectSetting(
           yaml.load(ResourceFunctions.readResourceAsString(url))));
     } catch (Exception e) {
@@ -58,7 +75,7 @@ public interface ConfigurationLoaderFunctions {
 
   static Settings readProjectSetting(LinkedHashMap<String, Object> yaml) throws MojoExecutionException {
     Dictionary dictionary = Dictionaries.get(yaml);
-    List<Dictionary> domainDescriptions = dictionary.readDictionaryListNullable("domains");
+    List<Dictionary> domainDescriptions = dictionary.dictionaryListValueNullable("domains");
 
     var builder = SettingsProvider.builder();
     if (domainDescriptions != null) {
@@ -69,10 +86,10 @@ public interface ConfigurationLoaderFunctions {
 
   static Map<String, DomainPurpose> readDomainPurposes(
       List<Dictionary> domainDescriptions
-  ) throws MojoExecutionException {
+  ) {
     var map = new HashMap<String, DomainPurpose>();
     for (Dictionary dictionary : domainDescriptions) {
-      map.put(dictionary.readString("name"), DomainPurposes.valueOf(dictionary.readString("purpose")));
+      map.put(dictionary.stringValue("name"), DomainPurposes.valueOf(dictionary.stringValue("purpose")));
     }
     return map;
   }

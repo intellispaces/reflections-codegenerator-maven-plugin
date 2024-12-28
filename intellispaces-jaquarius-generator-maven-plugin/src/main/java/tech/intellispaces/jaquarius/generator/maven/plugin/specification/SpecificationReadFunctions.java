@@ -3,9 +3,9 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.yaml.snakeyaml.Yaml;
 import tech.intellispaces.general.collection.CollectionFunctions;
+import tech.intellispaces.general.data.Dictionaries;
+import tech.intellispaces.general.data.Dictionary;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
-import tech.intellispaces.jaquarius.generator.maven.plugin.dictionary.Dictionaries;
-import tech.intellispaces.jaquarius.generator.maven.plugin.dictionary.Dictionary;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.SpecificationV0ReadFunctions;
 
 import java.io.FileInputStream;
@@ -67,7 +67,7 @@ public class SpecificationReadFunctions {
   }
 
   static SpecificationVersion readVersion(Dictionary spec) throws MojoExecutionException {
-    String version = spec.readString("intellispaces");
+    String version = spec.stringValue("intellispaces");
     return SpecificationVersions.from(version);
   }
 
@@ -75,7 +75,7 @@ public class SpecificationReadFunctions {
     if (!dictionary.hasProperty("imports")) {
       return List.of();
     }
-    List<String> importPathPatterns = dictionary.readStringList("imports");
+    List<String> importPathPatterns = dictionary.stringListValue("imports");
     return findImports(Paths.get(cfg.settings().projectPath()), importPathPatterns);
   }
 

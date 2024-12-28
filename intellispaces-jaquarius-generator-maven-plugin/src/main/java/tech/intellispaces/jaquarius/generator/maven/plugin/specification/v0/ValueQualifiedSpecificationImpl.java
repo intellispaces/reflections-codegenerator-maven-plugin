@@ -1,7 +1,7 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0;
 
-record ChannelQualifiedSpecificationImpl(
+record ValueQualifiedSpecificationImpl(
   String name,
   String domainName
-) implements ChannelQualifiedSpecification {
+) implements ValueQualifiedSpecification {
 }

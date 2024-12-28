@@ -2,7 +2,7 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import tech.intellispaces.general.collection.CollectionFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.dictionary.Dictionary;
+import tech.intellispaces.general.data.Dictionary;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationVersions;
 
@@ -19,7 +19,7 @@ public interface SpecificationV0ReadFunctions {
   }
 
   static OntologySpecification readOntology(Dictionary spec) throws MojoExecutionException {
-    Dictionary ontologyDictionary = spec.readDictionary("ontology");
+    Dictionary ontologyDictionary = spec.dictionaryValue("ontology");
     return OntologySpecifications.build()
         .domains(readDomains(ontologyDictionary))
         .get();
@@ -29,18 +29,35 @@ public interface SpecificationV0ReadFunctions {
     if (!ontologyDictionary.hasProperty("domains")) {
       return List.of();
     }
-    List<Dictionary> domainDictionaries = ontologyDictionary.readDictionaryList("domains");
+    List<Dictionary> domainDictionaries = ontologyDictionary.dictionaryListValue("domains");
     return CollectionFunctions.mapEach(domainDictionaries, SpecificationV0ReadFunctions::readDomain);
   }
 
   static DomainSpecification readDomain(Dictionary domainDictionary) throws MojoExecutionException {
     return DomainSpecifications.build()
         .label(domainDictionary.name())
-        .did(domainDictionary.readString("did"))
-        .description(domainDictionary.readStringNullable("description"))
+        .did(domainDictionary.stringValue("did"))
+        .description(domainDictionary.stringValueNullable("description"))
+        .genericQualifiers(readGenericQualifiers(domainDictionary))
         .parents(readDomainParents(domainDictionary))
         .channels(readDomainChannels(domainDictionary))
         .get();
+  }
+
+  static List<GenericQualifierSpecification> readGenericQualifiers(
+      Dictionary domainDictionary
+  ) throws MojoExecutionException {
+    if (!domainDictionary.hasProperty("genericQualifiers")) {
+      return List.of();
+    }
+    List<Dictionary> qualifierDictionaries = domainDictionary.dictionaryListValue("genericQualifiers");
+    return CollectionFunctions.mapEach(qualifierDictionaries, SpecificationV0ReadFunctions::readGenericQualifier);
+  }
+
+  static GenericQualifierSpecification readGenericQualifier(
+      Dictionary qualifierDictionary
+  ) throws MojoExecutionException {
+    return GenericQualifierSpecifications.get(readName(qualifierDictionary));
   }
 
   static List<ParentDomainSpecification> readDomainParents(
@@ -49,7 +66,7 @@ public interface SpecificationV0ReadFunctions {
     if (!domainDictionary.hasProperty("parents")) {
       return List.of();
     }
-    List<Dictionary> parentDictionaries = domainDictionary.readDictionaryList("parents");
+    List<Dictionary> parentDictionaries = domainDictionary.dictionaryListValue("parents");
     return CollectionFunctions.mapEach(parentDictionaries, SpecificationV0ReadFunctions::readDomainParent);
   }
 
@@ -63,7 +80,7 @@ public interface SpecificationV0ReadFunctions {
     if (!domainDictionary.hasProperty("channels")) {
       return List.of();
     }
-    List<Dictionary> parentProperties = domainDictionary.readDictionaryList("channels");
+    List<Dictionary> parentProperties = domainDictionary.dictionaryListValue("channels");
     return CollectionFunctions.mapEach(parentProperties, SpecificationV0ReadFunctions::readDomainChannel);
   }
 
@@ -71,40 +88,42 @@ public interface SpecificationV0ReadFunctions {
       Dictionary channelDictionary
   ) throws MojoExecutionException {
     return DomainChannelSpecifications.build()
-        .targetDomainName(channelDictionary.readString("target.domain.name"))
+        .targetDomainName(readTargetDomainName(channelDictionary))
+        .targetDomainRef(readTargetDomainRef(channelDictionary))
+        .targetValueRef(readTargetValueRef(channelDictionary))
         .alias(readName(channelDictionary))
-        .cid(channelDictionary.readString("cid"))
-        .name(channelDictionary.readStringNullable("name"))
+        .cid(channelDictionary.stringValue("cid"))
+        .name(channelDictionary.stringValueNullable("name"))
         .allowedTraverses(readAllowedTraverses(channelDictionary))
-        .qualifiers(readChannelQualifiers(channelDictionary))
+        .valueQualifiers(readChannelValueQualifiers(channelDictionary))
         .get();
   }
 
-  static List<ChannelQualifiedSpecification> readChannelQualifiers(
+  static List<ValueQualifiedSpecification> readChannelValueQualifiers(
       Dictionary channelDictionary
   ) throws MojoExecutionException {
-    if (!channelDictionary.hasProperty("qualifiers")) {
+    if (!channelDictionary.hasProperty("valueQualifiers")) {
       return List.of();
     }
-    List<Dictionary> qualifierDictionaries = channelDictionary.readDictionaryList("qualifiers");
-    return CollectionFunctions.mapEach(qualifierDictionaries, SpecificationV0ReadFunctions::readChannelQualifier);
+    List<Dictionary> qualifierDictionaries = channelDictionary.dictionaryListValue("valueQualifiers");
+    return CollectionFunctions.mapEach(qualifierDictionaries, SpecificationV0ReadFunctions::readChannelValueQualifier);
   }
 
-  static ChannelQualifiedSpecification readChannelQualifier(
+  static ValueQualifiedSpecification readChannelValueQualifier(
       Dictionary qualifierDictionary
   ) throws MojoExecutionException {
-    return ChannelQualifiedSpecifications.get(
+    return ValueQualifiedSpecifications.get(
         readName(qualifierDictionary),
-        qualifierDictionary.readString("domain.name")
+        qualifierDictionary.stringValue("domain.name")
     );
   }
 
   static String readName(Dictionary dictionary) throws MojoExecutionException {
-    String alias = dictionary.readStringNullable("alias");
+    String alias = dictionary.stringValueNullable("alias");
     if (alias != null) {
       return alias;
     }
-    List<String> properties = dictionary.properties();
+    List<String> properties = dictionary.propertyNames();
     if (properties.isEmpty()) {
       throw new MojoExecutionException("Invalid description: " + dictionary.path());
     }
@@ -115,7 +134,34 @@ public interface SpecificationV0ReadFunctions {
     return firstProperty;
   }
 
-  static List<String> readAllowedTraverses(Dictionary channelDictionary) throws MojoExecutionException {
-    return channelDictionary.readStringListNullable("allowedTraverses");
+  static String readTargetDomainName(Dictionary channelDictionary) {
+    if (channelDictionary.hasProperty("target")) {
+      Dictionary targetDictionary = channelDictionary.dictionaryValue("target");
+      return targetDictionary.stringValueNullable("domain.name");
+    } else if (channelDictionary.hasProperty("target.domain")) {
+      Dictionary domainDictionary = channelDictionary.dictionaryValue("target.domain");
+      return domainDictionary.stringValueNullable("name");
+    }
+    return channelDictionary.stringValueNullable("target.domain.name");
+  }
+
+  static String readTargetDomainRef(Dictionary channelDictionary) {
+    if (channelDictionary.hasProperty("target")) {
+      Dictionary targetDictionary = channelDictionary.dictionaryValue("target");
+      return targetDictionary.stringValueNullable("domain.ref");
+    }
+    return channelDictionary.stringValueNullable("target.domain.ref");
+  }
+
+  static String readTargetValueRef(Dictionary channelDictionary) {
+    if (channelDictionary.hasProperty("target")) {
+      Dictionary targetDictionary = channelDictionary.dictionaryValue("target");
+      return targetDictionary.stringValueNullable("value.ref");
+    }
+    return channelDictionary.stringValueNullable("target.value.ref");
+  }
+
+  static List<String> readAllowedTraverses(Dictionary channelDictionary) {
+    return channelDictionary.stringListValueNullable("allowedTraverses");
   }
 }

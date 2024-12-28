@@ -10,6 +10,8 @@ public interface DomainSpecification {
 
   String description();
 
+  List<GenericQualifierSpecification> genericQualifiers();
+
   List<ParentDomainSpecification> parents();
 
   List<DomainChannelSpecification> channels();

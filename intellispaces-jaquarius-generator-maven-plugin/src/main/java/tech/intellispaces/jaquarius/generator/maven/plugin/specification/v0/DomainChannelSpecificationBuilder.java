@@ -4,14 +4,26 @@ import java.util.List;
 
 public class DomainChannelSpecificationBuilder {
   private String targetDomainName;
+  private String targetDomainRef;
+  private String targetValueRef;
   private String alias;
   private String cid;
   private String name;
   private List<String> allowedTraverses;
-  private List<ChannelQualifiedSpecification> qualifiers = List.of();
+  private List<ValueQualifiedSpecification> valueQualifiers = List.of();
 
   public DomainChannelSpecificationBuilder targetDomainName(String targetDomainName) {
     this.targetDomainName = targetDomainName;
+    return this;
+  }
+
+  public DomainChannelSpecificationBuilder targetDomainRef(String targetDomainRef) {
+    this.targetDomainRef = targetDomainRef;
+    return this;
+  }
+
+  public DomainChannelSpecificationBuilder targetValueRef(String targetValueRef) {
+    this.targetValueRef = targetValueRef;
     return this;
   }
 
@@ -35,19 +47,21 @@ public class DomainChannelSpecificationBuilder {
     return this;
   }
 
-  public DomainChannelSpecificationBuilder qualifiers(List<ChannelQualifiedSpecification> qualifiers) {
-    this.qualifiers = qualifiers;
+  public DomainChannelSpecificationBuilder valueQualifiers(List<ValueQualifiedSpecification> valueQualifiers) {
+    this.valueQualifiers = valueQualifiers;
     return this;
   }
 
   public DomainChannelSpecification get() {
     return new DomainChannelSpecificationImpl(
         targetDomainName,
+        targetDomainRef,
+        targetValueRef,
         alias,
         cid,
         name,
         allowedTraverses,
-        qualifiers
+        valueQualifiers
     );
   }
 }

@@ -4,10 +4,12 @@ import java.util.List;
 
 record DomainChannelSpecificationImpl(
     String targetDomainName,
+    String targetDomainRef,
+    String targetValueRef,
     String alias,
     String cid,
     String name,
     List<String> allowedTraverse,
-    List<ChannelQualifiedSpecification> qualifiers
+    List<ValueQualifiedSpecification> valueQualifiers
 ) implements DomainChannelSpecification {
 }

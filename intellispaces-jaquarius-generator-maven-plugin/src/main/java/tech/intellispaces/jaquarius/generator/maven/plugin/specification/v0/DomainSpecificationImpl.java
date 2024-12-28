@@ -6,6 +6,7 @@ record DomainSpecificationImpl(
     String label,
     String did,
     String description,
+    List<GenericQualifierSpecification> genericQualifiers,
     List<ParentDomainSpecification> parents,
     List<DomainChannelSpecification> channels
 ) implements DomainSpecification {

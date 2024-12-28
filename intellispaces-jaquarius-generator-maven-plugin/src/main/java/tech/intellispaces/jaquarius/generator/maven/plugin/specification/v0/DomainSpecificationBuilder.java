@@ -6,6 +6,7 @@ public class DomainSpecificationBuilder {
   private String label;
   private String did;
   private String description;
+  private List<GenericQualifierSpecification> genericQualifiers = List.of();
   private List<ParentDomainSpecification> parents = List.of();
   private List<DomainChannelSpecification> channels;
 
@@ -24,6 +25,11 @@ public class DomainSpecificationBuilder {
     return this;
   }
 
+  public DomainSpecificationBuilder genericQualifiers(List<GenericQualifierSpecification> genericQualifiers) {
+    this.genericQualifiers = genericQualifiers;
+    return this;
+  }
+
   public DomainSpecificationBuilder parents(List<ParentDomainSpecification> parents) {
     this.parents = parents;
     return this;
@@ -39,6 +45,7 @@ public class DomainSpecificationBuilder {
         label,
         did,
         description,
+        genericQualifiers,
         parents,
         channels
     );
