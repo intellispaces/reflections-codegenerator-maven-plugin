@@ -13,7 +13,7 @@ public interface SpecificationV0ReadFunctions {
 
   static Specification readSpecification(Path path, Dictionary spec) throws MojoExecutionException {
     return Specifications.build(path)
-        .version(SpecificationVersions.V0p0)
+        .version(SpecificationVersions.V0p1)
         .ontology(readOntology(spec))
         .get();
   }

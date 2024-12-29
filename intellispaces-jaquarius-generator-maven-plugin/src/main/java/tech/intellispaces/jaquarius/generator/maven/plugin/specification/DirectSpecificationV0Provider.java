@@ -22,7 +22,7 @@ public class DirectSpecificationV0Provider implements SpecificationProvider {
 
   void loadSpecification(Specification specification) {
     switch (SpecificationVersions.from(specification.version())) {
-      case V0p0 -> loadSpecificationV0((SpecificationV0) specification);
+      case V0p1 -> loadSpecificationV0((SpecificationV0) specification);
     }
   }
 

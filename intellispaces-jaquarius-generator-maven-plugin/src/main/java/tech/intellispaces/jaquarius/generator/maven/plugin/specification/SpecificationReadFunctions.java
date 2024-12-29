@@ -62,7 +62,7 @@ public class SpecificationReadFunctions {
   static Specification readSpecification(Path specPath, Dictionary spec) throws MojoExecutionException {
     SpecificationVersion version = readVersion(spec);
     return switch (SpecificationVersions.from(version)) {
-      case V0p0 -> SpecificationV0ReadFunctions.readSpecification(specPath, spec);
+      case V0p1 -> SpecificationV0ReadFunctions.readSpecification(specPath, spec);
     };
   }
 

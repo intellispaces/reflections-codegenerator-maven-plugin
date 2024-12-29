@@ -11,7 +11,7 @@ public interface GenerationFunctions {
   static void generateArtifacts(Specification spec, Configuration cfg) throws MojoExecutionException {
     cfg.log().info("Process specification " + spec.path());
     switch (SpecificationVersions.from(spec.version())) {
-      case V0p0:
+      case V0p1:
         GenerationFunctionsV0.generateArtifacts((SpecificationV0) spec, cfg);
         break;
       default:
