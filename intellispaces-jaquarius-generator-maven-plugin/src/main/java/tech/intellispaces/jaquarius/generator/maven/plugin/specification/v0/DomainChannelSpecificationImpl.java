@@ -5,6 +5,7 @@ import java.util.List;
 record DomainChannelSpecificationImpl(
     String targetDomainName,
     String targetDomainRef,
+    List<GenericQualifierDefinition> targetDomainGenericQualifierDefinitions,
     String targetValueRef,
     String alias,
     String cid,

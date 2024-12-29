@@ -5,6 +5,7 @@ import java.util.List;
 public class DomainChannelSpecificationBuilder {
   private String targetDomainName;
   private String targetDomainRef;
+  private List<GenericQualifierDefinition> targetDomainGenericQualifierDefinitions = List.of();
   private String targetValueRef;
   private String alias;
   private String cid;
@@ -19,6 +20,13 @@ public class DomainChannelSpecificationBuilder {
 
   public DomainChannelSpecificationBuilder targetDomainRef(String targetDomainRef) {
     this.targetDomainRef = targetDomainRef;
+    return this;
+  }
+
+  public DomainChannelSpecificationBuilder targetDomainGenericQualifierDefinitions(
+      List<GenericQualifierDefinition> targetDomainGenericQualifierDefinitions
+  ) {
+    this.targetDomainGenericQualifierDefinitions = targetDomainGenericQualifierDefinitions;
     return this;
   }
 
@@ -56,6 +64,7 @@ public class DomainChannelSpecificationBuilder {
     return new DomainChannelSpecificationImpl(
         targetDomainName,
         targetDomainRef,
+        targetDomainGenericQualifierDefinitions,
         targetValueRef,
         alias,
         cid,

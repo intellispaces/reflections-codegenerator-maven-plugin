@@ -9,10 +9,14 @@ import org.apache.maven.project.MavenProject;
 import tech.intellispaces.general.collection.CollectionFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.ConfigurationLoaderFunctions;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Settings;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DirectSpecificationV0Provider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.UnitedSpecificationProvider;
 
 import java.util.List;
 
@@ -42,9 +46,16 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException {
     try {
-      Configuration cfg = loadConfiguration();
+      Settings settings = createSettings();
+
+      var unitedSpecificationProvider = new UnitedSpecificationProvider();
+      Configuration cfg = createConfiguration(settings, unitedSpecificationProvider);
+
       List<Specification> specs = SpecificationReadFunctions.readSpecifications(cfg);
+      unitedSpecificationProvider.addProvider(new DirectSpecificationV0Provider(specs));
+
       CollectionFunctions.forEach(specs, spec -> GenerationFunctions.generateArtifacts(spec, cfg));
+
       project.addCompileSourceRoot(cfg.settings().outputDirectory());
     } catch (MojoExecutionException e) {
       getLog().error("Failed to execute plugin", e);
@@ -55,16 +66,23 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
     }
   }
 
-  Configuration loadConfiguration() throws MojoExecutionException {
-    var settings = SettingsProvider.builder()
+  Configuration createConfiguration(
+      Settings settings,
+      SpecificationProvider specificationProvider
+  ) throws MojoExecutionException {
+    return ConfigurationLoaderFunctions.loadConfiguration(
+        project,
+        settings,
+        specificationProvider,
+        getLog()
+    );
+  }
+
+  Settings createSettings() {
+    return SettingsProvider.builder()
         .projectPath(project.getBasedir().toString())
         .specificationPath(inputSpec)
         .outputDirectory(outputDirectory)
         .get();
-    return ConfigurationLoaderFunctions.loadConfiguration(
-        getLog(),
-        project,
-        settings
-    );
   }
 }

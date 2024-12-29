@@ -5,7 +5,7 @@ import {{$importedClass}};
 {{end}}
 
 @Domain("{{$did}}")
-public interface {{$simpleName}}{{when $qualifiers.isNotEmpty()}}<{{for qualifier : $qualifiers}}{{$qualifier}}{{end}}>{{end}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent."name"}}{{end}}{{end}} {
+public interface {{$simpleName}}{{when $genericQualifiers.isNotEmpty()}}<{{for qualifier : $genericQualifiers}}{{$qualifier}}{{end}}>{{end}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent."name"}}{{$parent."typeParams"}}{{end}}{{end}} {
 
 {{for channel : $channels}}
 {{when eachOf($channel."name".isEmpty(), $channel."allowedTraverse".isEmpty()).isTrue()}}
@@ -17,7 +17,7 @@ public interface {{$simpleName}}{{when $qualifiers.isNotEmpty()}}<{{for qualifie
     {{when $channel."allowedTraverse".isNotEmpty()}}, allowedTraverse = {{$channel."allowedTraverse"}} {{end}}
   )
 {{end}}
-  {{$channel."target"}} {{$channel."alias"}}({{for qualifier : $channel."valueQualifiers"}}{{$qualifier."class"}} {{$qualifier."name"}}{{end}});
+  {{$channel."target"}}{{when $channel."genericQualifiers".isNotEmpty()}}<{{for qualifier : $channel."genericQualifiers"}}{{$qualifier}}{{end}}>{{end}} {{$channel."alias"}}({{for qualifier : $channel."valueQualifiers"}}{{$qualifier."class"}} {{$qualifier."name"}}{{end}});
 
 {{end}}
 }

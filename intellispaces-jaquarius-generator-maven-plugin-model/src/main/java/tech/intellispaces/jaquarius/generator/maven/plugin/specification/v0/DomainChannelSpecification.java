@@ -8,6 +8,8 @@ public interface DomainChannelSpecification {
 
   String targetDomainRef();
 
+  List<GenericQualifierDefinition> targetDomainGenericQualifierDefinitions();
+
   String targetValueRef();
 
   String alias();

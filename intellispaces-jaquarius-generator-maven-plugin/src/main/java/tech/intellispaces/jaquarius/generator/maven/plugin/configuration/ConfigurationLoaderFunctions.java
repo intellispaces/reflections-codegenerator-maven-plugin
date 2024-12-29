@@ -10,6 +10,7 @@ import tech.intellispaces.general.data.Dictionaries;
 import tech.intellispaces.general.data.Dictionary;
 import tech.intellispaces.general.exception.NotImplementedExceptions;
 import tech.intellispaces.general.resource.ResourceFunctions;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationProvider;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -28,7 +29,10 @@ import java.util.Set;
 public interface ConfigurationLoaderFunctions {
 
   static Configuration loadConfiguration(
-      Log log, MavenProject project, Settings pluginSettings
+      MavenProject project,
+      Settings pluginSettings,
+      SpecificationProvider specificationProvider,
+      Log log
   ) throws MojoExecutionException {
     var builder = SettingsProvider.builder();
     builder.projectPath(pluginSettings.projectPath());
@@ -42,8 +46,9 @@ public interface ConfigurationLoaderFunctions {
       throw NotImplementedExceptions.withCode("dertww");
     }
     return Configurations.build()
-        .log(log)
         .settings(builder.get())
+        .specificationProvider(specificationProvider)
+        .log(log)
         .get();
   }
 
@@ -58,7 +63,7 @@ public interface ConfigurationLoaderFunctions {
       String content = Files.readString(path, StandardCharsets.UTF_8);
       return List.of(readProjectSetting(yaml.load(content)));
     } catch (IOException e) {
-//       ignore
+       // ignore
     }
 
     // Try to read from classpath

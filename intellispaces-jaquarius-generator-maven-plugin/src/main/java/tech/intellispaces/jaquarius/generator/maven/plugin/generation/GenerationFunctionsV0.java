@@ -12,6 +12,7 @@ import tech.intellispaces.jaquarius.annotation.Channel;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.DomainPurpose;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.DomainPurposes;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.GenericQualifierDefinition;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.GenericQualifierSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.ValueQualifiedSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.DomainChannelSpecification;
@@ -32,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class GenerationFunctionsV0 {
 
@@ -62,7 +65,7 @@ public class GenerationFunctionsV0 {
     imports.add(tech.intellispaces.jaquarius.annotation.Domain.class);
     return Map.of(
         "did", domainSpec.did(),
-        "qualifiers", buildGenericQualifierDeclarations(domainSpec.genericQualifiers(), imports, cfg),
+        "genericQualifiers", buildGenericQualifierDeclarations(domainSpec.genericQualifiers(), imports, cfg),
         "parents", buildParentsTemplateVariables(domainSpec.parents(), imports, cfg),
         "channels", buildDomainChannelTemplateVariables(domainSpec.channels(), imports, cfg),
         "packageName", ClassNameFunctions.getPackageName(canonicalName),
@@ -85,10 +88,35 @@ public class GenerationFunctionsV0 {
     var parens = new ArrayList<Map<String, Object>>();
     for (ParentDomainSpecification parentSpec : parentSpecs) {
       parens.add(Map.of(
-          "name", imports.addAndGetSimpleName(getDomainClassName(parentSpec, cfg))
+          "name", imports.addAndGetSimpleName(getDomainClassName(parentSpec, cfg)),
+          "typeParams", buildParentTypeParamsDeclaration(parentSpec, cfg)
       ));
     }
     return parens;
+  }
+
+  static String buildParentTypeParamsDeclaration(
+      ParentDomainSpecification parentSpec, Configuration cfg
+  ) {
+    DomainSpecification parentDomain = cfg.specificationProvider().domainV0ByName(parentSpec.label());
+    if (parentDomain.genericQualifiers().isEmpty()) {
+      return "";
+    }
+
+    Map<String, GenericQualifierDefinition> index = parentSpec.genericQualifierDefinitions().stream()
+        .collect(Collectors.toMap(GenericQualifierDefinition::alias, Function.identity()));
+
+    var sb = new StringBuilder();
+    RunnableAction commaAppender = StringActions.skipFirstTimeCommaAppender(sb);
+    sb.append("<");
+    for (GenericQualifierSpecification genericParam : parentDomain.genericQualifiers()) {
+      String typeParamName = genericParam.name();
+      GenericQualifierDefinition typeParamDefinition = index.get(typeParamName);
+      commaAppender.run();
+      sb.append(typeParamDefinition.valueReference());
+    }
+    sb.append(">");
+    return sb.toString();
   }
 
   static List<Map<String, Object>> buildDomainChannelTemplateVariables(
@@ -98,6 +126,7 @@ public class GenerationFunctionsV0 {
     for (DomainChannelSpecification channelSpec : channelSpecs) {
       var map = new HashMap<String, Object>();
       map.put("target", buildChannelTargetDeclaration(channelSpec, imports, cfg));
+      map.put("genericQualifiers", buildChannelTargetTypeParams(channelSpec, imports, cfg));
       map.put("alias", channelSpec.alias());
       map.put("cid", channelSpec.cid());
       map.put("name", channelSpec.name());
@@ -132,6 +161,27 @@ public class GenerationFunctionsV0 {
       return channelSpec.targetDomainRef();
     }
     throw NotImplementedExceptions.withCode("ymDLHA");
+  }
+
+  static List<String> buildChannelTargetTypeParams(
+      DomainChannelSpecification channelSpec, MutableImportList imports, Configuration cfg
+  ) {
+    if (channelSpec.targetDomainGenericQualifierDefinitions().isEmpty()) {
+      return List.of();
+    }
+
+    Map<String, GenericQualifierDefinition> index = channelSpec.targetDomainGenericQualifierDefinitions().stream()
+        .collect(Collectors.toMap(GenericQualifierDefinition::alias, Function.identity()));
+
+    List<String> result = new ArrayList<>();
+    DomainSpecification targetDomain = cfg.specificationProvider().domainV0ByName(channelSpec.targetDomainName());
+    for (GenericQualifierSpecification genericParam : targetDomain.genericQualifiers()) {
+      String typeParamName = genericParam.name();
+      GenericQualifierDefinition typeParamDefinition = index.get(typeParamName);
+
+      result.add(typeParamDefinition.valueReference());
+    }
+    return result;
   }
 
   static List<Map<String, Object>> buildChannelValueQualifiers(
