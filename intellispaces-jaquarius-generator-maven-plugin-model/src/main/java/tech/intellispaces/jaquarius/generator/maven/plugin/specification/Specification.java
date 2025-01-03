@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public interface Specification {
 
-  Path path();
+  Path specPath();
 
-  SpecificationVersion version();
+  OntologySpecification ontology();
 }

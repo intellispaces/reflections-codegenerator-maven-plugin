@@ -1,8 +1,8 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.DomainSpecification;
+import org.apache.maven.plugin.MojoExecutionException;
 
 public interface SpecificationProvider {
 
-  DomainSpecification domainV0ByName(String domainName);
+  DomainSpecification getDomainByName(String domainName) throws MojoExecutionException;
 }

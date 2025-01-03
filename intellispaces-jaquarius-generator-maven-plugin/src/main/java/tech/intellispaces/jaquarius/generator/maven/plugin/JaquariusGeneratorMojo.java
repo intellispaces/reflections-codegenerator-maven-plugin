@@ -6,19 +6,16 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import tech.intellispaces.general.collection.CollectionFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.ConfigurationLoaderFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Settings;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DirectSpecificationV0Provider;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DirectSpecificationProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.UnitedSpecificationProvider;
-
-import java.util.List;
 
 @Mojo(
     name = "jaquarius-generator",
@@ -48,13 +45,13 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
     try {
       Settings settings = createSettings();
 
-      var unitedSpecificationProvider = new UnitedSpecificationProvider();
-      Configuration cfg = createConfiguration(settings, unitedSpecificationProvider);
+      var specificationProvider = new UnitedSpecificationProvider();
+      Configuration cfg = createConfiguration(settings, specificationProvider);
 
-      List<Specification> specs = SpecificationReadFunctions.readSpecifications(cfg);
-      unitedSpecificationProvider.addProvider(new DirectSpecificationV0Provider(specs));
+      Specification spec = SpecificationReadFunctions.readSpecification(cfg);
+      specificationProvider.addProvider(new DirectSpecificationProvider(spec));
 
-      CollectionFunctions.forEach(specs, spec -> GenerationFunctions.generateArtifacts(spec, cfg));
+      GenerationFunctions.generateArtifacts(spec, cfg);
 
       project.addCompileSourceRoot(cfg.settings().outputDirectory());
     } catch (MojoExecutionException e) {

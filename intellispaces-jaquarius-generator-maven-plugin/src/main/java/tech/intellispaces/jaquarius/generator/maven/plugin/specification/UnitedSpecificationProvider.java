@@ -1,6 +1,6 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.v0.DomainSpecification;
+import org.apache.maven.plugin.MojoExecutionException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,13 @@ public class UnitedSpecificationProvider implements SpecificationProvider {
   }
 
   @Override
-  public DomainSpecification domainV0ByName(String domainName) {
+  public DomainSpecification getDomainByName(String domainName) throws MojoExecutionException {
     for (SpecificationProvider sp : specificationProviders) {
-      DomainSpecification domainSpecification = sp.domainV0ByName(domainName);
+      DomainSpecification domainSpecification = sp.getDomainByName(domainName);
       if (domainSpecification != null) {
         return domainSpecification;
       }
     }
-    return null;
+    throw new MojoExecutionException("Could not to find the specification of the domain " + domainName);
   }
 }
