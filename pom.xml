@@ -26,6 +26,11 @@
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
+                <groupId>tech.intellispaces.jaquarius</groupId>
+                <artifactId>intellispaces-jaquarius-model</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>tech.intellispaces.common</groupId>
                 <artifactId>intellispaces-java-reflection</artifactId>
                 <version>0.0.1-SNAPSHOT</version>

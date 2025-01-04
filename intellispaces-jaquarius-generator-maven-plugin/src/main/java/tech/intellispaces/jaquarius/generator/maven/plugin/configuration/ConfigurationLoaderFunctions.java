@@ -4,13 +4,14 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.yaml.snakeyaml.Yaml;
 import tech.intellispaces.general.collection.CollectionFunctions;
 import tech.intellispaces.general.data.Dictionaries;
 import tech.intellispaces.general.data.Dictionary;
 import tech.intellispaces.general.exception.NotImplementedExceptions;
 import tech.intellispaces.general.resource.ResourceFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationProvider;
+import tech.intellispaces.jaquarius.space.domain.CoreDomain;
+import tech.intellispaces.jaquarius.space.domain.CoreDomains;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +41,7 @@ public interface ConfigurationLoaderFunctions {
 
     List<Settings> projectSettings = readProjectSettings(project);
     if (projectSettings.size() == 1) {
-      builder.domainPurposes(projectSettings.get(0).domainPurposes());
+      builder.coreDomains(projectSettings.get(0).coreDomains());
     } else if (projectSettings.size() > 1) {
       throw NotImplementedExceptions.withCode("dertww");
     }
@@ -53,15 +53,13 @@ public interface ConfigurationLoaderFunctions {
   }
 
   static List<Settings> readProjectSettings(MavenProject project) throws MojoExecutionException {
-    var yaml = new Yaml();
-
-    // Try to direct read settings file
+    // Try to direct read
     try {
       var path = Paths.get(project.getBasedir().toString(),
-          "src/main/resources/META-INF/jaquarius/jaquarius-generator.yaml"
+          "src/main/resources/META-INF/jaquarius/domain.properties"
       );
       String content = Files.readString(path, StandardCharsets.UTF_8);
-      return List.of(readProjectSetting(yaml.load(content)));
+      return List.of(readDomainProperties(content));
     } catch (IOException e) {
        // ignore
     }
@@ -69,33 +67,27 @@ public interface ConfigurationLoaderFunctions {
     // Try to read from classpath
     try {
       Enumeration<URL> enumeration = getProjectClassLoader(project).getResources(
-          "META-INF/jaquarius/jaquarius-generator.yaml");
+          "META-INF/jaquarius/domain.properties");
       List<URL> urls = CollectionFunctions.toList(enumeration);
-      return CollectionFunctions.mapEach(urls, url -> readProjectSetting(
-          yaml.load(ResourceFunctions.readResourceAsString(url))));
+      return CollectionFunctions.mapEach(urls, url -> readDomainProperties(
+          ResourceFunctions.readResourceAsString(url)));
     } catch (Exception e) {
-      throw new MojoExecutionException("Could not load jaquarius-generator.yaml files", e);
+      throw new MojoExecutionException("Could not load domain.properties file", e);
     }
   }
 
-  static Settings readProjectSetting(LinkedHashMap<String, Object> yaml) throws MojoExecutionException {
-    Dictionary dictionary = Dictionaries.get(yaml);
-    List<Dictionary> domainDescriptions = dictionary.dictionaryListValueNullable("domains");
-
-    var builder = SettingsProvider.builder();
-    if (domainDescriptions != null) {
-      builder.domainPurposes(readDomainPurposes(domainDescriptions));
-    }
-    return builder.get();
+  static Settings readDomainProperties(String content) {
+    Dictionary dictionary = Dictionaries.ofProperties(content);
+    return SettingsProvider.builder()
+        .coreDomains(readCoreDomains(dictionary))
+        .get();
   }
 
-  static Map<String, DomainPurpose> readDomainPurposes(
-      List<Dictionary> domainDescriptions
-  ) {
-    var map = new HashMap<String, DomainPurpose>();
-    for (Dictionary dictionary : domainDescriptions) {
-      map.put(dictionary.stringValue("name"), DomainPurposes.valueOf(dictionary.stringValue("purpose")));
-    }
+  static Map<String, CoreDomain> readCoreDomains(Dictionary dictionary) {
+    var map = new HashMap<String, CoreDomain>();
+    dictionary.propertyNames().forEach(property -> map.put(
+        dictionary.stringValue(property), CoreDomains.valueOf(property))
+    );
     return map;
   }
 

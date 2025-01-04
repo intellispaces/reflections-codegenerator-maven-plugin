@@ -1,5 +1,7 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.configuration;
 
+import tech.intellispaces.jaquarius.space.domain.CoreDomain;
+
 import java.util.Map;
 
 /**
@@ -13,5 +15,5 @@ public interface Settings {
 
   String outputDirectory();
 
-  Map<String, DomainPurpose> domainPurposes();
+  Map<String, CoreDomain> coreDomains();
 }

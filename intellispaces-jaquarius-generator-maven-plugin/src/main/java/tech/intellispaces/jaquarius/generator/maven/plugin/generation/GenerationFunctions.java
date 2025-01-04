@@ -10,8 +10,6 @@ import tech.intellispaces.general.text.StringFunctions;
 import tech.intellispaces.general.type.ClassNameFunctions;
 import tech.intellispaces.jaquarius.annotation.Channel;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.DomainPurpose;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.DomainPurposes;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DomainReference;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.GenericQualifierAppointment;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.GenericQualifierSpecification;
@@ -20,6 +18,7 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.specification.ValueQu
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DomainChannelSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DomainSpecification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.ValueReference;
+import tech.intellispaces.jaquarius.space.domain.CoreDomains;
 import tech.intellispaces.jaquarius.traverse.TraverseTypes;
 import tech.intellispaces.java.reflection.customtype.ImportLists;
 import tech.intellispaces.java.reflection.customtype.MutableImportList;
@@ -261,10 +260,6 @@ public class GenerationFunctions {
   }
 
   static String getDomainClassName(String domainName, Configuration cfg) {
-    DomainPurpose domainPurpose = cfg.settings().domainPurposes().get(domainName);
-    if (domainPurpose != null) {
-      return domainPurpose.className();
-    }
     return getClassName(domainName + "Domain", cfg);
   }
 
@@ -273,11 +268,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainOfDomainsName(Configuration cfg) {
-    return cfg.settings().domainPurposes().entrySet().stream()
-        .filter(e -> DomainPurposes.Domain.is(e.getValue()))
+    return cfg.settings().coreDomains().entrySet().stream()
+        .filter(e -> CoreDomains.Domain.is(e.getValue()))
         .map(Map.Entry::getKey)
         .findFirst()
-        .orElseThrow(() -> UnexpectedExceptions.withMessage("Name of the domain representing the domain is not defined"));
+        .orElseThrow(() -> UnexpectedExceptions.withMessage("Name of the domain of domains is not defined"));
   }
 
   static void write(

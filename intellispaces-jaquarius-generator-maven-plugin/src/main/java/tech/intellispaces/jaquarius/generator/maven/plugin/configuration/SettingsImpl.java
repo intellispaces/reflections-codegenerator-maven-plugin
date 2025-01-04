@@ -1,11 +1,13 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.configuration;
 
+import tech.intellispaces.jaquarius.space.domain.CoreDomain;
+
 import java.util.Map;
 
 record SettingsImpl(
     String projectPath,
     String specificationPath,
     String outputDirectory,
-    Map<String, DomainPurpose> domainPurposes
+    Map<String, CoreDomain> coreDomains
 ) implements Settings {
 }
