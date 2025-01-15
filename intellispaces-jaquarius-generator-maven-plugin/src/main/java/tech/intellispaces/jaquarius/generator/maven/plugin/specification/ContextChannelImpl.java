@@ -2,13 +2,14 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
 import java.util.List;
 
-record DomainChannelSpecificationImpl(
+record ContextChannelImpl(
     String alias,
     String cid,
     String name,
+    String description,
+    List<ContextChannel> projections,
     DomainReference targetDomain,
-    ValueReference targetValue,
-    List<ValueQualifierSpecification> valueQualifiers,
+    String targetAlias,
     List<String> allowedTraverse
-) implements DomainChannelSpecification {
+) implements ContextChannel {
 }

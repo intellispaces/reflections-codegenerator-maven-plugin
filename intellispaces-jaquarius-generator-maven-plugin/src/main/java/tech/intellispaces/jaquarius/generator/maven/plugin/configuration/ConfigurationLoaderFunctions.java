@@ -8,6 +8,7 @@ import tech.intellispaces.general.collection.CollectionFunctions;
 import tech.intellispaces.general.data.Dictionaries;
 import tech.intellispaces.general.data.Dictionary;
 import tech.intellispaces.general.exception.NotImplementedExceptions;
+import tech.intellispaces.general.exception.UnexpectedExceptions;
 import tech.intellispaces.general.resource.ResourceFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationProvider;
 import tech.intellispaces.jaquarius.space.domain.CoreDomain;
@@ -59,7 +60,7 @@ public interface ConfigurationLoaderFunctions {
           "src/main/resources/META-INF/jaquarius/domain.properties"
       );
       String content = Files.readString(path, StandardCharsets.UTF_8);
-      return List.of(readDomainProperties(content));
+      return List.of(readCoreDomains(content));
     } catch (IOException e) {
        // ignore
     }
@@ -69,26 +70,37 @@ public interface ConfigurationLoaderFunctions {
       Enumeration<URL> enumeration = getProjectClassLoader(project).getResources(
           "META-INF/jaquarius/domain.properties");
       List<URL> urls = CollectionFunctions.toList(enumeration);
-      return CollectionFunctions.mapEach(urls, url -> readDomainProperties(
+      return CollectionFunctions.mapEach(urls, url -> readCoreDomains(
           ResourceFunctions.readResourceAsString(url)));
     } catch (Exception e) {
-      throw new MojoExecutionException("Could not load domain.properties file", e);
+      throw new MojoExecutionException("Could not to load file domain.properties", e);
     }
   }
 
-  static Settings readDomainProperties(String content) {
+  static Settings readCoreDomains(String content) {
     Dictionary dictionary = Dictionaries.ofProperties(content);
     return SettingsProvider.builder()
         .coreDomains(readCoreDomains(dictionary))
         .get();
   }
 
-  static Map<String, CoreDomain> readCoreDomains(Dictionary dictionary) {
-    var map = new HashMap<String, CoreDomain>();
+  static Map<CoreDomain, String> readCoreDomains(Dictionary dictionary) {
+    var map = new HashMap<CoreDomain, String>();
     dictionary.propertyNames().forEach(property -> map.put(
-        dictionary.stringValue(property), CoreDomains.valueOf(property))
+        getCoreDomainByPropertyName(property), dictionary.stringValue(property))
     );
     return map;
+  }
+
+  static CoreDomain getCoreDomainByPropertyName(String propertyName) {
+    return switch (propertyName) {
+      case "domain" -> CoreDomains.Domain;
+      case "string" -> CoreDomains.String;
+      case "number" -> CoreDomains.Number;
+      case "integer" -> CoreDomains.Integer;
+      default -> throw UnexpectedExceptions.withMessage(
+          "Unsupported property '{0}' in file domain.properties", propertyName);
+    };
   }
 
   @SuppressWarnings("unchecked")

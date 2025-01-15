@@ -4,13 +4,13 @@ import java.nio.file.Path;
 
 public class SpecificationBuilder {
   private final Path specPath;
-  private OntologySpecification ontology;
+  private Ontology ontology;
 
   public SpecificationBuilder(Path specPath) {
     this.specPath = specPath;
   }
 
-  public SpecificationBuilder ontology(OntologySpecification ontology) {
+  public SpecificationBuilder ontology(Ontology ontology) {
     this.ontology = ontology;
     return this;
   }

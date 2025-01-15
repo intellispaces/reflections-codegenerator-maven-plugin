@@ -4,29 +4,29 @@ import java.util.List;
 
 public class DomainReferenceBuilder {
   private String name;
-  private String alias;
-  private List<GenericQualifierAppointment> genericQualifiers = List.of();
+  private List<ContextEquivalence> equivalences = List.of();
+  private List<DomainReference> superDomainBounds;
 
   public DomainReferenceBuilder name(String name) {
     this.name = name;
     return this;
   }
 
-  public DomainReferenceBuilder alias(String alias) {
-    this.alias = alias;
+  public DomainReferenceBuilder equivalences(List<ContextEquivalence> equivalences) {
+    this.equivalences = equivalences;
     return this;
   }
 
-  public DomainReferenceBuilder genericQualifiers(List<GenericQualifierAppointment> qualifiers) {
-    this.genericQualifiers = qualifiers;
+  public DomainReferenceBuilder superDomainBounds(List<DomainReference> superDomainBounds) {
+    this.superDomainBounds = superDomainBounds;
     return this;
   }
 
   public DomainReference get() {
     return new DomainReferenceImpl(
         name,
-        alias,
-        genericQualifiers
+        equivalences,
+        superDomainBounds
     );
   }
 }

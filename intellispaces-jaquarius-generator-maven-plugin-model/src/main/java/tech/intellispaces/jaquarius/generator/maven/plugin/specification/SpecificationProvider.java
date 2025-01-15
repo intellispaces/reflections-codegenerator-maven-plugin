@@ -4,5 +4,5 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 public interface SpecificationProvider {
 
-  DomainSpecification getDomainByName(String domainName) throws MojoExecutionException;
+  Domain getDomainByName(String domainName) throws MojoExecutionException;
 }

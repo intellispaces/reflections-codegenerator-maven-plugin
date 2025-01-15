@@ -13,11 +13,11 @@ public class UnitedSpecificationProvider implements SpecificationProvider {
   }
 
   @Override
-  public DomainSpecification getDomainByName(String domainName) throws MojoExecutionException {
+  public Domain getDomainByName(String domainName) throws MojoExecutionException {
     for (SpecificationProvider sp : specificationProviders) {
-      DomainSpecification domainSpecification = sp.getDomainByName(domainName);
-      if (domainSpecification != null) {
-        return domainSpecification;
+      Domain domain = sp.getDomainByName(domainName);
+      if (domain != null) {
+        return domain;
       }
     }
     throw new MojoExecutionException("Could not to find the specification of the domain " + domainName);

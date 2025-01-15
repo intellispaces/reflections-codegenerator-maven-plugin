@@ -8,7 +8,7 @@ public class SettingsBuilder {
   private String projectPath;
   private String specificationPath;
   private String outputDirectory;
-  private Map<String, CoreDomain> coreDomains = Map.of();
+  private Map<CoreDomain, String> coreDomains = Map.of();
 
   public SettingsBuilder projectPath(String projectPath) {
     this.projectPath = projectPath;
@@ -25,7 +25,7 @@ public class SettingsBuilder {
     return this;
   }
 
-  public SettingsBuilder coreDomains(Map<String, CoreDomain> coreDomains) {
+  public SettingsBuilder coreDomains(Map<CoreDomain, String> coreDomains) {
     this.coreDomains = coreDomains;
     return this;
   }

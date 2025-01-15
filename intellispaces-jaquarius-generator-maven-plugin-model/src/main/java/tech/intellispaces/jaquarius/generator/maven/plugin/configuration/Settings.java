@@ -15,5 +15,5 @@ public interface Settings {
 
   String outputDirectory();
 
-  Map<String, CoreDomain> coreDomains();
+  Map<CoreDomain, String> coreDomains();
 }

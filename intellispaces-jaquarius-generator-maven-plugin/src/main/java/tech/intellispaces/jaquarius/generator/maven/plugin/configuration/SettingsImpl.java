@@ -8,6 +8,6 @@ record SettingsImpl(
     String projectPath,
     String specificationPath,
     String outputDirectory,
-    Map<String, CoreDomain> coreDomains
+    Map<CoreDomain, String> coreDomains
 ) implements Settings {
 }

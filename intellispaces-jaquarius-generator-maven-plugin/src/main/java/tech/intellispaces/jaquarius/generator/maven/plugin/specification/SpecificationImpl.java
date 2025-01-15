@@ -4,6 +4,6 @@ import java.nio.file.Path;
 
 record SpecificationImpl(
     Path specPath,
-    OntologySpecification ontology
+    Ontology ontology
 ) implements Specification {
 }

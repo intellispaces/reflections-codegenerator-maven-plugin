@@ -6,6 +6,8 @@ import tech.intellispaces.general.collection.ArraysFunctions;
 import tech.intellispaces.general.collection.CollectionFunctions;
 import tech.intellispaces.general.data.Dictionaries;
 import tech.intellispaces.general.data.Dictionary;
+import tech.intellispaces.general.exception.NotImplementedExceptions;
+import tech.intellispaces.general.exception.UnexpectedExceptions;
 import tech.intellispaces.general.text.StringFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 
@@ -20,33 +22,35 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 public class YamlSpecificationReadFunctions {
   private static final Yaml YAML = new Yaml();
 
-  public static Specification readSpecification(
+  public static Specification readYamlSpecification(
       Path specPath, Configuration cfg
   ) throws MojoExecutionException {
     var specs = new LinkedHashMap<String, Specification>();
-    readRelatedSpecifications(specPath, cfg, specs);
+    readSpecifications(specPath, cfg, specs);
     return joinSpecification(specPath, specs.values());
   }
 
-  static void readRelatedSpecifications(
-      Path specPath,
-      Configuration cfg,
-      Map<String, Specification> specs
+  static void readSpecifications(
+      Path specPath, Configuration cfg, Map<String, Specification> specs
   ) throws MojoExecutionException {
     if (!specs.containsKey(specPath.toString())) {
       Dictionary specDictionary = readSpecificationDictionary(specPath);
+
+      SpecificationVersion specVersion = readVersion(specDictionary);
+      if (!SpecificationVersions.V0p1.is(specVersion)) {
+        throw NotImplementedExceptions.withCode("FT4tQA");
+      }
+
       Specification spec = readSpecification(specPath, specDictionary);
       specs.put(specPath.toString(), spec);
 
-      List<Path> importSpecPaths = readImports(specDictionary, cfg);
+      List<Path> importSpecPaths = getImportedSpecifications(specDictionary, cfg);
       CollectionFunctions.forEach(importSpecPaths,
-          importSpecPath -> readRelatedSpecifications(importSpecPath, cfg, specs));
+          importSpecPath -> readSpecifications(importSpecPath, cfg, specs));
     }
   }
 
@@ -65,14 +69,14 @@ public class YamlSpecificationReadFunctions {
         .get();
   }
 
-  static OntologySpecification readOntology(Dictionary specDictionary) throws MojoExecutionException {
+  static Ontology readOntology(Dictionary specDictionary) throws MojoExecutionException {
     Dictionary ontologyDictionary = specDictionary.dictionaryValue("ontology");
-    return OntologySpecifications.build()
+    return Ontologies.build()
         .domains(readDomains(ontologyDictionary))
         .get();
   }
 
-  static List<DomainSpecification> readDomains(Dictionary ontologyDictionary) throws MojoExecutionException {
+  static List<Domain> readDomains(Dictionary ontologyDictionary) throws MojoExecutionException {
     if (!ontologyDictionary.hasProperty("domains")) {
       return List.of();
     }
@@ -80,98 +84,87 @@ public class YamlSpecificationReadFunctions {
     return CollectionFunctions.mapEach(domainDictionaries, YamlSpecificationReadFunctions::readDomain);
   }
 
-  static DomainSpecification readDomain(Dictionary domainDictionary) throws MojoExecutionException {
-    return DomainSpecifications.build()
+  static Domain readDomain(Dictionary domainDictionary) throws MojoExecutionException {
+    return Domains.build()
         .name(domainDictionary.name())
         .did(domainDictionary.stringValue("did"))
         .description(domainDictionary.stringValueNullable("description"))
-        .genericQualifiers(readGenericQualifiers(domainDictionary))
-        .parents(readParentDomains(domainDictionary))
+        .superDomains(readSuperDomains(domainDictionary))
         .channels(readDomainChannels(domainDictionary))
         .get();
   }
 
-  static List<DomainReference> readParentDomains(
-      Dictionary domainDictionary
-  ) throws MojoExecutionException {
-    if (!domainDictionary.hasProperty("parents")) {
+  static List<DomainReference> readSuperDomains(Dictionary domainDictionary) {
+    if (!domainDictionary.hasProperty("superDomains")) {
       return List.of();
     }
-    List<Dictionary> parentDictionaries = domainDictionary.dictionaryListValue("parents");
-    return CollectionFunctions.mapEach(parentDictionaries,
-        dict -> YamlSpecificationReadFunctions.readDomainReference(dict, null));
+    List<Dictionary> dictionaries = domainDictionary.dictionaryListValue("superDomains");
+    return CollectionFunctions.mapEach(dictionaries, dict -> readDomainReference(dict));
   }
 
-  static DomainReference readDomainReference(
-      Dictionary dictionary, String... prefix
-  ) throws MojoExecutionException {
-    var builder = DomainReferences.build();
-    builder.alias(traverseToString(dictionary, ArraysFunctions.join(prefix, "alias")));
-    builder.name(traverseToString(dictionary, ArraysFunctions.join(prefix, "name")));
-
-    List<Dictionary> genericQualifierDictionaries = traverseToDictionariesList(
-        dictionary, ArraysFunctions.join(prefix, "qualifiers", "generic")
-    );
-    if (genericQualifierDictionaries != null) {
-      builder.genericQualifiers(readGenericQualifierAppointments(genericQualifierDictionaries));
+  static DomainReference readDomainReference(Object value, String... propertyPath) {
+    if (value instanceof String name) {
+      DomainReferenceBuilder builder = DomainReferences.build();
+      builder.name(name);
+      return builder.get();
+    } else if (value instanceof Dictionary dictionary) {
+      return readDomainReference(dictionary, propertyPath);
+    } else {
+      throw NotImplementedExceptions.withCode("jjm5xyFL");
     }
+  }
+
+  static DomainReference readDomainReference(Dictionary dictionary, String... propertyPath) {
+    DomainReferenceBuilder builder = DomainReferences.build();
+    builder.name(readDomainName(dictionary, propertyPath));
+    builder.equivalences(readContextEquivalences(dictionary, propertyPath));
+    builder.superDomainBounds(readSuperDomainBounds(dictionary, propertyPath));
     return builder.get();
   }
 
-  static ValueReference readValueReference(
-      Dictionary dictionary, String... prefix
-  ) {
-    if (dictionary == null) {
+  static String readDomainName(Dictionary dictionary, String... propertyPath) {
+    if (isStringValue(dictionary, propertyPath)) {
+      return traverseToString(dictionary, propertyPath);
+    } else {
+      Dictionary dict = traverseToDictionary(dictionary, propertyPath);
+      if (dict != null && !dict.propertyNames().isEmpty()) {
+        String firstProperty = dict.propertyNames().get(0);
+        if (!dict.hasValue(firstProperty)) {
+          return firstProperty;
+        }
+      }
+      return dictionary.name();
+    }
+  }
+
+  static List<DomainReference> readSuperDomainBounds(Dictionary dictionary, String... propertyPath) {
+    List<?> superDomainBoundDictionaries = traverseToList(
+        dictionary, ArraysFunctions.join(propertyPath, "bounds", "superDomains")
+    );
+    if (CollectionFunctions.isNullOrEmpty(superDomainBoundDictionaries)) {
       return null;
     }
-    var builder = ValueReferences.build();
-    builder.alias(traverseToString(dictionary, ArraysFunctions.join(prefix, "alias")));
-    return builder.get();
+    return CollectionFunctions.mapEach(superDomainBoundDictionaries, sdb -> readDomainReference(sdb));
   }
 
-  static List<GenericQualifierSpecification> readGenericQualifiers(
-      Dictionary dictionary
-  ) throws MojoExecutionException {
-    List<Dictionary> genericQualifierDictionaries = traverseToDictionariesList(dictionary, "qualifiers", "generic");
-    if (genericQualifierDictionaries == null) {
+  static List<ContextEquivalence> readContextEquivalences(Dictionary dictionary, String... propertyPath) {
+    List<Dictionary> equivalenceDictionaries = traverseToDictionaryList(
+        dictionary, ArraysFunctions.join(propertyPath, "equivalences")
+    );
+    if (equivalenceDictionaries == null) {
       return List.of();
     }
-    return CollectionFunctions.mapEach(genericQualifierDictionaries,
-        YamlSpecificationReadFunctions::readGenericQualifier);
+    return CollectionFunctions.mapEach(equivalenceDictionaries, YamlSpecificationReadFunctions::readContextEquivalence);
   }
 
-  static GenericQualifierSpecification readGenericQualifier(
-      Dictionary qualifierDictionary
-  ) throws MojoExecutionException {
-    List<Dictionary> extendedDomainSpecs = traverseToDictionariesList(qualifierDictionary, "extends");
-    List<DomainReference> extendedDomains = CollectionFunctions.mapEach(extendedDomainSpecs,
-        extendedDomainSpec -> readDomainReference(extendedDomainSpec, "domain"));
-
-    return GenericQualifierSpecifications.build()
-        .alias(readDictionaryAlias(qualifierDictionary))
-        .extendedDomains(extendedDomains != null ? extendedDomains : List.of())
+  static ContextEquivalence readContextEquivalence(Dictionary equivalenceDictionary) {
+    return ContextEquivalences.build()
+        .projectionAlias(equivalenceDictionary.stringValueNullable("projection"))
+        .matchedProjectionAlias(equivalenceDictionary.stringValue("matchedProjection"))
         .get();
   }
 
-  static List<GenericQualifierAppointment> readGenericQualifierAppointments(
-      List<Dictionary> genericQualifierDictionaries
-  ) throws MojoExecutionException {
-    return CollectionFunctions.mapEach(genericQualifierDictionaries,
-        YamlSpecificationReadFunctions::readGenericQualifierAppointment
-    );
-  }
-
-  static GenericQualifierAppointment readGenericQualifierAppointment(
-      Dictionary genericQualifierDictionary
-  ) throws MojoExecutionException {
-    String alias = readDictionaryAlias(genericQualifierDictionary);
-    return GenericQualifierAppointments.build()
-        .alias(alias)
-        .actualDomain(readDomainReference(genericQualifierDictionary, "domain"))
-        .get();
-  }
-
-  static List<DomainChannelSpecification> readDomainChannels(
+  static List<ContextChannel> readDomainChannels(
       Dictionary domainDictionary
   ) throws MojoExecutionException {
     if (!domainDictionary.hasProperty("channels")) {
@@ -181,37 +174,38 @@ public class YamlSpecificationReadFunctions {
     return CollectionFunctions.mapEach(parentProperties, YamlSpecificationReadFunctions::readDomainChannel);
   }
 
-  static DomainChannelSpecification readDomainChannel(
+  static ContextChannel readDomainChannel(
       Dictionary channelDictionary
   ) throws MojoExecutionException {
-    return DomainChannelSpecifications.build()
+    return ContextChannels.build()
         .alias(readDictionaryAlias(channelDictionary))
-        .name(channelDictionary.stringValueNullable("name"))
         .cid(channelDictionary.stringValue("cid"))
+        .name(channelDictionary.stringValueNullable("name"))
+        .description(channelDictionary.stringValueNullable("description"))
+        .projections(readChannelProjections(channelDictionary))
         .targetDomain(readDomainReference(channelDictionary, "target", "domain"))
-        .targetValue(readValueReference(channelDictionary, "target", "value"))
-        .valueQualifiers(readChannelValueQualifiers(channelDictionary))
+        .targetAlias(traverseToString(channelDictionary, "target", "alias"))
         .allowedTraverses(readAllowedTraverses(channelDictionary))
         .get();
   }
 
-  static List<ValueQualifierSpecification> readChannelValueQualifiers(
+  static List<ContextChannel> readChannelProjections(
       Dictionary channelDictionary
   ) throws MojoExecutionException {
-    List<Dictionary> qualifierDictionaries = traverseToDictionariesList(channelDictionary, "qualifiers", "value");
-    if (qualifierDictionaries == null) {
+    List<Dictionary> projectionDictionaries = traverseToDictionaryList(channelDictionary, "projections");
+    if (projectionDictionaries == null) {
       return List.of();
     }
-    return CollectionFunctions.mapEach(qualifierDictionaries,
-        YamlSpecificationReadFunctions::readChannelValueQualifier);
+    return CollectionFunctions.mapEach(projectionDictionaries,
+        YamlSpecificationReadFunctions::readChannelProjection);
   }
 
-  static ValueQualifierSpecification readChannelValueQualifier(
-      Dictionary valueQualifierDictionary
+  static ContextChannel readChannelProjection(
+      Dictionary projectionDictionary
   ) throws MojoExecutionException {
-    return ValueQualifierSpecifications.build()
-        .name(readDictionaryAlias(valueQualifierDictionary))
-        .domain(readDomainReference(valueQualifierDictionary, "domain"))
+    return ContextChannels.build()
+        .targetAlias(readDictionaryAlias(projectionDictionary))
+        .targetDomain(readDomainReference(projectionDictionary, "domain"))
         .get();
   }
 
@@ -224,21 +218,23 @@ public class YamlSpecificationReadFunctions {
     return SpecificationVersions.from(version);
   }
 
-  static List<Path> readImports(Dictionary specDictionary, Configuration cfg) {
+  static List<Path> getImportedSpecifications(Dictionary specDictionary, Configuration cfg) {
     if (!specDictionary.hasProperty("imports")) {
       return List.of();
     }
     List<String> importPathPatterns = specDictionary.stringListValue("imports");
-    return readImports(Paths.get(cfg.settings().projectPath()), importPathPatterns);
+    return getImportedSpecifications(Paths.get(cfg.settings().projectPath()), importPathPatterns);
   }
 
-  static List<Path> readImports(Path projectPath, List<String> importPathPatterns) {
+  static List<Path> getImportedSpecifications(Path projectPath, List<String> importPathPatterns) {
     var files = new ArrayList<Path>();
-    CollectionFunctions.forEach(importPathPatterns, importMask -> readImports(projectPath, importMask, files));
+    CollectionFunctions.forEach(importPathPatterns, importMask -> getImportedSpecifications(
+        projectPath, importMask, files)
+    );
     return files;
   }
 
-  static void readImports(Path projectPath, String importPathPattern, List<Path> files) {
+  static void getImportedSpecifications(Path projectPath, String importPathPattern, List<Path> files) {
     files.add(Paths.get(projectPath.toString(), importPathPattern));
   }
 
@@ -260,40 +256,123 @@ public class YamlSpecificationReadFunctions {
 
   static Specification joinSpecification(Path specPath, Collection<Specification> specs) {
     return Specifications.build(specPath)
-        .ontology(OntologySpecifications.build()
+        .ontology(Ontologies.build()
             .domains(specs.stream()
                 .map(Specification::ontology)
-                .map(OntologySpecification::domains)
+                .map(Ontology::domains)
                 .flatMap(List::stream)
                 .toList())
             .get())
         .get();
   }
 
-  static String traverseToString(Dictionary dictionary, String... pathParts) {
-    return traverse(dictionary, Dictionary::stringValue, pathParts);
+  static boolean isStringValue(Dictionary dictionary, String... propertyPath) {
+    Object value = traverse(dictionary, propertyPath);
+    if (value == null) {
+      return false;
+    }
+    return (value instanceof String);
   }
 
-  static List<Dictionary> traverseToDictionariesList(Dictionary dictionary, String... pathParts) {
-    return traverse(dictionary, Dictionary::dictionaryListValue, pathParts);
+  static String traverseToString(Dictionary dictionary, String... propertyPath) {
+    Object value = traverse(dictionary, propertyPath);
+    if (value == null) {
+      return null;
+    } else if (value instanceof String string) {
+      return string;
+    }
+    throw UnexpectedExceptions.withMessage("Property '{0}' is not string",
+        propertyPathString(dictionary, propertyPath));
   }
 
-  static <T> T traverse(Dictionary dictionary, BiFunction<Dictionary, String, T> targetMapper, String... pathParts) {
-    String path = Arrays.stream(pathParts).filter(Objects::nonNull).collect(Collectors.joining("."));
-    List<String> parts = StringFunctions.splitAndTrim(path, ".");
-    String propertyName = "";
-    for (int ind = 0; ind < parts.size(); ind++) {
-      String part = parts.get(ind);
-      propertyName = propertyName + (propertyName.isEmpty() ? "" : ".") + part;
-      if (dictionary.hasProperty(propertyName)) {
-        if (ind == parts.size() - 1) {
-          return targetMapper.apply(dictionary, propertyName);
+  static Dictionary traverseToDictionary(Dictionary dictionary, String... propertyPath) {
+    Object value = traverse(dictionary, propertyPath);
+    if (value == null) {
+      return null;
+    } else if (value instanceof Dictionary dict) {
+      return dict;
+    }
+    throw UnexpectedExceptions.withMessage("Property '{0}' is not dictionary",
+        propertyPathString(dictionary, propertyPath));
+  }
+
+  static List<?> traverseToList(Dictionary dictionary, String... propertyPath) {
+    Object value = traverse(dictionary, propertyPath);
+    if (value == null) {
+      return null;
+    } else if (value instanceof List<?> list) {
+      return list;
+    }
+    throw UnexpectedExceptions.withMessage("Property '{0}' is not list", propertyPathString(dictionary, propertyPath));
+  }
+
+  @SuppressWarnings("unchecked")
+  static List<Dictionary> traverseToDictionaryList(Dictionary dictionary, String... propertyPath) {
+    List<?> list = traverseToList(dictionary, propertyPath);
+    if (list == null) {
+      return null;
+    }
+
+    Object element = list.get(0);
+    if (element instanceof Dictionary) {
+      return (List<Dictionary>) list;
+    }
+    throw UnexpectedExceptions.withMessage("Property '{0}' is not dictionary list",
+        propertyPathString(dictionary, propertyPath));
+  }
+
+  static Object traverse(Dictionary dictionary, String... propertyPath) {
+    if (ArraysFunctions.isNullOrEmpty(propertyPath)) {
+      return dictionary;
+    }
+
+    List<String> conjointPropertyPath = Arrays.stream(propertyPath)
+            .filter(Objects::nonNull)
+            .flatMap(p -> StringFunctions.splitAndTrim(p, ".").stream())
+            .toList();
+
+    String actualPropertyName = "";
+    for (int ind = 0; ind < conjointPropertyPath.size(); ind++) {
+      String propertyName = conjointPropertyPath.get(ind);
+      actualPropertyName = actualPropertyName + (actualPropertyName.isEmpty() ? "" : ".") + propertyName;
+      if (dictionary.hasProperty(actualPropertyName)) {
+        Object value = dictionary.valueNullable(actualPropertyName);
+        if (ind == conjointPropertyPath.size() - 1) {
+          return value;
         }
-        dictionary = dictionary.dictionaryValue(propertyName);
-        propertyName = "";
+        if (value instanceof Dictionary) {
+          dictionary = (Dictionary) value;
+          actualPropertyName = "";
+        } else if (value instanceof List<?>) {
+          throw NotImplementedExceptions.withCode("vnyVN");
+        } else {
+          return null;
+        }
       }
     }
     return null;
+  }
+
+  static String propertyPathString(String... path) {
+    if (ArraysFunctions.isNullOrEmpty(path)) {
+      return "";
+    }
+    return String.join("\\", path);
+  }
+
+  static String propertyPathString(Dictionary dictionary, String... path) {
+    int dictionaryPathLength = dictionary.path() != null ? dictionary.path().size() : 0;
+    int pathLength = path != null ? path.length : 0;
+
+    String[] fullPath = new String[dictionaryPathLength + pathLength];
+    int ind = 0;
+    for (int i = 0; i < dictionaryPathLength; i++) {
+      fullPath[ind++] = dictionary.path().get(i);
+    }
+    for (int i = 0; i < pathLength; i++) {
+      fullPath[ind++] = path[i];
+    }
+    return propertyPathString(fullPath);
   }
 
   private YamlSpecificationReadFunctions() {}
