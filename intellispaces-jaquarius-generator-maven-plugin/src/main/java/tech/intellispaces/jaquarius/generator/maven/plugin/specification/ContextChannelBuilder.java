@@ -9,6 +9,7 @@ public class ContextChannelBuilder {
   private String description;
   private List<ContextChannel> projections = List.of();
   private DomainReference targetDomain;
+  private List<ContextEquivalence> targetEquivalences = List.of();
   private String targetAlias;
   private List<String> allowedTraverses;
 
@@ -47,6 +48,11 @@ public class ContextChannelBuilder {
     return this;
   }
 
+  public ContextChannelBuilder targetEquivalences(List<ContextEquivalence> targetEquivalences) {
+    this.targetEquivalences = targetEquivalences;
+    return this;
+  }
+
   public ContextChannelBuilder allowedTraverses(List<String> allowedTraverses) {
     this.allowedTraverses = allowedTraverses;
     return this;
@@ -60,6 +66,7 @@ public class ContextChannelBuilder {
         description,
         projections,
         targetDomain,
+        targetEquivalences,
         targetAlias,
         allowedTraverses
     );

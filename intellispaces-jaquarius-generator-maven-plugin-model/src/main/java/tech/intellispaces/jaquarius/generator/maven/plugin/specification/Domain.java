@@ -7,14 +7,29 @@ import java.util.List;
  */
 public interface Domain {
 
+  /**
+   * The domain identifier.
+   */
   String did();
 
+  /**
+   * The domain qualified name.
+   */
   String name();
 
+  /**
+   * The domain description.
+   */
   String description();
 
-  List<DomainReference> superDomains();
+  /**
+   * Super domains.
+   */
+  List<SuperDomain> superDomains();
 
+  /**
+   * Domain channels.
+   */
   List<ContextChannel> channels();
 }
 

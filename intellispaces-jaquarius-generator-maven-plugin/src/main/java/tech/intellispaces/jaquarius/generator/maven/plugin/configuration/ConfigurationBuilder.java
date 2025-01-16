@@ -1,11 +1,11 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.configuration;
 
 import org.apache.maven.plugin.logging.Log;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationProvider;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.OntologyRepository;
 
 public class ConfigurationBuilder {
   private Settings settings;
-  private SpecificationProvider specificationProvider;
+  private OntologyRepository repository;
   private Log log;
 
   public ConfigurationBuilder settings(Settings settings) {
@@ -18,15 +18,15 @@ public class ConfigurationBuilder {
     return this;
   }
 
-  public ConfigurationBuilder specificationProvider(SpecificationProvider specificationProvider) {
-    this.specificationProvider = specificationProvider;
+  public ConfigurationBuilder repository(OntologyRepository repository) {
+    this.repository = repository;
     return this;
   }
 
   public Configuration get() {
     return new ConfigurationImpl(
         settings,
-        specificationProvider,
+        repository,
         log
     );
   }

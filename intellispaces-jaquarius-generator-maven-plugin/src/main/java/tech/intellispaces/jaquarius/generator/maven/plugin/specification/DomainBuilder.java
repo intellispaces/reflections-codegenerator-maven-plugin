@@ -6,7 +6,7 @@ public class DomainBuilder {
   private String name;
   private String did;
   private String description;
-  private List<DomainReference> superDomains = List.of();
+  private List<SuperDomain> superDomains = List.of();
   private List<ContextChannel> channels;
 
   public DomainBuilder name(String name) {
@@ -24,7 +24,7 @@ public class DomainBuilder {
     return this;
   }
 
-  public DomainBuilder superDomains(List<DomainReference> domainReferences) {
+  public DomainBuilder superDomains(List<SuperDomain> domainReferences) {
     this.superDomains = domainReferences;
     return this;
   }

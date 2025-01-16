@@ -18,7 +18,7 @@ public interface ContextChannel {
   String cid();
 
   /**
-   * The channel name.
+   * The channel qualified name.
    */
   String name();
 
@@ -33,6 +33,11 @@ public interface ContextChannel {
    * The channel target domain.
    */
   DomainReference targetDomain();
+
+  /**
+   * The target equivalences.
+   */
+  List<ContextEquivalence> targetEquivalences();
 
   /**
    * The channel target alias.

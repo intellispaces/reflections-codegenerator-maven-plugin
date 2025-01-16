@@ -6,7 +6,7 @@ record DomainImpl(
     String name,
     String did,
     String description,
-    List<DomainReference> superDomains,
+    List<SuperDomain> superDomains,
     List<ContextChannel> channels
 ) implements Domain {
 }

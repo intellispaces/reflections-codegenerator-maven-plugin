@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class DirectSpecificationProvider implements SpecificationProvider {
+public class DirectOntologyRepository implements OntologyRepository {
   private Map<String, Domain> nameToDomainSpecification;
 
-  public DirectSpecificationProvider(Specification spec) {
+  public DirectOntologyRepository(Specification spec) {
     loadSpecification(spec);
   }
 

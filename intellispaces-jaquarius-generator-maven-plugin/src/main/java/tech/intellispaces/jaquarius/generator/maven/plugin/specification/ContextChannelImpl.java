@@ -9,6 +9,7 @@ record ContextChannelImpl(
     String description,
     List<ContextChannel> projections,
     DomainReference targetDomain,
+    List<ContextEquivalence> targetEquivalences,
     String targetAlias,
     List<String> allowedTraverse
 ) implements ContextChannel {

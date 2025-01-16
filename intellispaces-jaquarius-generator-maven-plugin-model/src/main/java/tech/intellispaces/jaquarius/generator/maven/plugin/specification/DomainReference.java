@@ -12,10 +12,5 @@ public interface DomainReference {
    */
   String name();
 
-  /**
-   * The domain equivalences.
-   */
-  List<ContextEquivalence> equivalences();
-
   List<DomainReference> superDomainBounds();
 }

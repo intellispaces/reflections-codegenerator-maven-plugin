@@ -94,12 +94,19 @@ public class YamlSpecificationReadFunctions {
         .get();
   }
 
-  static List<DomainReference> readSuperDomains(Dictionary domainDictionary) {
+  static List<SuperDomain> readSuperDomains(Dictionary domainDictionary) {
     if (!domainDictionary.hasProperty("superDomains")) {
       return List.of();
     }
     List<Dictionary> dictionaries = domainDictionary.dictionaryListValue("superDomains");
-    return CollectionFunctions.mapEach(dictionaries, dict -> readDomainReference(dict));
+    return CollectionFunctions.mapEach(dictionaries, dict -> readSuperDomain(dict));
+  }
+
+  static SuperDomain readSuperDomain(Dictionary superDomainDictionary, String... propertyPath) {
+    return SuperDomains.build()
+        .domain(readDomainReference(superDomainDictionary, propertyPath))
+        .equivalences(readContextEquivalences(superDomainDictionary, propertyPath))
+        .get();
   }
 
   static DomainReference readDomainReference(Object value, String... propertyPath) {
@@ -115,9 +122,12 @@ public class YamlSpecificationReadFunctions {
   }
 
   static DomainReference readDomainReference(Dictionary dictionary, String... propertyPath) {
+    if (!hasProperty(dictionary, propertyPath)) {
+      return null;
+    }
+
     DomainReferenceBuilder builder = DomainReferences.build();
     builder.name(readDomainName(dictionary, propertyPath));
-    builder.equivalences(readContextEquivalences(dictionary, propertyPath));
     builder.superDomainBounds(readSuperDomainBounds(dictionary, propertyPath));
     return builder.get();
   }
@@ -128,6 +138,11 @@ public class YamlSpecificationReadFunctions {
     } else {
       Dictionary dict = traverseToDictionary(dictionary, propertyPath);
       if (dict != null && !dict.propertyNames().isEmpty()) {
+        String name = traverseToString(dict, "name");
+        if (name != null) {
+          return name;
+        }
+
         String firstProperty = dict.propertyNames().get(0);
         if (!dict.hasValue(firstProperty)) {
           return firstProperty;
@@ -138,9 +153,7 @@ public class YamlSpecificationReadFunctions {
   }
 
   static List<DomainReference> readSuperDomainBounds(Dictionary dictionary, String... propertyPath) {
-    List<?> superDomainBoundDictionaries = traverseToList(
-        dictionary, ArraysFunctions.join(propertyPath, "bounds", "superDomains")
-    );
+    List<?> superDomainBoundDictionaries = traverseToList(dictionary, propertyPath, "bounds", "superDomains");
     if (CollectionFunctions.isNullOrEmpty(superDomainBoundDictionaries)) {
       return null;
     }
@@ -148,9 +161,7 @@ public class YamlSpecificationReadFunctions {
   }
 
   static List<ContextEquivalence> readContextEquivalences(Dictionary dictionary, String... propertyPath) {
-    List<Dictionary> equivalenceDictionaries = traverseToDictionaryList(
-        dictionary, ArraysFunctions.join(propertyPath, "equivalences")
-    );
+    List<Dictionary> equivalenceDictionaries = traverseToDictionaryList(dictionary, propertyPath, "equivalences");
     if (equivalenceDictionaries == null) {
       return List.of();
     }
@@ -164,14 +175,12 @@ public class YamlSpecificationReadFunctions {
         .get();
   }
 
-  static List<ContextChannel> readDomainChannels(
-      Dictionary domainDictionary
-  ) throws MojoExecutionException {
+  static List<ContextChannel> readDomainChannels(Dictionary domainDictionary) throws MojoExecutionException {
     if (!domainDictionary.hasProperty("channels")) {
       return List.of();
     }
-    List<Dictionary> parentProperties = domainDictionary.dictionaryListValue("channels");
-    return CollectionFunctions.mapEach(parentProperties, YamlSpecificationReadFunctions::readDomainChannel);
+    List<Dictionary> channelDictionaries = domainDictionary.dictionaryListValue("channels");
+    return CollectionFunctions.mapEach(channelDictionaries, YamlSpecificationReadFunctions::readDomainChannel);
   }
 
   static ContextChannel readDomainChannel(
@@ -184,6 +193,7 @@ public class YamlSpecificationReadFunctions {
         .description(channelDictionary.stringValueNullable("description"))
         .projections(readChannelProjections(channelDictionary))
         .targetDomain(readDomainReference(channelDictionary, "target", "domain"))
+        .targetEquivalences(readContextEquivalences(channelDictionary, "target"))
         .targetAlias(traverseToString(channelDictionary, "target", "alias"))
         .allowedTraverses(readAllowedTraverses(channelDictionary))
         .get();
@@ -266,6 +276,11 @@ public class YamlSpecificationReadFunctions {
         .get();
   }
 
+  static boolean hasProperty(Dictionary dictionary, String... propertyPath) {
+    Object value = traverse(dictionary, propertyPath);
+    return (value != null);
+  }
+
   static boolean isStringValue(Dictionary dictionary, String... propertyPath) {
     Object value = traverse(dictionary, propertyPath);
     if (value == null) {
@@ -306,6 +321,10 @@ public class YamlSpecificationReadFunctions {
     throw UnexpectedExceptions.withMessage("Property '{0}' is not list", propertyPathString(dictionary, propertyPath));
   }
 
+  static List<?> traverseToList(Dictionary dictionary, String[] initialPath, String... propertyPath) {
+    return traverseToList(dictionary, ArraysFunctions.join(initialPath, propertyPath));
+  }
+
   @SuppressWarnings("unchecked")
   static List<Dictionary> traverseToDictionaryList(Dictionary dictionary, String... propertyPath) {
     List<?> list = traverseToList(dictionary, propertyPath);
@@ -319,6 +338,12 @@ public class YamlSpecificationReadFunctions {
     }
     throw UnexpectedExceptions.withMessage("Property '{0}' is not dictionary list",
         propertyPathString(dictionary, propertyPath));
+  }
+
+  static List<Dictionary> traverseToDictionaryList(
+      Dictionary dictionary, String[] initialPath, String... propertyPath
+  ) {
+    return traverseToDictionaryList(dictionary, ArraysFunctions.join(initialPath, propertyPath));
   }
 
   static Object traverse(Dictionary dictionary, String... propertyPath) {

@@ -2,7 +2,10 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-public interface SpecificationProvider {
+/**
+ * The ontology repository.
+ */
+public interface OntologyRepository {
 
   Domain getDomainByName(String domainName) throws MojoExecutionException;
 }

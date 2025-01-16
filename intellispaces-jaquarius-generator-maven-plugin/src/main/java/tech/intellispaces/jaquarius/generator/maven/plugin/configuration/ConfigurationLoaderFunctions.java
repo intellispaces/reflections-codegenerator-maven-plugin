@@ -10,7 +10,7 @@ import tech.intellispaces.general.data.Dictionary;
 import tech.intellispaces.general.exception.NotImplementedExceptions;
 import tech.intellispaces.general.exception.UnexpectedExceptions;
 import tech.intellispaces.general.resource.ResourceFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationProvider;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.OntologyRepository;
 import tech.intellispaces.jaquarius.space.domain.CoreDomain;
 import tech.intellispaces.jaquarius.space.domain.CoreDomains;
 
@@ -32,7 +32,7 @@ public interface ConfigurationLoaderFunctions {
   static Configuration loadConfiguration(
       MavenProject project,
       Settings pluginSettings,
-      SpecificationProvider specificationProvider,
+      OntologyRepository repository,
       Log log
   ) throws MojoExecutionException {
     var builder = SettingsProvider.builder();
@@ -48,7 +48,7 @@ public interface ConfigurationLoaderFunctions {
     }
     return Configurations.build()
         .settings(builder.get())
-        .specificationProvider(specificationProvider)
+        .repository(repository)
         .log(log)
         .get();
   }
