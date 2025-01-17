@@ -1,14 +1,12 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.configuration;
 
-import tech.intellispaces.jaquarius.space.domain.CoreDomain;
-
-import java.util.Map;
+import tech.intellispaces.jaquarius.space.domain.PrimaryDomainSet;
 
 public class SettingsBuilder {
   private String projectPath;
   private String specificationPath;
   private String outputDirectory;
-  private Map<CoreDomain, String> coreDomains = Map.of();
+  private PrimaryDomainSet primaryDomains;
 
   public SettingsBuilder projectPath(String projectPath) {
     this.projectPath = projectPath;
@@ -25,8 +23,8 @@ public class SettingsBuilder {
     return this;
   }
 
-  public SettingsBuilder coreDomains(Map<CoreDomain, String> coreDomains) {
-    this.coreDomains = coreDomains;
+  public SettingsBuilder coreDomains(PrimaryDomainSet primaryDomains) {
+    this.primaryDomains = primaryDomains;
     return this;
   }
 
@@ -35,7 +33,7 @@ public class SettingsBuilder {
         projectPath,
         specificationPath,
         outputDirectory,
-        coreDomains
+        primaryDomains
     );
   }
 }

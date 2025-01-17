@@ -5,26 +5,17 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import tech.intellispaces.general.collection.CollectionFunctions;
-import tech.intellispaces.general.data.Dictionaries;
 import tech.intellispaces.general.data.Dictionary;
-import tech.intellispaces.general.exception.NotImplementedExceptions;
-import tech.intellispaces.general.exception.UnexpectedExceptions;
-import tech.intellispaces.general.resource.ResourceFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.OntologyRepository;
-import tech.intellispaces.jaquarius.space.domain.CoreDomain;
-import tech.intellispaces.jaquarius.space.domain.CoreDomains;
+import tech.intellispaces.jaquarius.space.domain.PrimaryDomainSet;
+import tech.intellispaces.jaquarius.space.domain.PrimaryDomains;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface ConfigurationLoaderFunctions {
@@ -39,72 +30,36 @@ public interface ConfigurationLoaderFunctions {
     builder.projectPath(pluginSettings.projectPath());
     builder.specificationPath(pluginSettings.specificationPath());
     builder.outputDirectory(pluginSettings.outputDirectory());
-
-    List<Settings> projectSettings = readProjectSettings(project);
-    if (projectSettings.size() == 1) {
-      builder.coreDomains(projectSettings.get(0).coreDomains());
-    } else if (projectSettings.size() > 1) {
-      throw NotImplementedExceptions.withCode("dertww");
-    }
+    builder.coreDomains(readPrimaryDomains(project));
+    Settings settings = builder.get();
     return Configurations.build()
-        .settings(builder.get())
+        .settings(settings)
         .repository(repository)
         .log(log)
         .get();
   }
 
-  static List<Settings> readProjectSettings(MavenProject project) throws MojoExecutionException {
+  static PrimaryDomainSet readPrimaryDomains(MavenProject project) throws MojoExecutionException {
+    var dictionaries = new ArrayList<Dictionary>();
+
     // Try to direct read
     try {
-      var path = Paths.get(project.getBasedir().toString(),
-          "src/main/resources/META-INF/jaquarius/domain.properties"
-      );
-      String content = Files.readString(path, StandardCharsets.UTF_8);
-      return List.of(readCoreDomains(content));
+      dictionaries.add(PrimaryDomains.readPrimaryDomainDictionary(project.getBasedir().toString()));
     } catch (IOException e) {
        // ignore
     }
 
     // Try to read from classpath
     try {
-      Enumeration<URL> enumeration = getProjectClassLoader(project).getResources(
-          "META-INF/jaquarius/domain.properties");
-      List<URL> urls = CollectionFunctions.toList(enumeration);
-      return CollectionFunctions.mapEach(urls, url -> readCoreDomains(
-          ResourceFunctions.readResourceAsString(url)));
+      dictionaries.addAll(PrimaryDomains.readPrimaryDomainDictionaries(projectClassLoader(project)));
     } catch (Exception e) {
       throw new MojoExecutionException("Could not to load file domain.properties", e);
     }
-  }
-
-  static Settings readCoreDomains(String content) {
-    Dictionary dictionary = Dictionaries.ofProperties(content);
-    return SettingsProvider.builder()
-        .coreDomains(readCoreDomains(dictionary))
-        .get();
-  }
-
-  static Map<CoreDomain, String> readCoreDomains(Dictionary dictionary) {
-    var map = new HashMap<CoreDomain, String>();
-    dictionary.propertyNames().forEach(property -> map.put(
-        getCoreDomainByPropertyName(property), dictionary.stringValue(property))
-    );
-    return map;
-  }
-
-  static CoreDomain getCoreDomainByPropertyName(String propertyName) {
-    return switch (propertyName) {
-      case "domain" -> CoreDomains.Domain;
-      case "string" -> CoreDomains.String;
-      case "number" -> CoreDomains.Number;
-      case "integer" -> CoreDomains.Integer;
-      default -> throw UnexpectedExceptions.withMessage(
-          "Unsupported property '{0}' in file domain.properties", propertyName);
-    };
+    return PrimaryDomains.get(dictionaries);
   }
 
   @SuppressWarnings("unchecked")
-  static ClassLoader getProjectClassLoader(MavenProject project) throws MojoExecutionException {
+  static ClassLoader projectClassLoader(MavenProject project) throws MojoExecutionException {
     try {
       List<URL> urls = CollectionFunctions.mapEach(
           (Set<Artifact>) project.getDependencyArtifacts(), a -> a.getFile().toURI().toURL());

@@ -5,18 +5,16 @@ import tech.intellispaces.action.runnable.RunnableAction;
 import tech.intellispaces.action.text.StringActions;
 import tech.intellispaces.general.collection.CollectionFunctions;
 import tech.intellispaces.general.exception.NotImplementedExceptions;
-import tech.intellispaces.general.exception.UnexpectedExceptions;
 import tech.intellispaces.general.text.StringFunctions;
 import tech.intellispaces.general.type.ClassNameFunctions;
 import tech.intellispaces.jaquarius.annotation.Channel;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.ContextChannel;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.ContextEquivalence;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Domain;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DomainReference;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.ContextChannel;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Domain;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SuperDomain;
-import tech.intellispaces.jaquarius.space.domain.CoreDomains;
 import tech.intellispaces.jaquarius.traverse.TraverseTypes;
 import tech.intellispaces.java.reflection.customtype.ImportLists;
 import tech.intellispaces.java.reflection.customtype.MutableImportList;
@@ -80,7 +78,7 @@ public class GenerationFunctions {
   static List<String> buildTypeParamDeclarations(
       Domain domainSpec, MutableImportList imports, Configuration cfg
   ) {
-    if (domainSpec.name() != null && domainSpec.name().equals(getDomainOfDomainsName(cfg))) {
+    if (domainSpec.name() != null && cfg.settings().primaryDomains().isDomainDomain(domainSpec.name())) {
       return List.of("D");
     }
     return domainSpec.channels().stream()
@@ -192,7 +190,7 @@ public class GenerationFunctions {
       String targetDomainName = targetDomainReference.name();
       String targetDomainClassName = getDomainClassName(targetDomainName, cfg);
       String targetDomainClassSimpleName = imports.addAndGetSimpleName(targetDomainClassName);
-      if (targetDomainName.equals(getDomainOfDomainsName(cfg))) {
+      if (cfg.settings().primaryDomains().isDomainDomain(targetDomainName)) {
         var sb = new StringBuilder();
         sb.append(targetDomainClassSimpleName);
         sb.append("<");
@@ -243,8 +241,7 @@ public class GenerationFunctions {
     if (channelSpec.targetDomain() == null) {
       return false;
     }
-    String domainDomainName = cfg.settings().coreDomains().get(CoreDomains.Domain);
-    return domainDomainName.equals(channelSpec.targetDomain().name());
+    return cfg.settings().primaryDomains().isDomainDomain(channelSpec.targetDomain().name());
   }
 
   static List<ContextChannel> getTypeRelatedChannels(Domain domainSpec, Configuration cfg) {
@@ -289,14 +286,6 @@ public class GenerationFunctions {
 
   static String getClassName(String entityName, Configuration cfg) {
     return entityName.replaceFirst("intellispaces\\.", "tech.intellispaces.jaquarius.");
-  }
-
-  static String getDomainOfDomainsName(Configuration cfg) {
-    String name = cfg.settings().coreDomains().get(CoreDomains.Domain);
-    if (name == null) {
-      throw UnexpectedExceptions.withMessage("Name of the domain of domains is not defined");
-    }
-    return name;
   }
 
   static void write(

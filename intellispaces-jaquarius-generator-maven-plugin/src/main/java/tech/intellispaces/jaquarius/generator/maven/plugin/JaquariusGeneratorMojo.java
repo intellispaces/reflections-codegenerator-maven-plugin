@@ -15,8 +15,8 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Setting
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DirectOntologyRepository;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.OntologyRepository;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.UnitedOntologyRepository;
 

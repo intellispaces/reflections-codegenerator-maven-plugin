@@ -1,8 +1,6 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.configuration;
 
-import tech.intellispaces.jaquarius.space.domain.CoreDomain;
-
-import java.util.Map;
+import tech.intellispaces.jaquarius.space.domain.PrimaryDomainSet;
 
 /**
  * The plugin settings.
@@ -15,5 +13,5 @@ public interface Settings {
 
   String outputDirectory();
 
-  Map<CoreDomain, String> coreDomains();
+  PrimaryDomainSet primaryDomains();
 }
