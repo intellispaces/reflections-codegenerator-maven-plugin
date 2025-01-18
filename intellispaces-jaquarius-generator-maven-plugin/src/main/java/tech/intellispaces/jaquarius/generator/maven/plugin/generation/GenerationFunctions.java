@@ -15,6 +15,8 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Domain;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DomainReference;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SuperDomain;
+import tech.intellispaces.jaquarius.naming.NameConventionFunctions;
+import tech.intellispaces.jaquarius.space.domain.PrimaryDomains;
 import tech.intellispaces.jaquarius.traverse.TraverseTypes;
 import tech.intellispaces.java.reflection.customtype.ImportLists;
 import tech.intellispaces.java.reflection.customtype.MutableImportList;
@@ -45,7 +47,7 @@ public class GenerationFunctions {
     try {
       Template template = Templates.get("/domain.template");
       for (Domain domainSpec : domainSpecs) {
-        String canonicalName = getDomainClassName(domainSpec, cfg);
+        String canonicalName = getDomainClassName(domainSpec);
         Map<String, Object> templateVars = buildDomainTemplateVariables(domainSpec, canonicalName, cfg);
         String source = template.resolve(templateVars);
         write(cfg, canonicalName, source);
@@ -78,7 +80,7 @@ public class GenerationFunctions {
   static List<String> buildTypeParamDeclarations(
       Domain domainSpec, MutableImportList imports, Configuration cfg
   ) {
-    if (domainSpec.name() != null && cfg.settings().primaryDomains().isDomainDomain(domainSpec.name())) {
+    if (domainSpec.name() != null && PrimaryDomains.current().isDomainDomain(domainSpec.name())) {
       return List.of("D");
     }
     return domainSpec.channels().stream()
@@ -188,9 +190,9 @@ public class GenerationFunctions {
     DomainReference targetDomainReference = channelSpec.targetDomain();
     if (targetDomainReference != null && targetDomainReference.name() != null) {
       String targetDomainName = targetDomainReference.name();
-      String targetDomainClassName = getDomainClassName(targetDomainName, cfg);
+      String targetDomainClassName = getDomainClassName(targetDomainName);
       String targetDomainClassSimpleName = imports.addAndGetSimpleName(targetDomainClassName);
-      if (cfg.settings().primaryDomains().isDomainDomain(targetDomainName)) {
+      if (PrimaryDomains.current().isDomainDomain(targetDomainName)) {
         var sb = new StringBuilder();
         sb.append(targetDomainClassSimpleName);
         sb.append("<");
@@ -233,7 +235,7 @@ public class GenerationFunctions {
   ) {
     var map = new HashMap<String, Object>();
     map.put("name", qualifierChannel.targetAlias());
-    map.put("class", imports.addAndGetSimpleName(getDomainClassName(qualifierChannel.targetDomain().name(), cfg)));
+    map.put("class", imports.addAndGetSimpleName(getDomainClassName(qualifierChannel.targetDomain().name())));
     return map;
   }
 
@@ -241,7 +243,7 @@ public class GenerationFunctions {
     if (channelSpec.targetDomain() == null) {
       return false;
     }
-    return cfg.settings().primaryDomains().isDomainDomain(channelSpec.targetDomain().name());
+    return PrimaryDomains.current().isDomainDomain(channelSpec.targetDomain().name());
   }
 
   static List<ContextChannel> getTypeRelatedChannels(Domain domainSpec, Configuration cfg) {
@@ -272,20 +274,16 @@ public class GenerationFunctions {
     return sb.toString();
   }
 
-  static String getDomainClassName(Domain domainSpec, Configuration cfg) {
-    return getClassName(domainSpec.name() + "Domain", cfg);
+  static String getDomainClassName(Domain domainSpec) {
+    return NameConventionFunctions.convertIntelliSpacesDomainName(domainSpec.name());
   }
 
   static String getDomainClassName(DomainReference domainReference, Configuration cfg) {
-    return getDomainClassName(domainReference.name(), cfg);
+    return getDomainClassName(domainReference.name());
   }
 
-  static String getDomainClassName(String domainName, Configuration cfg) {
-    return getClassName(domainName + "Domain", cfg);
-  }
-
-  static String getClassName(String entityName, Configuration cfg) {
-    return entityName.replaceFirst("intellispaces\\.", "tech.intellispaces.jaquarius.");
+  static String getDomainClassName(String domainName) {
+    return NameConventionFunctions.convertIntelliSpacesDomainName(domainName);
   }
 
   static void write(
