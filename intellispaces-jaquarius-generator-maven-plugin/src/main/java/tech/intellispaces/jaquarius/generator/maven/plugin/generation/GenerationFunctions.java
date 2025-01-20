@@ -44,37 +44,33 @@ public class GenerationFunctions {
   static void generateDomains(
       List<Domain> domainSpecs, Configuration cfg
   ) throws MojoExecutionException {
-    try {
-      Template template = Templates.get("/domain.template");
-      for (Domain domainSpec : domainSpecs) {
+    Template template = Templates.get("/domain.template");
+    for (Domain domainSpec : domainSpecs) {
+      try {
         String canonicalName = getDomainClassName(domainSpec);
         Map<String, Object> templateVars = buildDomainTemplateVariables(domainSpec, canonicalName, cfg);
         String source = template.resolve(templateVars);
         write(cfg, canonicalName, source);
+      } catch (Exception e) {
+        throw new MojoExecutionException("Could not process domain specification " + domainSpec.name(), e);
       }
-    } catch (ResolveTemplateException e) {
-      throw new MojoExecutionException("Could not generate domain class", e);
     }
   }
 
   static Map<String, Object> buildDomainTemplateVariables(
       Domain domainSpec, String canonicalName, Configuration cfg
   ) throws MojoExecutionException {
-    try {
-      MutableImportList imports = ImportLists.get(canonicalName);
-      imports.add(tech.intellispaces.jaquarius.annotation.Domain.class);
-      return Map.of(
-          "did", domainSpec.did(),
-          "typeParams", buildTypeParamDeclarations(domainSpec, imports, cfg),
-          "parents", buildParentsTemplateVariables(domainSpec, imports, cfg),
-          "channels", buildChannelTemplateVariables(domainSpec, imports, cfg),
-          "packageName", ClassNameFunctions.getPackageName(canonicalName),
-          "simpleName", ClassNameFunctions.getSimpleName(canonicalName),
-          "importedClasses", imports.getImports()
-      );
-    } catch (Exception e) {
-      throw new MojoExecutionException("Could not process domain specification " + domainSpec.name(), e);
-    }
+    MutableImportList imports = ImportLists.get(canonicalName);
+    imports.add(tech.intellispaces.jaquarius.annotation.Domain.class);
+    return Map.of(
+        "did", domainSpec.did(),
+        "typeParams", buildTypeParamDeclarations(domainSpec, imports, cfg),
+        "parents", buildParentsTemplateVariables(domainSpec, imports, cfg),
+        "channels", buildChannelTemplateVariables(domainSpec, imports, cfg),
+        "packageName", ClassNameFunctions.getPackageName(canonicalName),
+        "simpleName", ClassNameFunctions.getSimpleName(canonicalName),
+        "importedClasses", imports.getImports()
+    );
   }
 
   static List<String> buildTypeParamDeclarations(
@@ -123,7 +119,7 @@ public class GenerationFunctions {
     for (SuperDomain superDomain : domainSpec.superDomains()) {
       parens.add(Map.of(
           "name", imports.addAndGetSimpleName(getDomainClassName(superDomain.domain(), cfg)),
-          "typeParams", buildTypeParamsDeclaration(domainSpec, superDomain.domain(), superDomain.equivalences(), cfg)
+          "typeParams", buildTypeParamsDeclaration(domainSpec, superDomain.domain(), superDomain.equivalences(), imports, cfg)
       ));
     }
     return parens;
@@ -133,6 +129,7 @@ public class GenerationFunctions {
       Domain domainSpec,
       DomainReference destinationDomainSpec,
       List<ContextEquivalence> equivalences,
+      MutableImportList imports,
       Configuration cfg
   ) throws MojoExecutionException {
     Domain superDomain = cfg.repository().getDomainByName(destinationDomainSpec.name());
@@ -153,7 +150,17 @@ public class GenerationFunctions {
       ContextEquivalence equivalence = equivalenceIndex.get(typeRelatedChannel.alias());
       ContextChannel channel = channelIndex.get(equivalence.matchedProjectionAlias());
       commaAppender.run();
-      sb.append(channel.targetAlias());
+      if (channel.targetAlias() != null) {
+        sb.append(channel.targetAlias());
+      } else if (channel.targetValue() != null) {
+        if (channel.targetValue().stringValue() != null) {
+          sb.append(imports.addAndGetSimpleName(getDomainClassName(channel.targetValue().stringValue())));
+        } else {
+          throw NotImplementedExceptions.withCode("H7Nnygs");
+        }
+      } else {
+        throw NotImplementedExceptions.withCode("8DNy410A");
+      }
     }
     sb.append(">");
     return sb.toString();
@@ -196,27 +203,35 @@ public class GenerationFunctions {
         var sb = new StringBuilder();
         sb.append(targetDomainClassSimpleName);
         sb.append("<");
-        if (channelSpec.targetAlias() == null) {
-          sb.append("?");
-        } else {
+        if (channelSpec.targetAlias() != null) {
           sb.append(channelSpec.targetAlias());
+        } else if (channelSpec.targetValue() != null) {
+          sb.append(imports.addAndGetSimpleName(getDomainClassName(channelSpec.targetValue().stringValue())));
+        } else {
+          sb.append("?");
         }
         sb.append(">");
         return sb.toString();
       }
       return targetDomainClassSimpleName + buildTypeParamsDeclaration(
-          domainSpec, targetDomainReference, channelSpec.targetEquivalences(), cfg
+          domainSpec, targetDomainReference, channelSpec.targetEquivalences(), imports, cfg
       );
     } else if (channelSpec.targetAlias() != null) {
       return channelSpec.targetAlias();
     } else if (!CollectionFunctions.isNullOrEmpty(channelSpec.targetEquivalences())) {
       for (ContextEquivalence equivalence : channelSpec.targetEquivalences()) {
         if (equivalence.projectionAlias() == null && equivalence.matchedProjectionAlias() != null) {
-          ContextChannel channel =domainSpec.channels().stream()
+          ContextChannel channel = domainSpec.channels().stream()
               .filter(c -> equivalence.matchedProjectionAlias().equals(c.alias()))
               .collect(tech.intellispaces.general.stream.Collectors.one());
           if (channel.targetAlias() != null) {
             return channel.targetAlias();
+          } else if (channel.targetValue() != null) {
+            if (PrimaryDomains.current().isDomainDomain(channel.targetDomain().name())) {
+              if (channel.targetValue().stringValue() != null) {
+                return imports.addAndGetSimpleName(getDomainClassName(channel.targetValue().stringValue()));
+              }
+            }
           }
         }
       }
@@ -243,7 +258,10 @@ public class GenerationFunctions {
     if (channelSpec.targetDomain() == null) {
       return false;
     }
-    return PrimaryDomains.current().isDomainDomain(channelSpec.targetDomain().name());
+    if (PrimaryDomains.current().isDomainDomain(channelSpec.targetDomain().name())) {
+      return channelSpec.targetValue() == null;
+    }
+    return false;
   }
 
   static List<ContextChannel> getTypeRelatedChannels(Domain domainSpec, Configuration cfg) {

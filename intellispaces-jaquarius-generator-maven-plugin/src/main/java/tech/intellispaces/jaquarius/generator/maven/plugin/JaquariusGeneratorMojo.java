@@ -74,7 +74,6 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
       var unitedRepository = new UnitedOntologyRepository();
       Configuration cfg = createConfiguration(settings, unitedRepository);
-
       customizeJaquariusSettings();
 
       Path specPath = Paths.get(cfg.settings().specificationPath());

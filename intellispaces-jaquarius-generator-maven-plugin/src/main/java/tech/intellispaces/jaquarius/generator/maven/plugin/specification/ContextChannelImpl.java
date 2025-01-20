@@ -11,6 +11,7 @@ record ContextChannelImpl(
     DomainReference targetDomain,
     List<ContextEquivalence> targetEquivalences,
     String targetAlias,
+    Value targetValue,
     List<String> allowedTraverse
 ) implements ContextChannel {
 }

@@ -195,6 +195,7 @@ public class YamlSpecificationReadFunctions {
         .targetDomain(readDomainReference(channelDictionary, "target", "domain"))
         .targetEquivalences(readContextEquivalences(channelDictionary, "target"))
         .targetAlias(traverseToString(channelDictionary, "target", "alias"))
+        .targetValue(readValue(channelDictionary, "target", "value"))
         .allowedTraverses(readAllowedTraverses(channelDictionary))
         .get();
   }
@@ -217,6 +218,18 @@ public class YamlSpecificationReadFunctions {
         .targetAlias(readDictionaryAlias(projectionDictionary))
         .targetDomain(readDomainReference(projectionDictionary, "domain"))
         .get();
+  }
+
+  static Value readValue(Dictionary dictionary, String... propertyPath) {
+    if (!hasProperty(dictionary, propertyPath)) {
+      return null;
+    }
+
+    String stringValue = traverseToString(dictionary, propertyPath);
+    if (stringValue != null) {
+      return Values.get(stringValue);
+    }
+    throw NotImplementedExceptions.withCode("RG/Gb1Pl");
   }
 
   static List<String> readAllowedTraverses(Dictionary channelDictionary) {

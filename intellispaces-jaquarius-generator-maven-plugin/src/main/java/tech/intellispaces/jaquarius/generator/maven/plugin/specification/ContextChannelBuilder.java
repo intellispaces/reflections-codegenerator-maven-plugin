@@ -11,6 +11,7 @@ public class ContextChannelBuilder {
   private DomainReference targetDomain;
   private List<ContextEquivalence> targetEquivalences = List.of();
   private String targetAlias;
+  private Value targetValue;
   private List<String> allowedTraverses;
 
   public ContextChannelBuilder alias(String alias) {
@@ -38,11 +39,6 @@ public class ContextChannelBuilder {
     return this;
   }
 
-  public ContextChannelBuilder targetAlias(String alias) {
-    this.targetAlias = alias;
-    return this;
-  }
-
   public ContextChannelBuilder targetDomain(DomainReference targetDomain) {
     this.targetDomain = targetDomain;
     return this;
@@ -50,6 +46,16 @@ public class ContextChannelBuilder {
 
   public ContextChannelBuilder targetEquivalences(List<ContextEquivalence> targetEquivalences) {
     this.targetEquivalences = targetEquivalences;
+    return this;
+  }
+
+  public ContextChannelBuilder targetAlias(String alias) {
+    this.targetAlias = alias;
+    return this;
+  }
+
+  public ContextChannelBuilder targetValue(Value targetValue) {
+    this.targetValue = targetValue;
     return this;
   }
 
@@ -68,6 +74,7 @@ public class ContextChannelBuilder {
         targetDomain,
         targetEquivalences,
         targetAlias,
+        targetValue,
         allowedTraverses
     );
   }

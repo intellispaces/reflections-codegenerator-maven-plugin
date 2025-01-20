@@ -44,5 +44,10 @@ public interface ContextChannel {
    */
   String targetAlias();
 
+  /**
+   * The target value.
+   */
+  Value targetValue();
+
   List<String> allowedTraverse();
 }
