@@ -16,11 +16,11 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DomainR
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SuperDomain;
 import tech.intellispaces.jaquarius.naming.NameConventionFunctions;
-import tech.intellispaces.jaquarius.space.domain.PrimaryDomains;
+import tech.intellispaces.jaquarius.space.domain.BasicDomain;
+import tech.intellispaces.jaquarius.space.domain.BasicDomains;
 import tech.intellispaces.jaquarius.traverse.TraverseTypes;
 import tech.intellispaces.java.reflection.customtype.ImportLists;
 import tech.intellispaces.java.reflection.customtype.MutableImportList;
-import tech.intellispaces.templateengine.exception.ResolveTemplateException;
 import tech.intellispaces.templateengine.template.Template;
 
 import java.io.File;
@@ -76,7 +76,7 @@ public class GenerationFunctions {
   static List<String> buildTypeParamDeclarations(
       Domain domainSpec, MutableImportList imports, Configuration cfg
   ) {
-    if (domainSpec.name() != null && PrimaryDomains.current().isDomainDomain(domainSpec.name())) {
+    if (domainSpec.name() != null && BasicDomains.active().isDomainDomain(domainSpec.name())) {
       return List.of("D");
     }
     return domainSpec.channels().stream()
@@ -107,7 +107,7 @@ public class GenerationFunctions {
     RunnableAction commaAppender = StringActions.skipFirstTimeCommaAppender(sb);
     for (DomainReference extendedDomain : channelSpec.targetDomain().superDomainBounds()) {
       commaAppender.run();
-      sb.append(imports.addAndGetSimpleName(getDomainClassName(extendedDomain, cfg)));
+      sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(extendedDomain)));
     }
     return sb.toString();
   }
@@ -118,7 +118,7 @@ public class GenerationFunctions {
     var parens = new ArrayList<Map<String, Object>>();
     for (SuperDomain superDomain : domainSpec.superDomains()) {
       parens.add(Map.of(
-          "name", imports.addAndGetSimpleName(getDomainClassName(superDomain.domain(), cfg)),
+          "name", imports.addAndGetSimpleName(getDomainClassName(superDomain.domain())),
           "typeParams", buildTypeParamsDeclaration(domainSpec, superDomain.domain(), superDomain.equivalences(), imports, cfg)
       ));
     }
@@ -154,7 +154,7 @@ public class GenerationFunctions {
         sb.append(channel.targetAlias());
       } else if (channel.targetValue() != null) {
         if (channel.targetValue().stringValue() != null) {
-          sb.append(imports.addAndGetSimpleName(getDomainClassName(channel.targetValue().stringValue())));
+          sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(channel.targetValue().stringValue())));
         } else {
           throw NotImplementedExceptions.withCode("H7Nnygs");
         }
@@ -197,16 +197,16 @@ public class GenerationFunctions {
     DomainReference targetDomainReference = channelSpec.targetDomain();
     if (targetDomainReference != null && targetDomainReference.name() != null) {
       String targetDomainName = targetDomainReference.name();
-      String targetDomainClassName = getDomainClassName(targetDomainName);
+      String targetDomainClassName = getDefaultDomainClassName(targetDomainName);
       String targetDomainClassSimpleName = imports.addAndGetSimpleName(targetDomainClassName);
-      if (PrimaryDomains.current().isDomainDomain(targetDomainName)) {
+      if (BasicDomains.active().isDomainDomain(targetDomainName)) {
         var sb = new StringBuilder();
         sb.append(targetDomainClassSimpleName);
         sb.append("<");
         if (channelSpec.targetAlias() != null) {
           sb.append(channelSpec.targetAlias());
         } else if (channelSpec.targetValue() != null) {
-          sb.append(imports.addAndGetSimpleName(getDomainClassName(channelSpec.targetValue().stringValue())));
+          sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(channelSpec.targetValue().stringValue())));
         } else {
           sb.append("?");
         }
@@ -227,9 +227,9 @@ public class GenerationFunctions {
           if (channel.targetAlias() != null) {
             return channel.targetAlias();
           } else if (channel.targetValue() != null) {
-            if (PrimaryDomains.current().isDomainDomain(channel.targetDomain().name())) {
+            if (BasicDomains.active().isDomainDomain(channel.targetDomain().name())) {
               if (channel.targetValue().stringValue() != null) {
-                return imports.addAndGetSimpleName(getDomainClassName(channel.targetValue().stringValue()));
+                return imports.addAndGetSimpleName(getDefaultDomainClassName(channel.targetValue().stringValue()));
               }
             }
           }
@@ -250,7 +250,7 @@ public class GenerationFunctions {
   ) {
     var map = new HashMap<String, Object>();
     map.put("name", qualifierChannel.targetAlias());
-    map.put("class", imports.addAndGetSimpleName(getDomainClassName(qualifierChannel.targetDomain().name())));
+    map.put("class", imports.addAndGetSimpleName(getDefaultDomainClassName(qualifierChannel.targetDomain().name())));
     return map;
   }
 
@@ -258,7 +258,7 @@ public class GenerationFunctions {
     if (channelSpec.targetDomain() == null) {
       return false;
     }
-    if (PrimaryDomains.current().isDomainDomain(channelSpec.targetDomain().name())) {
+    if (BasicDomains.active().isDomainDomain(channelSpec.targetDomain().name())) {
       return channelSpec.targetValue() == null;
     }
     return false;
@@ -296,8 +296,20 @@ public class GenerationFunctions {
     return NameConventionFunctions.convertIntelliSpacesDomainName(domainSpec.name());
   }
 
-  static String getDomainClassName(DomainReference domainReference, Configuration cfg) {
+  static String getDefaultDomainClassName(DomainReference domainReference) {
+    return getDefaultDomainClassName(domainReference.name());
+  }
+
+  static String getDomainClassName(DomainReference domainReference) {
     return getDomainClassName(domainReference.name());
+  }
+
+  static String getDefaultDomainClassName(String domainName) {
+    BasicDomain basicDomain = BasicDomains.active().getByDomainName(domainName);
+    if (basicDomain != null) {
+      return basicDomain.delegateClassName();
+    }
+    return NameConventionFunctions.convertIntelliSpacesDomainName(domainName);
   }
 
   static String getDomainClassName(String domainName) {

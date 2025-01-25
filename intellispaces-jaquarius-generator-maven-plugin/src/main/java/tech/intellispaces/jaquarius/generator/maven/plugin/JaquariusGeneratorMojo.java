@@ -22,9 +22,9 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Ontolog
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.UnitedOntologyRepository;
-import tech.intellispaces.jaquarius.space.domain.PrimaryDomainFunctions;
-import tech.intellispaces.jaquarius.space.domain.PrimaryDomainSet;
-import tech.intellispaces.jaquarius.space.domain.PrimaryDomains;
+import tech.intellispaces.jaquarius.space.domain.BasicDomainFunctions;
+import tech.intellispaces.jaquarius.space.domain.BasicDomainSet;
+import tech.intellispaces.jaquarius.space.domain.BasicDomains;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -131,33 +131,34 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
   void addFileOntologyRepository(
       UnitedOntologyRepository unitedRepository, String repositoryUrl, Configuration cfg
   ) throws MojoExecutionException {
-      var specPath = Path.of(StringFunctions.removeHead(URI.create(repositoryUrl).getPath(), "/"));
+      String normRepositoryUrl = repositoryUrl.replace('\\', '/');
+      var specPath = Path.of(StringFunctions.removeHeadIfPresent(URI.create(normRepositoryUrl).getPath(), "/"));
       Specification spec = SpecificationReadFunctions.readSpecification(specPath, cfg);
       unitedRepository.addProvider(new DirectOntologyRepository(spec));
   }
 
   void customizeJaquariusSettings() throws MojoExecutionException {
-    PrimaryDomainSet primaryDomains = readPrimaryDomains();
-    PrimaryDomains.current(primaryDomains);
+    BasicDomainSet basicDomains = readBasicDomains();
+    BasicDomains.setActive(basicDomains);
   }
 
-  PrimaryDomainSet readPrimaryDomains() throws MojoExecutionException {
+  BasicDomainSet readBasicDomains() throws MojoExecutionException {
     var dictionaries = new ArrayList<Dictionary>();
 
     // Try to direct read
     try {
-      dictionaries.add(PrimaryDomainFunctions.readPrimaryDomainDictionary(project.getBasedir().toString()));
+      dictionaries.add(BasicDomainFunctions.readBasicDomainDictionary(project.getBasedir().toString()));
     } catch (IOException e) {
       // ignore
     }
 
     // Try to read from classpath
     try {
-      dictionaries.addAll(PrimaryDomainFunctions.readPrimaryDomainDictionaries(projectClassLoader()));
+      dictionaries.addAll(BasicDomainFunctions.readBasicDomainDictionaries(projectClassLoader()));
     } catch (Exception e) {
-      throw new MojoExecutionException("Could not to load file domain.properties", e);
+      throw new MojoExecutionException("Could not to load file basic_domain.properties", e);
     }
-    return PrimaryDomains.get(dictionaries);
+    return BasicDomains.get(dictionaries);
   }
 
   @SuppressWarnings("unchecked")
