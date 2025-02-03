@@ -27,8 +27,8 @@
     <dependencies>
         <!-- Intellispaces -->
         <dependency>
-            <groupId>tech.intellispaces.common</groupId>
-            <artifactId>intellispaces-general-model</artifactId>
+            <groupId>tech.intellispaces.commons</groupId>
+            <artifactId>intellispaces-commons-base-model</artifactId>
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.jaquarius</groupId>

@@ -1,10 +1,10 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.generation;
 
-import tech.intellispaces.general.exception.UnexpectedExceptions;
-import tech.intellispaces.general.function.Functions;
-import tech.intellispaces.general.resource.ResourceFunctions;
-import tech.intellispaces.templateengine.TemplateEngine;
-import tech.intellispaces.templateengine.template.Template;
+import tech.intellispaces.commons.base.exception.UnexpectedExceptions;
+import tech.intellispaces.commons.base.function.Functions;
+import tech.intellispaces.commons.base.resource.ResourceFunctions;
+import tech.intellispaces.commons.templateengine.TemplateEngine;
+import tech.intellispaces.commons.templateengine.template.Template;
 
 import java.util.HashMap;
 import java.util.Map;

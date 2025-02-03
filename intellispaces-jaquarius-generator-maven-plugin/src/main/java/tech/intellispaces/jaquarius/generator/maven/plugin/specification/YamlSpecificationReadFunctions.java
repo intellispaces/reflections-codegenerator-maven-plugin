@@ -2,13 +2,13 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.yaml.snakeyaml.Yaml;
-import tech.intellispaces.general.collection.ArraysFunctions;
-import tech.intellispaces.general.collection.CollectionFunctions;
-import tech.intellispaces.general.data.Dictionaries;
-import tech.intellispaces.general.data.Dictionary;
-import tech.intellispaces.general.exception.NotImplementedExceptions;
-import tech.intellispaces.general.exception.UnexpectedExceptions;
-import tech.intellispaces.general.text.StringFunctions;
+import tech.intellispaces.commons.base.collection.ArraysFunctions;
+import tech.intellispaces.commons.base.collection.CollectionFunctions;
+import tech.intellispaces.commons.base.data.Dictionaries;
+import tech.intellispaces.commons.base.data.Dictionary;
+import tech.intellispaces.commons.base.exception.NotImplementedExceptions;
+import tech.intellispaces.commons.base.exception.UnexpectedExceptions;
+import tech.intellispaces.commons.base.text.StringFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 
 import java.io.FileInputStream;

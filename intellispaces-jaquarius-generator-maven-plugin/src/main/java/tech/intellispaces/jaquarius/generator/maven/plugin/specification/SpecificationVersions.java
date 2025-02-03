@@ -1,7 +1,7 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import tech.intellispaces.general.entity.Enumeration;
+import tech.intellispaces.commons.base.entity.Enumeration;
 
 public enum SpecificationVersions implements SpecificationVersion, Enumeration<SpecificationVersion> {
 

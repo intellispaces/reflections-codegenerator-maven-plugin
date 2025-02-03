@@ -1,12 +1,15 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.generation;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import tech.intellispaces.action.runnable.RunnableAction;
-import tech.intellispaces.action.text.StringActions;
-import tech.intellispaces.general.collection.CollectionFunctions;
-import tech.intellispaces.general.exception.NotImplementedExceptions;
-import tech.intellispaces.general.text.StringFunctions;
-import tech.intellispaces.general.type.ClassNameFunctions;
+import tech.intellispaces.commons.action.runnable.RunnableAction;
+import tech.intellispaces.commons.action.text.StringActions;
+import tech.intellispaces.commons.base.collection.CollectionFunctions;
+import tech.intellispaces.commons.base.exception.NotImplementedExceptions;
+import tech.intellispaces.commons.base.text.StringFunctions;
+import tech.intellispaces.commons.base.type.ClassNameFunctions;
+import tech.intellispaces.commons.java.reflection.customtype.ImportLists;
+import tech.intellispaces.commons.java.reflection.customtype.MutableImportList;
+import tech.intellispaces.commons.templateengine.template.Template;
 import tech.intellispaces.jaquarius.annotation.Channel;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.ContextChannel;
@@ -19,9 +22,6 @@ import tech.intellispaces.jaquarius.naming.NameConventionFunctions;
 import tech.intellispaces.jaquarius.space.domain.BasicDomain;
 import tech.intellispaces.jaquarius.space.domain.BasicDomains;
 import tech.intellispaces.jaquarius.traverse.TraverseTypes;
-import tech.intellispaces.java.reflection.customtype.ImportLists;
-import tech.intellispaces.java.reflection.customtype.MutableImportList;
-import tech.intellispaces.templateengine.template.Template;
 
 import java.io.File;
 import java.io.IOException;
@@ -223,7 +223,7 @@ public class GenerationFunctions {
         if (equivalence.projectionAlias() == null && equivalence.matchedProjectionAlias() != null) {
           ContextChannel channel = domainSpec.channels().stream()
               .filter(c -> equivalence.matchedProjectionAlias().equals(c.alias()))
-              .collect(tech.intellispaces.general.stream.Collectors.one());
+              .collect(tech.intellispaces.commons.base.stream.Collectors.one());
           if (channel.targetAlias() != null) {
             return channel.targetAlias();
           } else if (channel.targetValue() != null) {
