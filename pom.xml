@@ -31,6 +31,16 @@
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
+                <groupId>tech.intellispaces.core</groupId>
+                <artifactId>intellispaces-core-specification-model</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.intellispaces.core</groupId>
+                <artifactId>intellispaces-core-specification</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>tech.intellispaces.commons</groupId>
                 <artifactId>intellispaces-commons-java-reflection</artifactId>
                 <version>0.0.1-SNAPSHOT</version>

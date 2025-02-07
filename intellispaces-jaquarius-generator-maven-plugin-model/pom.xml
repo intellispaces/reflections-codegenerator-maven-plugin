@@ -34,6 +34,10 @@
             <groupId>tech.intellispaces.jaquarius</groupId>
             <artifactId>intellispaces-jaquarius-model</artifactId>
         </dependency>
+        <dependency>
+            <groupId>tech.intellispaces.core</groupId>
+            <artifactId>intellispaces-core-specification-model</artifactId>
+        </dependency>
 
         <!-- Maven -->
         <dependency>

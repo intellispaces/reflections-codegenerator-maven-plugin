@@ -12,16 +12,16 @@ import tech.intellispaces.commons.base.collection.CollectionFunctions;
 import tech.intellispaces.commons.base.data.Dictionary;
 import tech.intellispaces.commons.base.exception.NotImplementedExceptions;
 import tech.intellispaces.commons.base.text.StringFunctions;
+import tech.intellispaces.core.specification.Specification;
+import tech.intellispaces.core.specification.repository.InMemoryOntologyRepository;
+import tech.intellispaces.core.specification.repository.OntologyRepository;
+import tech.intellispaces.core.specification.repository.UnitedOntologyRepository;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.ConfigurationLoaderFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Settings;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.DirectOntologyRepository;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.OntologyRepository;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.Specification;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.UnitedOntologyRepository;
 import tech.intellispaces.jaquarius.space.domain.BasicDomainFunctions;
 import tech.intellispaces.jaquarius.space.domain.BasicDomainSet;
 import tech.intellispaces.jaquarius.space.domain.BasicDomains;
@@ -78,7 +78,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
       Path specPath = Paths.get(cfg.settings().specificationPath());
       Specification spec = SpecificationReadFunctions.readSpecification(specPath, cfg);
-      unitedRepository.addProvider(new DirectOntologyRepository(spec));
+      unitedRepository.addRepository(new InMemoryOntologyRepository(spec.ontology()));
 
       addOntologyRepositories(unitedRepository, cfg);
 
@@ -95,8 +95,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
   }
 
   Configuration createConfiguration(
-      Settings settings,
-      OntologyRepository repository
+      Settings settings, OntologyRepository repository
   ) throws MojoExecutionException {
     return ConfigurationLoaderFunctions.loadConfiguration(
         settings,
@@ -134,7 +133,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
       String normRepositoryUrl = repositoryUrl.replace('\\', '/');
       var specPath = Path.of(StringFunctions.removeHeadIfPresent(URI.create(normRepositoryUrl).getPath(), "/"));
       Specification spec = SpecificationReadFunctions.readSpecification(specPath, cfg);
-      unitedRepository.addProvider(new DirectOntologyRepository(spec));
+      unitedRepository.addRepository(new InMemoryOntologyRepository(spec.ontology()));
   }
 
   void customizeJaquariusSettings() throws MojoExecutionException {
