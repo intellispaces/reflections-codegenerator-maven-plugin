@@ -17,6 +17,9 @@ public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typePara
     {{when $channel."allowedTraverse".isNotEmpty()}}, allowedTraverse = {{$channel."allowedTraverse"}} {{end}}
   )
 {{end}}
+{{when $channel."unmovable"}}
+  @Unmovable
+{{end}}
   {{when $channel."typeParams".isNotEmpty()}}<{{for typeParam : $channel."typeParams"}}{{$typeParam}}{{end}}> {{end}}{{$channel."target"}} {{$channel."alias"}}({{for qualifier : $channel."qualifiers"}}{{$qualifier."class"}} {{$qualifier."name"}}{{end}});
 
 {{end}}

@@ -12,6 +12,7 @@ import tech.intellispaces.commons.java.reflection.customtype.MutableImportList;
 import tech.intellispaces.commons.templateengine.template.Template;
 import tech.intellispaces.core.specification.ContextChannelSpecification;
 import tech.intellispaces.core.specification.DomainSpecification;
+import tech.intellispaces.core.specification.ImmobilityTypes;
 import tech.intellispaces.core.specification.Specification;
 import tech.intellispaces.core.specification.SuperDomainSpecification;
 import tech.intellispaces.core.specification.constraint.ConstraintSpecification;
@@ -25,6 +26,7 @@ import tech.intellispaces.core.specification.traverse.TraversePathSpecification;
 import tech.intellispaces.core.specification.traverse.TraverseTransitionSpecification;
 import tech.intellispaces.core.specification.traverse.TraverseTransitionThruSpecification;
 import tech.intellispaces.jaquarius.annotation.Channel;
+import tech.intellispaces.jaquarius.annotation.Unmovable;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.naming.NameConventionFunctions;
 import tech.intellispaces.jaquarius.space.domain.BasicDomain;
@@ -221,6 +223,12 @@ public class GenerationFunctions {
         map.put("alias", channelSpec.alias());
         map.put("cid", channelSpec.cid());
         map.put("name", channelSpec.name());
+        if (ImmobilityTypes.Unmovable.is(channelSpec.targetImmobilityType())) {
+          imports.add(Unmovable.class);
+          map.put("unmovable", true);
+        } else {
+          map.put("unmovable", false);
+        }
         map.put("typeParams", buildTypeParamDeclarations(channelSpec, imports));
         map.put("target", buildChannelTargetDeclaration(baseDomainSpec, channelSpec, imports, cfg));
         map.put("qualifiers", buildChannelQualifiers(baseDomainSpec, channelSpec, imports));
