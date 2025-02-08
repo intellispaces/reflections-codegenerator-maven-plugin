@@ -19,8 +19,10 @@ import tech.intellispaces.core.specification.constraint.ConstraintSpecification;
 import tech.intellispaces.core.specification.constraint.EquivalenceConstraintSpecification;
 import tech.intellispaces.core.specification.exception.SpecificationException;
 import tech.intellispaces.core.specification.exception.TraversePathSpecificationException;
+import tech.intellispaces.core.specification.instance.CustomInstanceSpecification;
 import tech.intellispaces.core.specification.instance.InstanceSpecification;
 import tech.intellispaces.core.specification.reference.SpaceReference;
+import tech.intellispaces.core.specification.reference.SpaceReferences;
 import tech.intellispaces.core.specification.traverse.TraversePathParseFunctions;
 import tech.intellispaces.core.specification.traverse.TraversePathSpecification;
 import tech.intellispaces.core.specification.traverse.TraverseTransitionSpecification;
@@ -140,14 +142,14 @@ public class GenerationFunctions {
 
   static String buildTypeParamsDeclaration(
       DomainSpecification baseDomainSpec,
-      SpaceReference destinationDomainSpec,
+      SpaceReference destinationDomain,
       List<ConstraintSpecification> constraints,
       MutableImportList imports,
       Configuration cfg
   ) throws MojoExecutionException {
-    DomainSpecification superDomain = findDomain(destinationDomainSpec, cfg);
-    List<ContextChannelSpecification> superDomainTypeRelatedChannels = getTypeRelatedChannels(superDomain, cfg);
-    if (superDomainTypeRelatedChannels.isEmpty()) {
+    DomainSpecification destinationDomainSpec = findDomain(destinationDomain, cfg);
+    List<ContextChannelSpecification> destinationDomainTypeRelatedChannels = getTypeRelatedChannels(destinationDomainSpec, cfg);
+    if (destinationDomainTypeRelatedChannels.isEmpty()) {
       return "";
     }
 
@@ -159,24 +161,49 @@ public class GenerationFunctions {
     var sb = new StringBuilder();
     RunnableAction commaAppender = StringActions.skipFirstTimeCommaAppender(sb);
     sb.append("<");
-    for (ContextChannelSpecification superDomainChannel : superDomainTypeRelatedChannels) {
+    for (ContextChannelSpecification destinationDomainTypeRelatedChannel : destinationDomainTypeRelatedChannels) {
       ContextChannelSpecification baseChannel = findEquivalentBaseChannel(
-          superDomainChannel, baseDomainProjectionAliasToChannelIndex, equivalenceIndex
+          destinationDomainTypeRelatedChannel, equivalenceIndex, baseDomainProjectionAliasToChannelIndex
       );
-      if (baseChannel == null) {
-        throw new MojoExecutionException("Cannot to find equivalent channel of base domain");
-      }
-      commaAppender.run();
-      if (baseChannel.targetAlias() != null) {
-        sb.append(baseChannel.targetAlias());
-      } else if (baseChannel.targetInstance() != null) {
-        if (baseChannel.targetInstance().isString()) {
-          sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(baseChannel.targetInstance().asString())));
+      if (baseChannel != null) {
+        commaAppender.run();
+        if (baseChannel.targetAlias() != null) {
+          sb.append(baseChannel.targetAlias());
+        } else if (baseChannel.targetInstance() != null) {
+          if (baseChannel.targetInstance().isString()) {
+            sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(baseChannel.targetInstance().asString())));
+          } else {
+            throw NotImplementedExceptions.withCode("H7Nnygs");
+          }
         } else {
-          throw NotImplementedExceptions.withCode("H7Nnygs");
+          throw NotImplementedExceptions.withCode("8DNy410A");
         }
       } else {
-        throw NotImplementedExceptions.withCode("8DNy410A");
+        InstanceSpecification targetInstance = findEquivalentTargetInstance(
+            destinationDomainTypeRelatedChannel, equivalenceIndex
+        );
+        if (targetInstance != null) {
+          if (targetInstance.isCustomInstance()) {
+            CustomInstanceSpecification customTargetInstance = targetInstance.asCustomInstance();
+            if (BasicDomains.active().isDomainDomain(customTargetInstance.domain().name())) {
+              sb.append("? extends ");
+              String domainName = customTargetInstance.projections().get("name").asString();
+              sb.append(imports.addAndGetSimpleName(getDomainClassCanonicalName(domainName)));
+
+              SpaceReference domainRef = SpaceReferences.build().name(domainName).build();
+              String nestedDeclaration = buildTypeParamsDeclaration(
+                  baseDomainSpec, domainRef, customTargetInstance.constraints(), imports, cfg
+              );
+              sb.append(nestedDeclaration);
+            } else {
+              throw NotImplementedExceptions.withCode("OpXfQG1Q");
+            }
+          } else {
+            throw NotImplementedExceptions.withCode("TuOJF1pE");
+          }
+        } else {
+          throw new MojoExecutionException("Cannot to find equivalent channel of base domain or equivalent target instance");
+        }
       }
     }
     sb.append(">");
@@ -184,15 +211,15 @@ public class GenerationFunctions {
   }
 
   static ContextChannelSpecification findEquivalentBaseChannel(
-      ContextChannelSpecification superDomainChannel,
-      Map<String, ContextChannelSpecification> baseDomainProjectionAliasToChannelIndex,
-      Map<TraversePathSpecification, Equivalence> equivalenceIndex
+      ContextChannelSpecification destinationDomainChannel,
+      Map<TraversePathSpecification, Equivalence> equivalenceIndex,
+      Map<String, ContextChannelSpecification> baseDomainProjectionAliasToChannelIndex
   ) throws MojoExecutionException {
     try {
-      TraversePathSpecification superDomainPath = TraversePathParseFunctions.parse(
-          "this thru " + superDomainChannel.alias()
+      TraversePathSpecification destinationDomainPath = TraversePathParseFunctions.parse(
+          "this thru " + destinationDomainChannel.alias()
       );
-      Equivalence equivalence = equivalenceIndex.get(superDomainPath);
+      Equivalence equivalence = equivalenceIndex.get(destinationDomainPath);
       for (TraversePathSpecification equivalentPath : equivalence.equivalentPaths()) {
         if ("base".equals(equivalentPath.sourceDomain().name())) {
           if (equivalentPath.transitions().size() == 1) {
@@ -210,6 +237,21 @@ public class GenerationFunctions {
       return null;
     } catch (SpecificationException e) {
       throw new MojoExecutionException("Cannot to define equivalent channel of base domain", e);
+    }
+  }
+
+  static InstanceSpecification findEquivalentTargetInstance(
+      ContextChannelSpecification destinationDomainChannel,
+      Map<TraversePathSpecification, Equivalence> equivalenceIndex
+  ) throws MojoExecutionException {
+    try {
+      TraversePathSpecification destinationDomainPath = TraversePathParseFunctions.parse(
+          "this thru " + destinationDomainChannel.alias()
+      );
+      Equivalence equivalence = equivalenceIndex.get(destinationDomainPath);
+      return equivalence.equivalentInstance();
+    } catch (SpecificationException e) {
+      throw new MojoExecutionException("Cannot to define equivalent instance", e);
     }
   }
 
@@ -429,7 +471,7 @@ public class GenerationFunctions {
   }
 
   static String getDomainClassName(SpaceReference domainReference) {
-    return getDomainClassName(domainReference.name());
+    return getDomainClassCanonicalName(domainReference.name());
   }
 
   static String getDefaultDomainClassName(String domainName) {
@@ -440,7 +482,7 @@ public class GenerationFunctions {
     return NameConventionFunctions.convertIntelliSpacesDomainName(domainName);
   }
 
-  static String getDomainClassName(String domainName) {
+  static String getDomainClassCanonicalName(String domainName) {
     return NameConventionFunctions.convertIntelliSpacesDomainName(domainName);
   }
 
