@@ -185,18 +185,33 @@ public class GenerationFunctions {
         if (targetInstance != null) {
           if (targetInstance.isCustomInstance()) {
             CustomInstanceSpecification customTargetInstance = targetInstance.asCustomInstance();
-            if (BasicDomains.active().isDomainDomain(customTargetInstance.domain().name())) {
-              sb.append("? extends ");
-              String domainName = customTargetInstance.projections().get("name").asString();
-              sb.append(imports.addAndGetSimpleName(getDomainClassCanonicalName(domainName)));
+            String instanceDomainName = customTargetInstance.domain().name();
+            BasicDomain instanceBasicDomain = BasicDomains.active().getByDomainName(instanceDomainName);
+            if (instanceBasicDomain != null) {
+              if (BasicDomainPurposes.Domain.is(instanceBasicDomain.purpose())) {
+                String domainName = customTargetInstance.projections().get("name").asString();
+                BasicDomain basicDomain = BasicDomains.active().getByDomainName(domainName);
+                if (basicDomain != null && BasicDomainPurposes.String.is(basicDomain.purpose())) {
+                  sb.append(imports.addAndGetSimpleName(String.class));
+                } else if (basicDomain != null && BasicDomainPurposes.Integer.is(basicDomain.purpose())) {
+                  sb.append(imports.addAndGetSimpleName(Integer.class));
+                } else if (basicDomain != null && BasicDomainPurposes.Double.is(basicDomain.purpose())) {
+                  sb.append(imports.addAndGetSimpleName(Double.class));
+                } else {
+                  sb.append("? extends ");
+                  sb.append(imports.addAndGetSimpleName(getDomainClassCanonicalName(domainName)));
 
-              SpaceReference domainRef = SpaceReferences.build().name(domainName).build();
-              String nestedDeclaration = buildTypeParamsDeclaration(
-                  baseDomainSpec, domainRef, customTargetInstance.constraints(), imports, cfg
-              );
-              sb.append(nestedDeclaration);
+                  SpaceReference domainRef = SpaceReferences.build().name(domainName).build();
+                  String nestedDeclaration = buildTypeParamsDeclaration(
+                      baseDomainSpec, domainRef, customTargetInstance.constraints(), imports, cfg
+                  );
+                  sb.append(nestedDeclaration);
+                }
+              } else {
+                throw NotImplementedExceptions.withCode("OpXfQG1Q");
+              }
             } else {
-              throw NotImplementedExceptions.withCode("OpXfQG1Q");
+              throw NotImplementedExceptions.withCode("9p0FcIAP");
             }
           } else {
             throw NotImplementedExceptions.withCode("TuOJF1pE");
