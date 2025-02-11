@@ -1,0 +1,11 @@
+package {{$packageName}};
+
+{{for importedClass : $importedClasses}}
+import {{$importedClass}};
+{{end}}
+
+@Channel("{{$cid}}")
+public interface {{$simpleName}} extends {{$channelKind}}, {{for channelType : $channelTypes}}{{$channelType}}{{when $channelType.isNotLast()}}, {{end}}{{end}} {
+
+  {{when $typeParams.isNotEmpty()}}<{{for typeParam : $typeParams}}{{$typeParam}}{{end}}> {{end}}{{$targetDomain}} {{$methodName}}({{$sourceDomain}} source{{when $qualifiers.isNotEmpty()}}, {{for qualifier : $qualifiers}}{{$qualifier."type"}} {{$qualifier."alias"}}{{when $qualifier.isNotLast()}}, {{end}}{{end}}{{end}}{{end}});
+}
