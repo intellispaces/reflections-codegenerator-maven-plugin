@@ -20,7 +20,7 @@ public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typePara
 {{when $channel."unmovable"}}
   @Unmovable
 {{end}}
-  {{when $channel."typeParams".isNotEmpty()}}<{{for typeParam : $channel."typeParams"}}{{$typeParam}}{{end}}> {{end}}{{$channel."target"}} {{$channel."alias"}}({{for qualifier : $channel."qualifiers"}}{{$qualifier."class"}} {{$qualifier."name"}}{{end}});
+  {{when $channel."typeParams".isNotEmpty()}}<{{for typeParam : $channel."typeParams"}}{{$typeParam}}{{end}}> {{end}}{{$channel."target"}} {{$channel."alias"}}({{for qualifier : $channel."qualifiers"}}{{$qualifier."type"}} {{$qualifier."alias"}}{{end}});
 
 {{end}}
 }
