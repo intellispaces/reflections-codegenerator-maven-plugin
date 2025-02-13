@@ -6,27 +6,24 @@ import tech.intellispaces.commons.base.data.Dictionaries;
 import tech.intellispaces.core.specification.Specification;
 import tech.intellispaces.core.specification.SpecificationParseFunctions;
 import tech.intellispaces.core.specification.exception.SpecificationException;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 public class SpecificationReadFunctions {
 
-  public static Specification readSpecification(Path specPath, Configuration cfg) throws MojoExecutionException {
+  public static Specification readSpecification(Path specPath) throws MojoExecutionException {
     if (specPath.toString().toLowerCase().endsWith(".yaml")) {
-      return readYamlSpecification(specPath, cfg);
+      return readYamlSpecification(specPath);
     }
     throw new MojoExecutionException("Unsupported extension of specification file " + specPath);
   }
 
   @SuppressWarnings("unchecked")
-  static Specification readYamlSpecification(Path specPath, Configuration cfg) throws MojoExecutionException {
+  static Specification readYamlSpecification(Path specPath) throws MojoExecutionException {
     try {
       return SpecificationParseFunctions.parseSpecification(
           specPath,
-          Paths.get(cfg.settings().projectPath()),
           is -> Dictionaries.get((Map<String, Object>) YAML.load(is))
       );
     } catch (SpecificationException e) {

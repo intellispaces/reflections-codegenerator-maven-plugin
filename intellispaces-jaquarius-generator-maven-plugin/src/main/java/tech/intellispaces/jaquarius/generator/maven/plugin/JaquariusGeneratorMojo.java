@@ -77,7 +77,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
       customizeJaquariusSettings();
 
       Path specPath = Paths.get(cfg.settings().specificationPath());
-      Specification spec = SpecificationReadFunctions.readSpecification(specPath, cfg);
+      Specification spec = SpecificationReadFunctions.readSpecification(specPath);
       unitedRepository.addRepository(new InMemoryOntologyRepository(spec.ontology()));
 
       addOntologyRepositories(unitedRepository, cfg);
@@ -132,7 +132,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
   ) throws MojoExecutionException {
       String normRepositoryUrl = repositoryUrl.replace('\\', '/');
       var specPath = Path.of(StringFunctions.removeHeadIfPresent(URI.create(normRepositoryUrl).getPath(), "/"));
-      Specification spec = SpecificationReadFunctions.readSpecification(specPath, cfg);
+      Specification spec = SpecificationReadFunctions.readSpecification(specPath);
       unitedRepository.addRepository(new InMemoryOntologyRepository(spec.ontology()));
   }
 

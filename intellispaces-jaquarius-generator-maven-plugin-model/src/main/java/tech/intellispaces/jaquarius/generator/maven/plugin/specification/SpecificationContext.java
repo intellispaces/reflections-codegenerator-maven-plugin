@@ -1,0 +1,8 @@
+package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
+
+import tech.intellispaces.core.specification.SpecificationItem;
+
+public interface SpecificationContext {
+
+  SpecificationItem get(String reference);
+}
