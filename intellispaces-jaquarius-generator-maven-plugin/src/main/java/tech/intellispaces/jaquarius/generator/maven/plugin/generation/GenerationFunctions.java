@@ -241,8 +241,8 @@ public class GenerationFunctions {
     Map<TraversePathSpecification, Equivalence> equivalenceIndex = makeEquivalenceIndex(constraints);
     for (ChannelSpecification domainTypeRelatedChannel : domainTypeRelatedChannels) {
       ChannelSpecification contextChannel = findEquivalentBaseChannel(domainTypeRelatedChannel, equivalenceIndex, context);
+      commaAppender.run();
       if (contextChannel != null) {
-        commaAppender.run();
         if (contextChannel.target().alias() != null) {
           sb.append(contextChannel.target().alias());
         } else if (contextChannel.target().instance() != null) {
@@ -267,7 +267,9 @@ public class GenerationFunctions {
               if (BasicDomainPurposes.Domain.is(instanceBasicDomain.purpose())) {
                 String domainName = customTargetInstance.projections().get("name").asString();
                 BasicDomain basicDomain = BasicDomains.active().getByDomainName(domainName);
-                if (basicDomain != null && BasicDomainPurposes.String.is(basicDomain.purpose())) {
+                if (basicDomain != null && BasicDomainPurposes.Point.is(basicDomain.purpose())) {
+                  sb.append(imports.addAndGetSimpleName(Object.class));
+                } else if (basicDomain != null && BasicDomainPurposes.String.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(String.class));
                 } else if (basicDomain != null && BasicDomainPurposes.Integer.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(Integer.class));
