@@ -5,7 +5,10 @@ import {{$importedClass}};
 {{end}}
 
 @Domain("{{$did}}")
-public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typeParam : $typeParams}}{{$typeParam}}{{when $typeParam.isNotLast()}}, {{end}}{{end}}>{{end}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent."name"}}{{$parent."typeParams"}}{{end}}{{end}} {
+{{when $isDataset}}
+@Dataset
+{{end}}
+public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typeParam : $typeParams}}{{$typeParam}}{{when $typeParam.isNotLast()}}, {{end}}{{end}}>{{end}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent."name"}}{{$parent."typeParams"}}{{when $parent.isNotLast()}}, {{end}}{{end}}{{end}} {
 
 {{for channel : $channels}}
 {{when eachOf($channel."name".isEmpty(), $channel."allowedTraverse".isEmpty()).isTrue()}}

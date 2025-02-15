@@ -33,6 +33,7 @@ import tech.intellispaces.core.specification.traverse.TraversePathSpecification;
 import tech.intellispaces.core.specification.traverse.TraverseTransitionSpecification;
 import tech.intellispaces.core.specification.traverse.TraverseTransitionThruSpecification;
 import tech.intellispaces.jaquarius.annotation.Channel;
+import tech.intellispaces.jaquarius.annotation.Dataset;
 import tech.intellispaces.jaquarius.annotation.Movable;
 import tech.intellispaces.jaquarius.annotation.Unmovable;
 import tech.intellispaces.jaquarius.channel.MappingChannel;
@@ -116,15 +117,22 @@ public class GenerationFunctions {
   ) throws MojoExecutionException {
     MutableImportList imports = ImportLists.get(canonicalName);
     imports.add(tech.intellispaces.jaquarius.annotation.Domain.class);
-    return Map.of(
-        "did", domainSpec.did(),
-        "typeParams", buildTypeParamDeclarations(domainSpec, imports),
-        "parents", buildParentsTemplateVariables(domainSpec, context, imports, cfg),
-        "channels", buildDomainChannelTemplateVariables(domainSpec, imports, context, cfg),
-        "packageName", ClassNameFunctions.getPackageName(canonicalName),
-        "simpleName", ClassNameFunctions.getSimpleName(canonicalName),
-        "importedClasses", imports.getImports()
-    );
+
+    var vars = new HashMap<String, Object>();
+    vars.put("did", domainSpec.did());
+    if (isDataset(domainSpec)) {
+      vars.put("isDataset", true);
+      imports.add(Dataset.class);
+    } else {
+      vars.put("isDataset", false);
+    }
+    vars.put("typeParams", buildTypeParamDeclarations(domainSpec, imports));
+    vars.put("parents", buildParentsTemplateVariables(domainSpec, context, imports, cfg));
+    vars.put("channels", buildDomainChannelTemplateVariables(domainSpec, imports, context, cfg));
+    vars.put("packageName", ClassNameFunctions.getPackageName(canonicalName));
+    vars.put("simpleName", ClassNameFunctions.getSimpleName(canonicalName));
+    vars.put("importedClasses", imports.getImports());
+    return vars;
   }
 
   static Map<String, Object> buildChannelTemplateVariables(
@@ -530,6 +538,16 @@ public class GenerationFunctions {
     return map;
   }
 
+  static boolean isDataset(DomainSpecification domainSpec) {
+    for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
+      BasicDomain basicDomain = BasicDomains.active().getByDomainName(superDomain.reference().name());
+      if (basicDomain != null && BasicDomainPurposes.Dataset.is(basicDomain.purpose())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static boolean isTypeRelatedChannel(ChannelSpecification channelSpec) {
     if (channelSpec.target().domain() != null) {
       if (BasicDomains.active().isDomainDomain(channelSpec.target().domain().name())) {
@@ -614,7 +632,7 @@ public class GenerationFunctions {
 
   static String getDefaultDomainClassName(String domainName) {
     BasicDomain basicDomain = BasicDomains.active().getByDomainName(domainName);
-    if (basicDomain != null) {
+    if (basicDomain != null && basicDomain.delegateClassName() != null) {
       return basicDomain.delegateClassName();
     }
     return NameConventionFunctions.convertIntelliSpacesDomainName(domainName);
