@@ -1,13 +1,13 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.configuration;
 
 import org.apache.maven.plugin.logging.Log;
-import tech.intellispaces.core.specification.repository.OntologyRepository;
+import tech.intellispaces.core.specification.space.repository.SpaceRepository;
 
 public interface ConfigurationLoaderFunctions {
 
   static Configuration loadConfiguration(
       Settings pluginSettings,
-      OntologyRepository repository,
+      SpaceRepository repository,
       Log log
   ) {
     var builder = SettingsProvider.builder();

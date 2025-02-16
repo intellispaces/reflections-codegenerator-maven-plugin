@@ -1,11 +1,11 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.configuration;
 
 import org.apache.maven.plugin.logging.Log;
-import tech.intellispaces.core.specification.repository.OntologyRepository;
+import tech.intellispaces.core.specification.space.repository.SpaceRepository;
 
 public class ConfigurationBuilder {
   private Settings settings;
-  private OntologyRepository repository;
+  private SpaceRepository repository;
   private Log log;
 
   public ConfigurationBuilder settings(Settings settings) {
@@ -18,7 +18,7 @@ public class ConfigurationBuilder {
     return this;
   }
 
-  public ConfigurationBuilder repository(OntologyRepository repository) {
+  public ConfigurationBuilder repository(SpaceRepository repository) {
     this.repository = repository;
     return this;
   }

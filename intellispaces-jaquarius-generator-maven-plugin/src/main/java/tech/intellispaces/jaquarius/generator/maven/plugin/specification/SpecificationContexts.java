@@ -1,6 +1,6 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
-import tech.intellispaces.core.specification.SpecificationItem;
+import tech.intellispaces.core.specification.space.SpecificationItem;
 
 import java.util.HashMap;
 

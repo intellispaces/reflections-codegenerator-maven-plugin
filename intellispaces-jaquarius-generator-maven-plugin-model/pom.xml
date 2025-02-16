@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.core</groupId>
-            <artifactId>intellispaces-core-specification-model</artifactId>
+            <artifactId>intellispaces-core-space-specification-model</artifactId>
         </dependency>
 
         <!-- Maven -->

@@ -32,12 +32,12 @@
             </dependency>
             <dependency>
                 <groupId>tech.intellispaces.core</groupId>
-                <artifactId>intellispaces-core-specification-model</artifactId>
+                <artifactId>intellispaces-core-space-specification-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.intellispaces.core</groupId>
-                <artifactId>intellispaces-core-specification</artifactId>
+                <artifactId>intellispaces-core-space-specification</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>

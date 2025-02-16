@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.core</groupId>
-            <artifactId>intellispaces-core-specification</artifactId>
+            <artifactId>intellispaces-core-space-specification</artifactId>
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.commons</groupId>
