@@ -279,6 +279,8 @@ public class GenerationFunctions {
                   sb.append(imports.addAndGetSimpleName(Object.class));
                 } else if (basicDomain != null && BasicDomainPurposes.String.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(String.class));
+                } else if (basicDomain != null && BasicDomainPurposes.Byte.is(basicDomain.purpose())) {
+                  sb.append(imports.addAndGetSimpleName(Byte.class));
                 } else if (basicDomain != null && BasicDomainPurposes.Integer.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(Integer.class));
                 } else if (basicDomain != null && BasicDomainPurposes.Double.is(basicDomain.purpose())) {
