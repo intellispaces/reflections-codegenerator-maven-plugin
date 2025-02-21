@@ -617,11 +617,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainClassName(DomainSpecification domainSpec) {
-    return NameConventionFunctions.convertIntelliSpacesDomainName(domainSpec.name());
+    return NameConventionFunctions.convertToDomainClassName(domainSpec.name());
   }
 
   static String getChannelClassName(ChannelSpecification channelSpec) {
-    return NameConventionFunctions.convertIntelliSpacesChannelName(channelSpec.name());
+    return NameConventionFunctions.convertToChannelClassName(channelSpec.name());
   }
 
   static String getDefaultDomainClassName(SpaceReference domainReference) {
@@ -637,11 +637,11 @@ public class GenerationFunctions {
     if (basicDomain != null && basicDomain.delegateClassName() != null) {
       return basicDomain.delegateClassName();
     }
-    return NameConventionFunctions.convertIntelliSpacesDomainName(domainName);
+    return NameConventionFunctions.convertToDomainClassName(domainName);
   }
 
   static String getDomainClassCanonicalName(String domainName) {
-    return NameConventionFunctions.convertIntelliSpacesDomainName(domainName);
+    return NameConventionFunctions.convertToDomainClassName(domainName);
   }
 
   static String getDomainOfDomainsName() {
