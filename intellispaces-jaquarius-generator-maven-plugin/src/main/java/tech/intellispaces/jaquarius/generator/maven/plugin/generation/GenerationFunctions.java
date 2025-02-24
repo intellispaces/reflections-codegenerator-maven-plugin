@@ -36,9 +36,6 @@ import tech.intellispaces.jaquarius.annotation.Channel;
 import tech.intellispaces.jaquarius.annotation.Dataset;
 import tech.intellispaces.jaquarius.annotation.Movable;
 import tech.intellispaces.jaquarius.annotation.Unmovable;
-import tech.intellispaces.jaquarius.channel.MappingChannel;
-import tech.intellispaces.jaquarius.channel.MappingOfMovingChannel;
-import tech.intellispaces.jaquarius.channel.MovingChannel;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationContext;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationContexts;
@@ -47,6 +44,9 @@ import tech.intellispaces.jaquarius.space.channel.ChannelFunctions;
 import tech.intellispaces.jaquarius.space.domain.BasicDomain;
 import tech.intellispaces.jaquarius.space.domain.BasicDomainPurposes;
 import tech.intellispaces.jaquarius.space.domain.BasicDomains;
+import tech.intellispaces.jaquarius.traverse.MappingOfMovingTraverse;
+import tech.intellispaces.jaquarius.traverse.MappingTraverse;
+import tech.intellispaces.jaquarius.traverse.MovingTraverse;
 import tech.intellispaces.jaquarius.traverse.TraverseTypes;
 
 import java.io.File;
@@ -163,11 +163,11 @@ public class GenerationFunctions {
     List<String> channelTypes = new ArrayList<>();
     for (AllowedTraverseType allowedTraverseType : channelSpec.allowedTraverses()) {
       if (AllowedTraverseTypes.Mapping.is(allowedTraverseType)) {
-        channelTypes.add(imports.addAndGetSimpleName(MappingChannel.class));
+        channelTypes.add(imports.addAndGetSimpleName(MappingTraverse.class));
       } else if (AllowedTraverseTypes.Moving.is(allowedTraverseType)) {
-        channelTypes.add(imports.addAndGetSimpleName(MovingChannel.class));
+        channelTypes.add(imports.addAndGetSimpleName(MovingTraverse.class));
       } else if (AllowedTraverseTypes.MappingOfMoving.is(allowedTraverseType)) {
-        channelTypes.add(imports.addAndGetSimpleName(MappingOfMovingChannel.class));
+        channelTypes.add(imports.addAndGetSimpleName(MappingOfMovingTraverse.class));
       } else {
         throw NotImplementedExceptions.withCode("cfSM0K2N");
       }
