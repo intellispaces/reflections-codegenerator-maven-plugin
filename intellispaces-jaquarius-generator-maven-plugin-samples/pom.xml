@@ -41,10 +41,14 @@
     </build>
 
     <dependencies>
-        <!-- Intellispaces-->
+        <!-- Intellispaces Jaquarius -->
         <dependency>
             <groupId>tech.intellispaces.jaquarius</groupId>
             <artifactId>intellispaces-jaquarius-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tech.intellispaces.jaquarius</groupId>
+            <artifactId>intellispaces-jaquarius-model</artifactId>
         </dependency>
     </dependencies>
 </project>

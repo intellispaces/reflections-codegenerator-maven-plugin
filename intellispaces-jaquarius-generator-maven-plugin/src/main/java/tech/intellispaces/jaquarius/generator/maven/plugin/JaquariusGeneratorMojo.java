@@ -16,15 +16,15 @@ import tech.intellispaces.core.specification.space.Specification;
 import tech.intellispaces.core.specification.space.repository.InMemorySpaceRepository;
 import tech.intellispaces.core.specification.space.repository.SpaceRepository;
 import tech.intellispaces.core.specification.space.repository.UnitedSpaceRepository;
+import tech.intellispaces.jaquarius.Jaquarius;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.ConfigurationLoaderFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Settings;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
-import tech.intellispaces.jaquarius.space.domain.BasicDomainFunctions;
-import tech.intellispaces.jaquarius.space.domain.BasicDomainSet;
-import tech.intellispaces.jaquarius.space.domain.BasicDomains;
+import tech.intellispaces.jaquarius.settings.JaquariusSettings;
+import tech.intellispaces.jaquarius.settings.JaquariusSettingsFunctions;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -33,7 +33,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -137,27 +136,26 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
   }
 
   void customizeJaquariusSettings() throws MojoExecutionException {
-    BasicDomainSet basicDomains = readBasicDomains();
-    BasicDomains.setActive(basicDomains);
+    JaquariusSettings jaquariusSettings = readJaquariusSettings();
+    Jaquarius.settings(jaquariusSettings);
   }
 
-  BasicDomainSet readBasicDomains() throws MojoExecutionException {
-    var dictionaries = new ArrayList<Dictionary>();
-
+  JaquariusSettings readJaquariusSettings() throws MojoExecutionException {
     // Try to direct read
     try {
-      dictionaries.add(BasicDomainFunctions.readBasicDomainDictionary(project.getBasedir().toString()));
+      Dictionary dictionary = JaquariusSettingsFunctions.readSettingsDictionary(project.getBasedir().toString());
+      return JaquariusSettingsFunctions.buildSettings(dictionary);
     } catch (IOException e) {
       // ignore
     }
 
     // Try to read from classpath
     try {
-      dictionaries.addAll(BasicDomainFunctions.readBasicDomainDictionaries(projectClassLoader()));
+      Dictionary dictionary = JaquariusSettingsFunctions.readSettingsDictionary(projectClassLoader());
+      return JaquariusSettingsFunctions.buildSettings(dictionary);
     } catch (Exception e) {
       throw new MojoExecutionException("Could not to load file basic_domain.properties", e);
     }
-    return BasicDomains.get(dictionaries);
   }
 
   @SuppressWarnings("unchecked")

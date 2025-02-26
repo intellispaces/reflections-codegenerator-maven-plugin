@@ -32,6 +32,7 @@ import tech.intellispaces.core.specification.space.traverse.TraversePathParseFun
 import tech.intellispaces.core.specification.space.traverse.TraversePathSpecification;
 import tech.intellispaces.core.specification.space.traverse.TraverseTransitionSpecification;
 import tech.intellispaces.core.specification.space.traverse.TraverseTransitionThruSpecification;
+import tech.intellispaces.jaquarius.Jaquarius;
 import tech.intellispaces.jaquarius.annotation.Channel;
 import tech.intellispaces.jaquarius.annotation.Dataset;
 import tech.intellispaces.jaquarius.annotation.Movable;
@@ -40,10 +41,9 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configu
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationContext;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationContexts;
 import tech.intellispaces.jaquarius.naming.NameConventionFunctions;
+import tech.intellispaces.jaquarius.settings.KeyDomain;
+import tech.intellispaces.jaquarius.settings.KeyDomainPurposes;
 import tech.intellispaces.jaquarius.space.channel.ChannelFunctions;
-import tech.intellispaces.jaquarius.space.domain.BasicDomain;
-import tech.intellispaces.jaquarius.space.domain.BasicDomainPurposes;
-import tech.intellispaces.jaquarius.space.domain.BasicDomains;
 import tech.intellispaces.jaquarius.traverse.MappingOfMovingTraverse;
 import tech.intellispaces.jaquarius.traverse.MappingTraverse;
 import tech.intellispaces.jaquarius.traverse.MovingTraverse;
@@ -178,7 +178,7 @@ public class GenerationFunctions {
   static List<String> buildTypeParamDeclarations(
       DomainSpecification domainSpec, MutableImportList imports
   ) {
-    if (domainSpec.name() != null && BasicDomains.active().isDomainDomain(domainSpec.name())) {
+    if (domainSpec.name() != null && Jaquarius.settings().isDomainOfDomains(domainSpec.name())) {
       return List.of("D");
     }
     return domainSpec.channels().stream()
@@ -270,20 +270,20 @@ public class GenerationFunctions {
           if (targetInstance.isCustomInstance()) {
             CustomInstanceSpecification customTargetInstance = targetInstance.asCustomInstance();
             String instanceDomainName = customTargetInstance.domain().name();
-            BasicDomain instanceBasicDomain = BasicDomains.active().getByDomainName(instanceDomainName);
+            KeyDomain instanceBasicDomain = Jaquarius.settings().getKeyDomainByName(instanceDomainName);
             if (instanceBasicDomain != null) {
-              if (BasicDomainPurposes.Domain.is(instanceBasicDomain.purpose())) {
+              if (KeyDomainPurposes.Domain.is(instanceBasicDomain.purpose())) {
                 String domainName = customTargetInstance.projections().get("name").asString();
-                BasicDomain basicDomain = BasicDomains.active().getByDomainName(domainName);
-                if (basicDomain != null && BasicDomainPurposes.Point.is(basicDomain.purpose())) {
+                KeyDomain basicDomain = Jaquarius.settings().getKeyDomainByName(domainName);
+                if (basicDomain != null && KeyDomainPurposes.Point.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(Object.class));
-                } else if (basicDomain != null && BasicDomainPurposes.String.is(basicDomain.purpose())) {
+                } else if (basicDomain != null && KeyDomainPurposes.String.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(String.class));
-                } else if (basicDomain != null && BasicDomainPurposes.Byte.is(basicDomain.purpose())) {
+                } else if (basicDomain != null && KeyDomainPurposes.Byte.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(Byte.class));
-                } else if (basicDomain != null && BasicDomainPurposes.Integer.is(basicDomain.purpose())) {
+                } else if (basicDomain != null && KeyDomainPurposes.Integer.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(Integer.class));
-                } else if (basicDomain != null && BasicDomainPurposes.Double.is(basicDomain.purpose())) {
+                } else if (basicDomain != null && KeyDomainPurposes.Double.is(basicDomain.purpose())) {
                   sb.append(imports.addAndGetSimpleName(Double.class));
                 } else {
                   sb.append("? extends ");
@@ -434,7 +434,7 @@ public class GenerationFunctions {
       String domainName = domainReference.name();
       String domainClassName = getDefaultDomainClassName(domainName);
       String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
-      if (BasicDomains.active().isDomainDomain(domainName)) {
+      if (Jaquarius.settings().isDomainOfDomains(domainName)) {
         var sb = new StringBuilder();
         sb.append(domainClassSimpleName);
         sb.append("<");
@@ -506,7 +506,7 @@ public class GenerationFunctions {
               if (channel.target().alias() != null) {
                 return channel.target().alias();
               } else if (channel.target().instance() != null && channel.target().instance().isString()) {
-                if (BasicDomains.active().isDomainDomain(channel.target().domain().name())) {
+                if (Jaquarius.settings().isDomainOfDomains(channel.target().domain().name())) {
                   return imports.addAndGetSimpleName(getDefaultDomainClassName(channel.target().instance().asString()));
                 }
               }
@@ -542,8 +542,8 @@ public class GenerationFunctions {
 
   static boolean isDataset(DomainSpecification domainSpec) {
     for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
-      BasicDomain basicDomain = BasicDomains.active().getByDomainName(superDomain.reference().name());
-      if (basicDomain != null && BasicDomainPurposes.Dataset.is(basicDomain.purpose())) {
+      KeyDomain basicDomain = Jaquarius.settings().getKeyDomainByName(superDomain.reference().name());
+      if (basicDomain != null && KeyDomainPurposes.Dataset.is(basicDomain.purpose())) {
         return true;
       }
     }
@@ -552,7 +552,7 @@ public class GenerationFunctions {
 
   static boolean isTypeRelatedChannel(ChannelSpecification channelSpec) {
     if (channelSpec.target().domain() != null) {
-      if (BasicDomains.active().isDomainDomain(channelSpec.target().domain().name())) {
+      if (Jaquarius.settings().isDomainOfDomains(channelSpec.target().domain().name())) {
         return channelSpec.target().instance() == null;
       }
     }
@@ -633,7 +633,7 @@ public class GenerationFunctions {
   }
 
   static String getDefaultDomainClassName(String domainName) {
-    BasicDomain basicDomain = BasicDomains.active().getByDomainName(domainName);
+    KeyDomain basicDomain = Jaquarius.settings().getKeyDomainByName(domainName);
     if (basicDomain != null && basicDomain.delegateClassName() != null) {
       return basicDomain.delegateClassName();
     }
@@ -645,11 +645,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainOfDomainsName() {
-    return BasicDomains.active().getByDomainType(BasicDomainPurposes.Domain).get(0).domainName();
+    return Jaquarius.settings().getKeyDomainByPurpose(KeyDomainPurposes.Domain).domainName();
   }
 
   static String getDomainOfDomainsClassCanonicalName() {
-    return BasicDomains.active().getByDomainType(BasicDomainPurposes.Domain).get(0).delegateClassName();
+    return Jaquarius.settings().getKeyDomainByPurpose(KeyDomainPurposes.Domain).delegateClassName();
   }
 
   static Map<TraversePathSpecification, Equivalence> makeEquivalenceIndex(List<ConstraintSpecification> constraints) {
