@@ -3,11 +3,11 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.generation;
 import org.apache.maven.plugin.MojoExecutionException;
 import tech.intellispaces.commons.action.runnable.RunnableAction;
 import tech.intellispaces.commons.action.text.StringActions;
-import tech.intellispaces.commons.base.collection.CollectionFunctions;
-import tech.intellispaces.commons.base.exception.NotImplementedExceptions;
-import tech.intellispaces.commons.base.text.StringFunctions;
-import tech.intellispaces.commons.base.type.ClassFunctions;
-import tech.intellispaces.commons.base.type.ClassNameFunctions;
+import tech.intellispaces.commons.collection.CollectionFunctions;
+import tech.intellispaces.commons.exception.NotImplementedExceptions;
+import tech.intellispaces.commons.text.StringFunctions;
+import tech.intellispaces.commons.type.ClassFunctions;
+import tech.intellispaces.commons.type.ClassNameFunctions;
 import tech.intellispaces.commons.java.reflection.customtype.ImportLists;
 import tech.intellispaces.commons.java.reflection.customtype.MutableImportList;
 import tech.intellispaces.commons.templateengine.template.Template;
@@ -556,7 +556,7 @@ public class GenerationFunctions {
               TraverseTransitionThruSpecification thruTransition = transition.asThruTransition();
               ChannelSpecification channel = channels.stream()
                   .filter(c -> thruTransition.channel().name().equals(c.alias()))
-                  .collect(tech.intellispaces.commons.base.stream.Collectors.one());
+                  .collect(tech.intellispaces.commons.stream.Collectors.one());
               if (channel.target().alias() != null) {
                 return channel.target().alias();
               } else if (channel.target().instance() != null && channel.target().instance().isString()) {

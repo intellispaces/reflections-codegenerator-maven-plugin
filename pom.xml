@@ -14,7 +14,7 @@
     <modules>
         <module>intellispaces-jaquarius-generator-maven-plugin</module>
         <module>intellispaces-jaquarius-generator-maven-plugin-model</module>
-        <module>intellispaces-jaquarius-generator-maven-plugin-samples</module>
+        <module>intellispaces-jaquarius-generator-maven-plugin-testcases</module>
     </modules>
 
     <dependencyManagement>
@@ -52,12 +52,12 @@
             </dependency>
             <dependency>
                 <groupId>tech.intellispaces.commons</groupId>
-                <artifactId>intellispaces-commons-base-model</artifactId>
+                <artifactId>intellispaces-commons-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.intellispaces.commons</groupId>
-                <artifactId>intellispaces-commons-base</artifactId>
+                <artifactId>intellispaces-commons</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>

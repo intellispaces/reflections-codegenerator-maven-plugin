@@ -1,8 +1,8 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.generation;
 
-import tech.intellispaces.commons.base.exception.UnexpectedExceptions;
-import tech.intellispaces.commons.base.function.Functions;
-import tech.intellispaces.commons.base.resource.ResourceFunctions;
+import tech.intellispaces.commons.exception.UnexpectedExceptions;
+import tech.intellispaces.commons.function.Functions;
+import tech.intellispaces.commons.resource.ResourceFunctions;
 import tech.intellispaces.commons.templateengine.TemplateEngine;
 import tech.intellispaces.commons.templateengine.template.Template;
 

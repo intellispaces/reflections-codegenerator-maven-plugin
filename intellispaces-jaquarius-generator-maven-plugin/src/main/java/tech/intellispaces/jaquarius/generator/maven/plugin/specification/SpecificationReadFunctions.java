@@ -2,7 +2,7 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.yaml.snakeyaml.Yaml;
-import tech.intellispaces.commons.base.data.Dictionaries;
+import tech.intellispaces.commons.data.Dictionaries;
 import tech.intellispaces.core.specification.space.Specification;
 import tech.intellispaces.core.specification.space.SpecificationParseFunctions;
 import tech.intellispaces.core.specification.space.exception.SpecificationException;

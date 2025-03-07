@@ -7,7 +7,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>intellispaces-jaquarius-generator-maven-plugin-samples</artifactId>
+    <artifactId>intellispaces-jaquarius-generator-maven-plugin-testcases</artifactId>
     <packaging>jar</packaging>
     <version>0.0.1-SNAPSHOT</version>
 
