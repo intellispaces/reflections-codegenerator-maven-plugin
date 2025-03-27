@@ -487,6 +487,9 @@ public class GenerationFunctions {
     if (domainReference != null && domainReference.name() != null) {
       String domainName = domainReference.name();
       String domainClassName = getDefaultDomainClassName(domainName, enablePrimitives);
+      if (ClassNameFunctions.getSimpleName(domainClassName).equals(ClassNameFunctions.getSimpleName(domainName))) {
+        imports.addHidden(domainName);
+      }
       String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
       if (Jaquarius.settings().isDomainOfDomains(domainName)) {
         var sb = new StringBuilder();
