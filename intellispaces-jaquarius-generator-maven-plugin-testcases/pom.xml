@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>tech.intellispaces.jaquarius</groupId>
+        <groupId>tech.intellispaces</groupId>
         <artifactId>intellispaces-jaquarius-generator-maven-plugin-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
@@ -14,7 +14,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>tech.intellispaces.jaquarius</groupId>
+                <groupId>tech.intellispaces</groupId>
                 <artifactId>intellispaces-jaquarius-generator-maven-plugin</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
                 <executions>
@@ -43,11 +43,11 @@
     <dependencies>
         <!-- Intellispaces Jaquarius -->
         <dependency>
-            <groupId>tech.intellispaces.jaquarius</groupId>
+            <groupId>tech.intellispaces</groupId>
             <artifactId>intellispaces-jaquarius-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>tech.intellispaces.jaquarius</groupId>
+            <groupId>tech.intellispaces</groupId>
             <artifactId>intellispaces-jaquarius-model</artifactId>
         </dependency>
     </dependencies>

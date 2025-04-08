@@ -2,12 +2,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>tech.intellispaces.parent</groupId>
+        <groupId>tech.intellispaces</groupId>
         <artifactId>intellispaces-parent-pom</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>tech.intellispaces.jaquarius</groupId>
     <artifactId>intellispaces-jaquarius-generator-maven-plugin-parent</artifactId>
     <packaging>pom</packaging>
 
@@ -21,42 +20,42 @@
         <dependencies>
             <!-- Intellispaces-->
             <dependency>
-                <groupId>tech.intellispaces.jaquarius</groupId>
+                <groupId>tech.intellispaces</groupId>
                 <artifactId>intellispaces-jaquarius-core</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces.jaquarius</groupId>
+                <groupId>tech.intellispaces</groupId>
                 <artifactId>intellispaces-jaquarius-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces.core</groupId>
-                <artifactId>intellispaces-core-space-specification-model</artifactId>
+                <groupId>tech.intellispaces</groupId>
+                <artifactId>intellispaces-specification-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces.core</groupId>
-                <artifactId>intellispaces-core-space-specification</artifactId>
+                <groupId>tech.intellispaces</groupId>
+                <artifactId>intellispaces-specification</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces.commons</groupId>
-                <artifactId>intellispaces-commons-reflection</artifactId>
+                <groupId>tech.intellispaces</groupId>
+                <artifactId>intellispaces-reflection</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces.commons</groupId>
-                <artifactId>intellispaces-commons-template-engine</artifactId>
+                <groupId>tech.intellispaces</groupId>
+                <artifactId>intellispaces-templateengine</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces.commons</groupId>
+                <groupId>tech.intellispaces</groupId>
                 <artifactId>intellispaces-commons-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces.commons</groupId>
+                <groupId>tech.intellispaces</groupId>
                 <artifactId>intellispaces-commons</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>

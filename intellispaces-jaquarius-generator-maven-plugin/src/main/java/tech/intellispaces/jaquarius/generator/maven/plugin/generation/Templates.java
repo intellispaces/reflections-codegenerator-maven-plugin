@@ -3,8 +3,8 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.generation;
 import tech.intellispaces.commons.exception.UnexpectedExceptions;
 import tech.intellispaces.commons.function.Functions;
 import tech.intellispaces.commons.resource.ResourceFunctions;
-import tech.intellispaces.commons.templateengine.TemplateEngine;
-import tech.intellispaces.commons.templateengine.template.Template;
+import tech.intellispaces.templateengine.TemplateEngine;
+import tech.intellispaces.templateengine.template.Template;
 
 import java.util.HashMap;
 import java.util.Map;
