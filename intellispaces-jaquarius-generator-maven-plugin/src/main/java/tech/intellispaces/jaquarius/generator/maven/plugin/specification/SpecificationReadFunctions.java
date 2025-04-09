@@ -3,6 +3,7 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.yaml.snakeyaml.Yaml;
 import tech.intellispaces.commons.data.Dictionaries;
+import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.Specification;
 import tech.intellispaces.specification.space.SpecificationParseFunctions;
 import tech.intellispaces.specification.space.exception.SpecificationException;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 public class SpecificationReadFunctions {
 
-  public static Specification readSpecification(Path specPath) throws MojoExecutionException {
+  public static FileSpecification readSpecification(Path specPath) throws MojoExecutionException {
     if (specPath.toString().toLowerCase().endsWith(".yaml")) {
       return readYamlSpecification(specPath);
     }
@@ -20,7 +21,7 @@ public class SpecificationReadFunctions {
   }
 
   @SuppressWarnings("unchecked")
-  static Specification readYamlSpecification(Path specPath) throws MojoExecutionException {
+  static FileSpecification readYamlSpecification(Path specPath) throws MojoExecutionException {
     try {
       return SpecificationParseFunctions.parseSpecification(
           specPath,

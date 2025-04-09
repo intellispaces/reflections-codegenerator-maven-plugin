@@ -8,6 +8,7 @@ import tech.intellispaces.commons.exception.NotImplementedExceptions;
 import tech.intellispaces.core.id.IdentifierFunctions;
 import tech.intellispaces.reflection.customtype.ImportLists;
 import tech.intellispaces.reflection.customtype.MutableImportList;
+import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.templateengine.template.Template;
 import tech.intellispaces.commons.text.StringFunctions;
 import tech.intellispaces.commons.type.ClassFunctions;
@@ -66,7 +67,7 @@ import java.util.Set;
 
 public class GenerationFunctions {
 
-  public static void generateArtifacts(Specification spec, Configuration cfg) throws MojoExecutionException {
+  public static void generateArtifacts(FileSpecification spec, Configuration cfg) throws MojoExecutionException {
     cfg.log().info("Process specification " + spec.specPath());
     generateDomains(spec.ontology().domains(), cfg);
     generateChannels(spec.ontology().channels(), cfg);

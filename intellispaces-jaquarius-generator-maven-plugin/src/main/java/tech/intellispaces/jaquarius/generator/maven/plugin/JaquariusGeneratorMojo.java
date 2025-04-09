@@ -12,6 +12,7 @@ import tech.intellispaces.commons.collection.CollectionFunctions;
 import tech.intellispaces.commons.data.Dictionary;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
 import tech.intellispaces.commons.text.StringFunctions;
+import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.Specification;
 import tech.intellispaces.specification.space.repository.InMemorySpaceRepository;
 import tech.intellispaces.specification.space.repository.SpaceRepository;
@@ -76,7 +77,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
       customizeJaquariusSettings();
 
       Path specPath = Paths.get(cfg.settings().specificationPath());
-      Specification spec = SpecificationReadFunctions.readSpecification(specPath);
+      FileSpecification spec = SpecificationReadFunctions.readSpecification(specPath);
       unitedRepository.addRepository(new InMemorySpaceRepository(spec.ontology()));
 
       addOntologyRepositories(unitedRepository, cfg);
