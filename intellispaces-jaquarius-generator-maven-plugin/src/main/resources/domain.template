@@ -4,7 +4,7 @@ package {{$packageName}};
 import {{$importedClass}};
 {{end}}
 
-@Domain("{{$did}}")
+@Domain("{{$id}}")
 {{when $isDataset}}
 @Dataset
 {{end}}
@@ -12,10 +12,10 @@ public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typePara
 
 {{for channel : $channels}}
 {{when eachOf($channel."name".isEmpty(), $channel."allowedTraverse".isEmpty()).isTrue()}}
-  @Channel("{{$channel."cid"}}")
+  @Channel("{{$channel."id"}}")
 {{else}}
   @Channel(
-    value = "{{$channel."cid"}}"
+    value = "{{$channel."id"}}"
     {{when $channel."name".isNotEmpty()}}, name = "{{$channel."name"}}" {{end}}
     {{when $channel."allowedTraverse".isNotEmpty()}}, allowedTraverse = {{$channel."allowedTraverse"}} {{end}}
   )

@@ -5,6 +5,7 @@ import tech.intellispaces.actions.runnable.RunnableAction;
 import tech.intellispaces.actions.text.StringActions;
 import tech.intellispaces.commons.collection.CollectionFunctions;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
+import tech.intellispaces.core.id.IdentifierFunctions;
 import tech.intellispaces.reflection.customtype.ImportLists;
 import tech.intellispaces.reflection.customtype.MutableImportList;
 import tech.intellispaces.templateengine.template.Template;
@@ -121,7 +122,7 @@ public class GenerationFunctions {
     imports.add(tech.intellispaces.jaquarius.annotation.Domain.class);
 
     var vars = new HashMap<String, Object>();
-    vars.put("did", domainSpec.did());
+    vars.put("id", IdentifierFunctions.convertToHexString(domainSpec.id()));
     if (isDataset(domainSpec)) {
       vars.put("isDataset", true);
       imports.add(Dataset.class);
@@ -147,7 +148,7 @@ public class GenerationFunctions {
     imports.add(tech.intellispaces.jaquarius.annotation.Channel.class);
 
     var vars = new HashMap<String, Object>();
-    vars.put("cid", channelSpec.cid());
+    vars.put("id", IdentifierFunctions.convertToHexString(channelSpec.id()));
     vars.put("methodName", StringFunctions.lowercaseFirstLetter(ClassNameFunctions.getSimpleName(channelSpec.name())));
     vars.put("channelKind", imports.addAndGetSimpleName(ChannelFunctions.getChannelClass(channelSpec.qualifiers().size())));
     vars.put("channelTypes", buildChannelTypes(channelSpec, imports));
@@ -378,7 +379,7 @@ public class GenerationFunctions {
 
         var map = new HashMap<String, Object>();
         map.put("alias", channelSpec.alias());
-        map.put("cid", channelSpec.cid());
+        map.put("id", IdentifierFunctions.convertToHexString(channelSpec.id()));
         map.put("name", channelSpec.name());
         if (ImmobilityTypes.Unmovable.is(channelSpec.target().immobilityType())) {
           imports.add(Unmovable.class);

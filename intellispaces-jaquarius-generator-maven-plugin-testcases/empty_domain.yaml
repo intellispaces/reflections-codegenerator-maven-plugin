@@ -4,9 +4,9 @@ info:
 ontology:
   spaces:
     intellispaces.generatormavenplugin.sample.domain:
-      sid: 72f73a7e-eba8-4338-b4fa-94d9c769e314
+      id: 72f73a7e-eba8-4338-b4fa-94d9c769e314
 
   domains:
     intellispaces.generatormavenplugin.sample.domain.Empty:
       description: The empty domain sample
-      did: 9938abbf-2778-402b-8699-61afb0497e80
+      id: 9938abbf-2778-402b-8699-61afb0497e80
