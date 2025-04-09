@@ -69,6 +69,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException {
+    Path specPath = null;
     try {
       Settings settings = createSettings();
 
@@ -76,7 +77,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
       Configuration cfg = createConfiguration(settings, unitedRepository);
       customizeJaquariusSettings();
 
-      Path specPath = Paths.get(cfg.settings().specificationPath());
+      specPath = Paths.get(cfg.settings().specificationPath());
       FileSpecification spec = SpecificationReadFunctions.readSpecification(specPath);
       unitedRepository.addRepository(new InMemorySpaceRepository(spec.ontology()));
 
@@ -86,10 +87,10 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
       project.addCompileSourceRoot(cfg.settings().outputDirectory());
     } catch (MojoExecutionException e) {
-      getLog().error("Failed to execute plugin", e);
+      getLog().error("Failed to execute Jaquarius Generator plugin. Source specification: " + specPath, e);
       throw e;
     } catch (Exception e) {
-      getLog().error("Unexpected exception", e);
+      getLog().error("Failed to execute Jaquarius Generator plugin. Source specification: " + specPath, e);
       throw new MojoExecutionException("Unexpected exception", e);
     }
   }
