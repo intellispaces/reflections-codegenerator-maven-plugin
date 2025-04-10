@@ -6,6 +6,7 @@ import tech.intellispaces.actions.text.StringActions;
 import tech.intellispaces.commons.collection.CollectionFunctions;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
 import tech.intellispaces.core.id.IdentifierFunctions;
+import tech.intellispaces.jaquarius.id.RepetableUuidIdentifierGenerator;
 import tech.intellispaces.reflection.customtype.ImportLists;
 import tech.intellispaces.reflection.customtype.MutableImportList;
 import tech.intellispaces.specification.space.FileSpecification;
@@ -19,7 +20,6 @@ import tech.intellispaces.specification.space.ChannelSideSpecification;
 import tech.intellispaces.specification.space.ChannelSpecification;
 import tech.intellispaces.specification.space.DomainSpecification;
 import tech.intellispaces.specification.space.ImmobilityTypes;
-import tech.intellispaces.specification.space.Specification;
 import tech.intellispaces.specification.space.SpecificationItem;
 import tech.intellispaces.specification.space.SpecificationItemTypes;
 import tech.intellispaces.specification.space.SuperDomainSpecification;
@@ -133,6 +133,7 @@ public class GenerationFunctions {
     vars.put("typeParams", buildTypeParamDeclarations(domainSpec, imports));
     vars.put("parents", buildParentsTemplateVariables(domainSpec, context, imports, cfg));
     vars.put("channels", buildDomainChannelTemplateVariables(domainSpec, imports, context, cfg));
+    vars.put("inheritedChannels", buildInheritedChannelTemplateVariables(domainSpec, imports, context, cfg));
     vars.put("packageName", ClassNameFunctions.getPackageName(canonicalName));
     vars.put("simpleName", ClassNameFunctions.getSimpleName(canonicalName));
     vars.put("importedClasses", imports.getImports());
@@ -409,6 +410,63 @@ public class GenerationFunctions {
     return variables;
   }
 
+  static List<Map<String, Object>> buildInheritedChannelTemplateVariables(
+      DomainSpecification domainSpec,
+      MutableImportList imports,
+      SpecificationContext parentContext,
+      Configuration cfg
+  ) throws MojoExecutionException {
+    var variables = new ArrayList<Map<String, Object>>();
+    List<ChannelSpecification> inheritedChannels = findInheritedChannels(domainSpec, cfg);
+    for (ChannelSpecification channelSpec : inheritedChannels) {
+      if (channelSpec.allowedTraverses().contains(AllowedTraverseTypes.Moving)) {
+        try {
+          SpecificationContext context = SpecificationContexts.get(parentContext,
+              REFERENCE_CURRENT, channelSpec,
+              "$" + channelSpec.alias(), channelSpec
+          );
+
+          var identifierGenerator = new RepetableUuidIdentifierGenerator(channelSpec.id());
+
+          var map = new HashMap<String, Object>();
+          map.put("alias", channelSpec.alias());
+          map.put("id", identifierGenerator.next());
+          map.put("typeParams", buildTypeParamDeclarations(channelSpec, imports));
+          map.put("target", buildInheritedTargetTypeDeclaration(domainSpec, imports));
+          map.put("qualifiers", buildChannelQualifiers(channelSpec, context, imports, cfg));
+          variables.add(map);
+
+          imports.add(TraverseTypes.class);
+        } catch (Exception e) {
+          throw new MojoExecutionException("Could not process channel specification '" + channelSpec.alias() + "'", e);
+        }
+      }
+    }
+    return variables;
+  }
+
+  static List<ChannelSpecification> findInheritedChannels(
+      DomainSpecification domainSpec, Configuration cfg
+  ) throws MojoExecutionException {
+    try {
+      var inheritedChannels = new ArrayList<ChannelSpecification>();
+      findInheritedChannels(domainSpec, inheritedChannels, cfg);
+      return inheritedChannels;
+    } catch (SpecificationException e) {
+      throw new MojoExecutionException("Could not collect inherited channels for domain '" + domainSpec.name() + "'", e);
+    }
+  }
+
+  static void findInheritedChannels(
+      DomainSpecification domainSpec, List<ChannelSpecification> inheritedChannels, Configuration cfg
+  ) throws SpecificationException {
+    for (SuperDomainSpecification superDomainSpec : domainSpec.superDomains()) {
+      DomainSpecification superDomain = cfg.repository().findDomain(superDomainSpec.reference().name());
+      inheritedChannels.addAll(superDomain.channels());
+      findInheritedChannels(superDomain, inheritedChannels, cfg);
+    }
+  }
+
   static String buildChannelSourceTypeDeclaration(
       ChannelSpecification channelSpec,
       SpecificationContext parentContext,
@@ -540,6 +598,15 @@ public class GenerationFunctions {
       }
     }
     throw NotImplementedExceptions.withCode("ymDLHA");
+  }
+
+  static String buildInheritedTargetTypeDeclaration(
+      DomainSpecification domainSpec, MutableImportList imports
+  ) {
+    String domainName = domainSpec.name();
+    String domainClassName = getDefaultDomainClassName(domainName, false);
+    String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
+    return domainClassSimpleName;
   }
 
   static String buildChannelDeclarationByConstraints(
