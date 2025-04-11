@@ -3,6 +3,7 @@ package tech.intellispaces.jaquarius.generator.maven.plugin.generation;
 import org.apache.maven.plugin.MojoExecutionException;
 import tech.intellispaces.actions.runnable.RunnableAction;
 import tech.intellispaces.actions.text.StringActions;
+import tech.intellispaces.commons.collection.ArraysFunctions;
 import tech.intellispaces.commons.collection.CollectionFunctions;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
 import tech.intellispaces.core.id.IdentifierFunctions;
@@ -426,11 +427,13 @@ public class GenerationFunctions {
               "$" + channelSpec.alias(), channelSpec
           );
 
-          var identifierGenerator = new RepetableUuidIdentifierGenerator(channelSpec.id());
+          byte[] seed = ArraysFunctions.join(domainSpec.id(), channelSpec.id());
+          var identifierGenerator = new RepetableUuidIdentifierGenerator(seed);
+          String id = IdentifierFunctions.convertToHexString(identifierGenerator.next());
 
           var map = new HashMap<String, Object>();
           map.put("alias", channelSpec.alias());
-          map.put("id", identifierGenerator.next());
+          map.put("id", id);
           map.put("typeParams", buildTypeParamDeclarations(channelSpec, imports));
           map.put("target", buildInheritedTargetTypeDeclaration(domainSpec, imports));
           map.put("qualifiers", buildChannelQualifiers(channelSpec, context, imports, cfg));
