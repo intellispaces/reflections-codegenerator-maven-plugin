@@ -9,8 +9,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import tech.intellispaces.commons.collection.ArraysFunctions;
 import tech.intellispaces.commons.collection.CollectionFunctions;
-import tech.intellispaces.commons.data.Dictionary;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
+import tech.intellispaces.commons.properties.PropertiesSet;
 import tech.intellispaces.commons.text.StringFunctions;
 import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.Specification;
@@ -145,16 +145,16 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
   JaquariusSettings readJaquariusSettings() throws MojoExecutionException {
     // Try to direct read
     try {
-      Dictionary dictionary = JaquariusSettingsFunctions.readSettingsDictionary(project.getBasedir().toString());
-      return JaquariusSettingsFunctions.buildSettings(dictionary);
+      PropertiesSet properties = JaquariusSettingsFunctions.readSettingsDictionary(project.getBasedir().toString());
+      return JaquariusSettingsFunctions.buildSettings(properties);
     } catch (IOException e) {
       // ignore
     }
 
     // Try to read from classpath
     try {
-      Dictionary dictionary = JaquariusSettingsFunctions.readSettingsDictionary(projectClassLoader());
-      return JaquariusSettingsFunctions.buildSettings(dictionary);
+      PropertiesSet properties = JaquariusSettingsFunctions.readSettingsDictionary(projectClassLoader());
+      return JaquariusSettingsFunctions.buildSettings(properties);
     } catch (Exception e) {
       throw new MojoExecutionException("Could not to load file basic_domain.properties", e);
     }
