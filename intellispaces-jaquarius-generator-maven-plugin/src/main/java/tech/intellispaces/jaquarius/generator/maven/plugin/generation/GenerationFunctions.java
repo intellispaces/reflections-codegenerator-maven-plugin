@@ -1,25 +1,54 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.generation;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.apache.maven.plugin.MojoExecutionException;
+
 import tech.intellispaces.actions.runnable.RunnableAction;
 import tech.intellispaces.actions.text.StringActions;
 import tech.intellispaces.commons.collection.ArraysFunctions;
 import tech.intellispaces.commons.collection.CollectionFunctions;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
-import tech.intellispaces.core.id.IdentifierFunctions;
-import tech.intellispaces.jaquarius.id.RepetableUuidIdentifierGenerator;
-import tech.intellispaces.reflection.customtype.ImportLists;
-import tech.intellispaces.reflection.customtype.MutableImportList;
-import tech.intellispaces.specification.space.FileSpecification;
-import tech.intellispaces.templateengine.template.Template;
 import tech.intellispaces.commons.text.StringFunctions;
 import tech.intellispaces.commons.type.ClassFunctions;
 import tech.intellispaces.commons.type.ClassNameFunctions;
+import tech.intellispaces.core.id.IdentifierFunctions;
+import tech.intellispaces.jaquarius.Jaquarius;
+import tech.intellispaces.jaquarius.annotation.Channel;
+import tech.intellispaces.jaquarius.annotation.Dataset;
+import tech.intellispaces.jaquarius.annotation.Movable;
+import tech.intellispaces.jaquarius.annotation.Unmovable;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationContext;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationContexts;
+import tech.intellispaces.jaquarius.id.RepetableUuidIdentifierGenerator;
+import tech.intellispaces.jaquarius.naming.NameConventionFunctions;
+import tech.intellispaces.jaquarius.settings.DomainDescription;
+import tech.intellispaces.jaquarius.settings.DomainTypes;
+import tech.intellispaces.jaquarius.space.channel.ChannelFunctions;
+import tech.intellispaces.jaquarius.traverse.MappingOfMovingTraverse;
+import tech.intellispaces.jaquarius.traverse.MappingTraverse;
+import tech.intellispaces.jaquarius.traverse.MovingTraverse;
+import tech.intellispaces.jaquarius.traverse.TraverseTypes;
+import tech.intellispaces.reflection.customtype.ImportLists;
+import tech.intellispaces.reflection.customtype.MutableImportList;
 import tech.intellispaces.specification.space.AllowedTraverseType;
 import tech.intellispaces.specification.space.AllowedTraverseTypes;
 import tech.intellispaces.specification.space.ChannelSideSpecification;
 import tech.intellispaces.specification.space.ChannelSpecification;
 import tech.intellispaces.specification.space.DomainSpecification;
+import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.ImmobilityTypes;
 import tech.intellispaces.specification.space.SpecificationItem;
 import tech.intellispaces.specification.space.SpecificationItemTypes;
@@ -36,35 +65,7 @@ import tech.intellispaces.specification.space.traverse.TraversePathParseFunction
 import tech.intellispaces.specification.space.traverse.TraversePathSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionThruSpecification;
-import tech.intellispaces.jaquarius.Jaquarius;
-import tech.intellispaces.jaquarius.annotation.Channel;
-import tech.intellispaces.jaquarius.annotation.Dataset;
-import tech.intellispaces.jaquarius.annotation.Movable;
-import tech.intellispaces.jaquarius.annotation.Unmovable;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationContext;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationContexts;
-import tech.intellispaces.jaquarius.naming.NameConventionFunctions;
-import tech.intellispaces.jaquarius.settings.KeyDomain;
-import tech.intellispaces.jaquarius.settings.KeyDomainPurposes;
-import tech.intellispaces.jaquarius.space.channel.ChannelFunctions;
-import tech.intellispaces.jaquarius.traverse.MappingOfMovingTraverse;
-import tech.intellispaces.jaquarius.traverse.MappingTraverse;
-import tech.intellispaces.jaquarius.traverse.MovingTraverse;
-import tech.intellispaces.jaquarius.traverse.TraverseTypes;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import tech.intellispaces.templateengine.template.Template;
 
 public class GenerationFunctions {
 
@@ -184,7 +185,7 @@ public class GenerationFunctions {
   static List<String> buildTypeParamDeclarations(
       DomainSpecification domainSpec, MutableImportList imports
   ) {
-    if (domainSpec.name() != null && Jaquarius.settings().isDomainOfDomains(domainSpec.name())) {
+    if (domainSpec.name() != null && Jaquarius.ontologyDescription().isDomainOfDomains(domainSpec.name())) {
       return List.of("D");
     }
     return domainSpec.channels().stream()
@@ -276,20 +277,20 @@ public class GenerationFunctions {
           if (targetInstance.isCustomInstance()) {
             CustomInstanceSpecification customTargetInstance = targetInstance.asCustomInstance();
             String instanceDomainName = customTargetInstance.domain().name();
-            KeyDomain instanceBasicDomain = Jaquarius.settings().getKeyDomainByName(instanceDomainName);
+            DomainDescription instanceBasicDomain = Jaquarius.ontologyDescription().getDomainByName(instanceDomainName);
             if (instanceBasicDomain != null) {
-              if (KeyDomainPurposes.Domain.is(instanceBasicDomain.purpose())) {
+              if (DomainTypes.Domain.is(instanceBasicDomain.type())) {
                 String domainName = customTargetInstance.projections().get("name").asString();
-                KeyDomain basicDomain = Jaquarius.settings().getKeyDomainByName(domainName);
-                if (basicDomain != null && KeyDomainPurposes.Point.is(basicDomain.purpose())) {
+                DomainDescription basicDomain = Jaquarius.ontologyDescription().getDomainByName(domainName);
+                if (basicDomain != null && DomainTypes.Point.is(basicDomain.type())) {
                   sb.append(imports.addAndGetSimpleName(Object.class));
-                } else if (basicDomain != null && KeyDomainPurposes.String.is(basicDomain.purpose())) {
+                } else if (basicDomain != null && DomainTypes.String.is(basicDomain.type())) {
                   sb.append(imports.addAndGetSimpleName(String.class));
-                } else if (basicDomain != null && KeyDomainPurposes.Byte.is(basicDomain.purpose())) {
+                } else if (basicDomain != null && DomainTypes.Byte.is(basicDomain.type())) {
                   sb.append(imports.addAndGetSimpleName(Byte.class));
-                } else if (basicDomain != null && KeyDomainPurposes.Integer.is(basicDomain.purpose())) {
+                } else if (basicDomain != null && DomainTypes.Integer.is(basicDomain.type())) {
                   sb.append(imports.addAndGetSimpleName(Integer.class));
-                } else if (basicDomain != null && KeyDomainPurposes.Double.is(basicDomain.purpose())) {
+                } else if (basicDomain != null && DomainTypes.Double.is(basicDomain.type())) {
                   sb.append(imports.addAndGetSimpleName(Double.class));
                 } else {
                   sb.append("? extends ");
@@ -554,7 +555,7 @@ public class GenerationFunctions {
         imports.addHidden(domainName);
       }
       String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
-      if (Jaquarius.settings().isDomainOfDomains(domainName)) {
+      if (Jaquarius.ontologyDescription().isDomainOfDomains(domainName)) {
         var sb = new StringBuilder();
         sb.append(domainClassSimpleName);
         sb.append("<");
@@ -635,7 +636,7 @@ public class GenerationFunctions {
               if (channel.target().alias() != null) {
                 return channel.target().alias();
               } else if (channel.target().instance() != null && channel.target().instance().isString()) {
-                if (Jaquarius.settings().isDomainOfDomains(channel.target().domain().name())) {
+                if (Jaquarius.ontologyDescription().isDomainOfDomains(channel.target().domain().name())) {
                   return imports.addAndGetSimpleName(getDefaultDomainClassName(channel.target().instance().asString(), false));
                 }
               }
@@ -671,8 +672,8 @@ public class GenerationFunctions {
 
   static boolean isDataset(DomainSpecification domainSpec) {
     for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
-      KeyDomain basicDomain = Jaquarius.settings().getKeyDomainByName(superDomain.reference().name());
-      if (basicDomain != null && KeyDomainPurposes.Dataset.is(basicDomain.purpose())) {
+      DomainDescription domain = Jaquarius.ontologyDescription().getDomainByName(superDomain.reference().name());
+      if (domain != null && DomainTypes.Dataset.is(domain.type())) {
         return true;
       }
     }
@@ -681,7 +682,7 @@ public class GenerationFunctions {
 
   static boolean isTypeRelatedChannel(ChannelSpecification channelSpec) {
     if (channelSpec.target().domain() != null) {
-      if (Jaquarius.settings().isDomainOfDomains(channelSpec.target().domain().name())) {
+      if (Jaquarius.ontologyDescription().isDomainOfDomains(channelSpec.target().domain().name())) {
         return channelSpec.target().instance() == null;
       }
     }
@@ -762,26 +763,26 @@ public class GenerationFunctions {
   }
 
   static String getDefaultDomainClassName(String domainName, boolean enablePrimitives) {
-    KeyDomain basicDomain = Jaquarius.settings().getKeyDomainByName(domainName);
-    if (basicDomain != null && basicDomain.delegateClassName() != null) {
+    DomainDescription domain = Jaquarius.ontologyDescription().getDomainByName(domainName);
+    if (domain != null && domain.delegateClassName() != null) {
       if (enablePrimitives) {
-        if (KeyDomainPurposes.Boolean.is(basicDomain.purpose())) {
+        if (DomainTypes.Boolean.is(domain.type())) {
           return boolean.class.getCanonicalName();
-        } else if (KeyDomainPurposes.Byte.is(basicDomain.purpose())) {
+        } else if (DomainTypes.Byte.is(domain.type())) {
           return byte.class.getCanonicalName();
-        } else if (KeyDomainPurposes.Short.is(basicDomain.purpose())) {
+        } else if (DomainTypes.Short.is(domain.type())) {
           return short.class.getCanonicalName();
-        } else if (KeyDomainPurposes.Integer.is(basicDomain.purpose())) {
+        } else if (DomainTypes.Integer.is(domain.type())) {
           return int.class.getCanonicalName();
-        } else if (KeyDomainPurposes.Long.is(basicDomain.purpose())) {
+        } else if (DomainTypes.Long.is(domain.type())) {
           return long.class.getCanonicalName();
-        } else if (KeyDomainPurposes.Float.is(basicDomain.purpose())) {
+        } else if (DomainTypes.Float.is(domain.type())) {
           return float.class.getCanonicalName();
-        } else if (KeyDomainPurposes.Double.is(basicDomain.purpose())) {
+        } else if (DomainTypes.Double.is(domain.type())) {
           return double.class.getCanonicalName();
         }
       }
-      return basicDomain.delegateClassName();
+      return domain.delegateClassName();
     }
     return NameConventionFunctions.convertToDomainClassName(domainName);
   }
@@ -791,11 +792,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainOfDomainsName() {
-    return Jaquarius.settings().getKeyDomainByPurpose(KeyDomainPurposes.Domain).domainName();
+    return Jaquarius.ontologyDescription().getDomainByType(DomainTypes.Domain).domainName();
   }
 
   static String getDomainOfDomainsClassCanonicalName() {
-    return Jaquarius.settings().getKeyDomainByPurpose(KeyDomainPurposes.Domain).delegateClassName();
+    return Jaquarius.ontologyDescription().getDomainByType(DomainTypes.Domain).delegateClassName();
   }
 
   static Map<TraversePathSpecification, Equivalence> makeEquivalenceIndex(List<ConstraintSpecification> constraints) {

@@ -1,8 +1,8 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin.specification;
 
-import tech.intellispaces.specification.space.SpecificationItem;
-
 import java.util.HashMap;
+
+import tech.intellispaces.specification.space.SpecificationItem;
 
 public interface SpecificationContexts {
 

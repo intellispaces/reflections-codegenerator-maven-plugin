@@ -1,32 +1,5 @@
 package tech.intellispaces.jaquarius.generator.maven.plugin;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
-import tech.intellispaces.commons.collection.ArraysFunctions;
-import tech.intellispaces.commons.collection.CollectionFunctions;
-import tech.intellispaces.commons.exception.NotImplementedExceptions;
-import tech.intellispaces.commons.properties.PropertiesSet;
-import tech.intellispaces.commons.text.StringFunctions;
-import tech.intellispaces.specification.space.FileSpecification;
-import tech.intellispaces.specification.space.Specification;
-import tech.intellispaces.specification.space.repository.InMemorySpaceRepository;
-import tech.intellispaces.specification.space.repository.SpaceRepository;
-import tech.intellispaces.specification.space.repository.UnitedSpaceRepository;
-import tech.intellispaces.jaquarius.Jaquarius;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.ConfigurationLoaderFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Settings;
-import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
-import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
-import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
-import tech.intellispaces.jaquarius.settings.JaquariusSettings;
-import tech.intellispaces.jaquarius.settings.JaquariusSettingsFunctions;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -36,6 +9,34 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+
+import tech.intellispaces.commons.collection.ArraysFunctions;
+import tech.intellispaces.commons.collection.CollectionFunctions;
+import tech.intellispaces.commons.exception.NotImplementedExceptions;
+import tech.intellispaces.commons.properties.PropertiesSet;
+import tech.intellispaces.commons.text.StringFunctions;
+import tech.intellispaces.jaquarius.Jaquarius;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.ConfigurationLoaderFunctions;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Settings;
+import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
+import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
+import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
+import tech.intellispaces.jaquarius.settings.OntologyDescription;
+import tech.intellispaces.jaquarius.settings.SettingsFunctions;
+import tech.intellispaces.specification.space.FileSpecification;
+import tech.intellispaces.specification.space.Specification;
+import tech.intellispaces.specification.space.repository.InMemorySpaceRepository;
+import tech.intellispaces.specification.space.repository.SpaceRepository;
+import tech.intellispaces.specification.space.repository.UnitedSpaceRepository;
 
 @Mojo(
     name = "jaquarius-generator",
@@ -75,7 +76,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
       var unitedRepository = new UnitedSpaceRepository();
       Configuration cfg = createConfiguration(settings, unitedRepository);
-      customizeJaquariusSettings();
+      customizeBasicOntology();
 
       specPath = Paths.get(cfg.settings().specificationPath());
       FileSpecification spec = SpecificationReadFunctions.readSpecification(specPath);
@@ -137,26 +138,26 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
       unitedRepository.addRepository(new InMemorySpaceRepository(spec.ontology()));
   }
 
-  void customizeJaquariusSettings() throws MojoExecutionException {
-    JaquariusSettings jaquariusSettings = readJaquariusSettings();
-    Jaquarius.settings(jaquariusSettings);
+  void customizeBasicOntology() throws MojoExecutionException {
+    OntologyDescription ontology = readOntologyDescription();
+    Jaquarius.ontologyDescription(ontology);
   }
 
-  JaquariusSettings readJaquariusSettings() throws MojoExecutionException {
+  OntologyDescription readOntologyDescription() throws MojoExecutionException {
     // Try to direct read
     try {
-      PropertiesSet properties = JaquariusSettingsFunctions.readSettingsDictionary(project.getBasedir().toString());
-      return JaquariusSettingsFunctions.buildSettings(properties);
+      PropertiesSet props = SettingsFunctions.loadOntologyDescriptionProps(project.getBasedir().toString());
+      return SettingsFunctions.parseOntologyDescription(props);
     } catch (IOException e) {
       // ignore
     }
 
     // Try to read from classpath
     try {
-      PropertiesSet properties = JaquariusSettingsFunctions.readSettingsDictionary(projectClassLoader());
-      return JaquariusSettingsFunctions.buildSettings(properties);
+      PropertiesSet props = SettingsFunctions.loadOntologyDescriptionProps(projectClassLoader());
+      return SettingsFunctions.parseOntologyDescription(props);
     } catch (Exception e) {
-      throw new MojoExecutionException("Could not to load file basic_domain.properties", e);
+      throw new MojoExecutionException("Could not to load file ontology.description", e);
     }
   }
 
