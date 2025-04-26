@@ -154,8 +154,11 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
     // Try to read from classpath
     try {
-      PropertiesSet props = SettingsFunctions.loadOntologyDescriptionProps(projectClassLoader());
-      return SettingsFunctions.parseOntologyDescription(props);
+      List<PropertiesSet> propsList = SettingsFunctions.loadOntologyDescriptionProps(projectClassLoader());
+      List<OntologyDescription> ontologyDescriptions = propsList.stream()
+              .map(SettingsFunctions::parseOntologyDescription)
+              .toList();
+      return SettingsFunctions.mergeOntologyDescriptions(ontologyDescriptions);
     } catch (Exception e) {
       throw new MojoExecutionException("Could not to load file ontology.description", e);
     }
