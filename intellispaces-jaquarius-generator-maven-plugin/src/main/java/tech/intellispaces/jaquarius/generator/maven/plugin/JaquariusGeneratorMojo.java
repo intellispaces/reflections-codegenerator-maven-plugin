@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -76,7 +77,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
       var unitedRepository = new UnitedSpaceRepository();
       Configuration cfg = createConfiguration(settings, unitedRepository);
-      customizeBasicOntology();
+      loadOntologyDescription();
 
       specPath = Paths.get(cfg.settings().specificationPath());
       FileSpecification spec = SpecificationReadFunctions.readSpecification(specPath);
@@ -138,16 +139,12 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
       unitedRepository.addRepository(new InMemorySpaceRepository(spec.ontology()));
   }
 
-  void customizeBasicOntology() throws MojoExecutionException {
-    OntologyDescription ontology = readOntologyDescription();
-    Jaquarius.ontologyDescription(ontology);
-  }
-
-  OntologyDescription readOntologyDescription() throws MojoExecutionException {
+  void loadOntologyDescription() throws MojoExecutionException {
+    List<OntologyDescription> ontologyDescriptions = new ArrayList<>();
     // Try to direct read
     try {
       PropertiesSet props = SettingsFunctions.loadOntologyDescriptionProps(project.getBasedir().toString());
-      return SettingsFunctions.parseOntologyDescription(props);
+      ontologyDescriptions.add(SettingsFunctions.parseOntologyDescription(props));
     } catch (IOException e) {
       // ignore
     }
@@ -155,13 +152,15 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
     // Try to read from classpath
     try {
       List<PropertiesSet> propsList = SettingsFunctions.loadOntologyDescriptionProps(projectClassLoader());
-      List<OntologyDescription> ontologyDescriptions = propsList.stream()
+      propsList.stream()
               .map(SettingsFunctions::parseOntologyDescription)
-              .toList();
-      return SettingsFunctions.mergeOntologyDescriptions(ontologyDescriptions);
+              .forEach(ontologyDescriptions::add);
     } catch (Exception e) {
-      throw new MojoExecutionException("Could not to load file ontology.description", e);
+      throw new MojoExecutionException("Could not to load ontology descriptions", e);
     }
+
+    OntologyDescription ontologyDescription = SettingsFunctions.mergeOntologyDescriptions(ontologyDescriptions);
+    Jaquarius.ontologyDescription(ontologyDescription);
   }
 
   @SuppressWarnings("unchecked")
