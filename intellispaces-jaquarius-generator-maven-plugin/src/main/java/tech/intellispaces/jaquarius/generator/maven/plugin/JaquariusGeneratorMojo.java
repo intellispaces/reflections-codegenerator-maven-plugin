@@ -22,7 +22,6 @@ import org.apache.maven.project.MavenProject;
 import tech.intellispaces.commons.collection.ArraysFunctions;
 import tech.intellispaces.commons.collection.CollectionFunctions;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
-import tech.intellispaces.commons.properties.PropertiesSet;
 import tech.intellispaces.commons.text.StringFunctions;
 import tech.intellispaces.jaquarius.Jaquarius;
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Configuration;
@@ -31,7 +30,7 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Setting
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
-import tech.intellispaces.jaquarius.settings.OntologyDescription;
+import tech.intellispaces.jaquarius.settings.OntologyReferences;
 import tech.intellispaces.jaquarius.settings.SettingsFunctions;
 import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.Specification;
@@ -77,7 +76,7 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
 
       var unitedRepository = new UnitedSpaceRepository();
       Configuration cfg = createConfiguration(settings, unitedRepository);
-      loadOntologyDescription();
+      loadOntologyReferences();
 
       specPath = Paths.get(cfg.settings().specificationPath());
       FileSpecification spec = SpecificationReadFunctions.readSpecification(specPath);
@@ -139,28 +138,24 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
       unitedRepository.addRepository(new InMemorySpaceRepository(spec.ontology()));
   }
 
-  void loadOntologyDescription() throws MojoExecutionException {
-    List<OntologyDescription> ontologyDescriptions = new ArrayList<>();
+  void loadOntologyReferences() throws MojoExecutionException {
+    List<OntologyReferences> ontologyReferencesList = new ArrayList<>();
     // Try to direct read
     try {
-      PropertiesSet props = SettingsFunctions.loadOntologyDescriptionProps(project.getBasedir().toString());
-      ontologyDescriptions.add(SettingsFunctions.parseOntologyDescription(props));
+      ontologyReferencesList.add(SettingsFunctions.loadOntologyReferences(project.getBasedir().toString()));
     } catch (IOException e) {
       // ignore
     }
 
     // Try to read from classpath
     try {
-      List<PropertiesSet> propsList = SettingsFunctions.loadOntologyDescriptionProps(projectClassLoader());
-      propsList.stream()
-              .map(SettingsFunctions::parseOntologyDescription)
-              .forEach(ontologyDescriptions::add);
+      ontologyReferencesList.addAll(SettingsFunctions.loadOntologyReferences(projectClassLoader()));
     } catch (Exception e) {
-      throw new MojoExecutionException("Could not to load ontology descriptions", e);
+      throw new MojoExecutionException("Could not to load ontology references", e);
     }
 
-    OntologyDescription ontologyDescription = SettingsFunctions.mergeOntologyDescriptions(ontologyDescriptions);
-    Jaquarius.ontologyDescription(ontologyDescription);
+    OntologyReferences ontologyReferences = SettingsFunctions.mergeOntologyReferences(ontologyReferencesList);
+    Jaquarius.ontologyReferences(ontologyReferences);
   }
 
   @SuppressWarnings("unchecked")
