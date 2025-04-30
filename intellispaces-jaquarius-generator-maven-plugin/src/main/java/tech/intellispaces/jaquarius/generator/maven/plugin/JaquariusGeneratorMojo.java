@@ -139,23 +139,24 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
   }
 
   void loadOntologyReferences() throws MojoExecutionException {
+    List<OntologyReference> ontologyReferences = new ArrayList<>();
+
     // Try to direct read
     try {
-      OntologyReference ontologyReference = SettingsFunctions.loadOntologyReference(project.getBasedir().toString());
-      Jaquarius.ontologyReference(ontologyReference);
-      return;
+      ontologyReferences.add(SettingsFunctions.loadOntologyReference(project.getBasedir().toString()));
     } catch (IOException e) {
       // ignore
     }
 
     // Try to read from classpath
     try {
-      List<OntologyReference> ontologyReferences = SettingsFunctions.loadOntologyReferences(projectClassLoader());
-      OntologyReference ontologyReference = SettingsFunctions.mergeOntologyReferences(ontologyReferences);
-      Jaquarius.ontologyReference(ontologyReference);
+      ontologyReferences.addAll(SettingsFunctions.loadOntologyReferences(projectClassLoader()));
     } catch (Exception e) {
       throw new MojoExecutionException("Could not to load ontology references", e);
     }
+
+    OntologyReference ontologyReference = SettingsFunctions.mergeOntologyReferences(ontologyReferences);
+    Jaquarius.ontologyReference(ontologyReference);
   }
 
   @SuppressWarnings("unchecked")
