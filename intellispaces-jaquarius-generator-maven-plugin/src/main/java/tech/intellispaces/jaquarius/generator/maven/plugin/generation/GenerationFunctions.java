@@ -185,7 +185,7 @@ public class GenerationFunctions {
   static List<String> buildTypeParamDeclarations(
       DomainSpecification domainSpec, MutableImportList imports
   ) {
-    if (domainSpec.name() != null && Jaquarius.ontologyReferences().isDomainOfDomains(domainSpec.name())) {
+    if (domainSpec.name() != null && Jaquarius.ontologyReference().isDomainOfDomains(domainSpec.name())) {
       return List.of("D");
     }
     return domainSpec.channels().stream()
@@ -277,11 +277,11 @@ public class GenerationFunctions {
           if (targetInstance.isCustomInstance()) {
             CustomInstanceSpecification customTargetInstance = targetInstance.asCustomInstance();
             String instanceDomainName = customTargetInstance.domain().name();
-            DomainReference instanceDomain = Jaquarius.ontologyReferences().getDomainByName(instanceDomainName);
+            DomainReference instanceDomain = Jaquarius.ontologyReference().getDomainByName(instanceDomainName);
             if (instanceDomain != null) {
               if (DomainTypes.Domain.is(instanceDomain.type())) {
                 String domainName = customTargetInstance.projections().get("name").asString();
-                DomainReference domain = Jaquarius.ontologyReferences().getDomainByName(domainName);
+                DomainReference domain = Jaquarius.ontologyReference().getDomainByName(domainName);
                 if (domain != null && DomainTypes.Notion.is(domain.type())) {
                   sb.append(imports.addAndGetSimpleName(Object.class));
                 } else if (domain != null && DomainTypes.String.is(domain.type())) {
@@ -551,11 +551,8 @@ public class GenerationFunctions {
     if (domainReference != null && domainReference.name() != null) {
       String domainName = domainReference.name();
       String domainClassName = getDefaultDomainClassName(domainName, enablePrimitives);
-      if (ClassNameFunctions.getSimpleName(domainClassName).equals(ClassNameFunctions.getSimpleName(domainName))) {
-        imports.addHidden(domainName);
-      }
       String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
-      if (Jaquarius.ontologyReferences().isDomainOfDomains(domainName)) {
+      if (Jaquarius.ontologyReference().isDomainOfDomains(domainName)) {
         var sb = new StringBuilder();
         sb.append(domainClassSimpleName);
         sb.append("<");
@@ -609,8 +606,7 @@ public class GenerationFunctions {
   ) {
     String domainName = domainSpec.name();
     String domainClassName = getDefaultDomainClassName(domainName, false);
-    String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
-    return domainClassSimpleName;
+    return imports.addAndGetSimpleName(domainClassName);
   }
 
   static String buildChannelDeclarationByConstraints(
@@ -636,7 +632,7 @@ public class GenerationFunctions {
               if (channel.target().alias() != null) {
                 return channel.target().alias();
               } else if (channel.target().instance() != null && channel.target().instance().isString()) {
-                if (Jaquarius.ontologyReferences().isDomainOfDomains(channel.target().domain().name())) {
+                if (Jaquarius.ontologyReference().isDomainOfDomains(channel.target().domain().name())) {
                   return imports.addAndGetSimpleName(getDefaultDomainClassName(channel.target().instance().asString(), false));
                 }
               }
@@ -672,7 +668,7 @@ public class GenerationFunctions {
 
   static boolean isDataset(DomainSpecification domainSpec) {
     for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
-      DomainReference domain = Jaquarius.ontologyReferences().getDomainByName(superDomain.reference().name());
+      DomainReference domain = Jaquarius.ontologyReference().getDomainByName(superDomain.reference().name());
       if (domain != null && DomainTypes.Dataset.is(domain.type())) {
         return true;
       }
@@ -682,7 +678,7 @@ public class GenerationFunctions {
 
   static boolean isTypeRelatedChannel(ChannelSpecification channelSpec) {
     if (channelSpec.target().domain() != null) {
-      if (Jaquarius.ontologyReferences().isDomainOfDomains(channelSpec.target().domain().name())) {
+      if (Jaquarius.ontologyReference().isDomainOfDomains(channelSpec.target().domain().name())) {
         return channelSpec.target().instance() == null;
       }
     }
@@ -763,7 +759,7 @@ public class GenerationFunctions {
   }
 
   static String getDefaultDomainClassName(String domainName, boolean enablePrimitives) {
-    DomainReference domain = Jaquarius.ontologyReferences().getDomainByName(domainName);
+    DomainReference domain = Jaquarius.ontologyReference().getDomainByName(domainName);
     if (domain != null && domain.delegateClassName() != null) {
       if (enablePrimitives) {
         if (DomainTypes.Boolean.is(domain.type())) {
@@ -792,11 +788,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainOfDomainsName() {
-    return Jaquarius.ontologyReferences().getDomainByType(DomainTypes.Domain).domainName();
+    return Jaquarius.ontologyReference().getDomainByType(DomainTypes.Domain).domainName();
   }
 
   static String getDomainOfDomainsClassCanonicalName() {
-    return Jaquarius.ontologyReferences().getDomainByType(DomainTypes.Domain).delegateClassName();
+    return Jaquarius.ontologyReference().getDomainByType(DomainTypes.Domain).delegateClassName();
   }
 
   static Map<TraversePathSpecification, Equivalence> makeEquivalenceIndex(List<ConstraintSpecification> constraints) {

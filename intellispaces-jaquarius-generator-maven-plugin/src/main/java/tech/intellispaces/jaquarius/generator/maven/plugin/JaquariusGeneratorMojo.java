@@ -30,7 +30,7 @@ import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.Setting
 import tech.intellispaces.jaquarius.generator.maven.plugin.configuration.SettingsProvider;
 import tech.intellispaces.jaquarius.generator.maven.plugin.generation.GenerationFunctions;
 import tech.intellispaces.jaquarius.generator.maven.plugin.specification.SpecificationReadFunctions;
-import tech.intellispaces.jaquarius.settings.OntologyReferences;
+import tech.intellispaces.jaquarius.settings.OntologyReference;
 import tech.intellispaces.jaquarius.settings.SettingsFunctions;
 import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.Specification;
@@ -139,23 +139,23 @@ public class JaquariusGeneratorMojo extends AbstractMojo {
   }
 
   void loadOntologyReferences() throws MojoExecutionException {
-    List<OntologyReferences> ontologyReferencesList = new ArrayList<>();
     // Try to direct read
     try {
-      ontologyReferencesList.add(SettingsFunctions.loadOntologyReferences(project.getBasedir().toString()));
+      OntologyReference ontologyReference = SettingsFunctions.loadOntologyReference(project.getBasedir().toString());
+      Jaquarius.ontologyReference(ontologyReference);
+      return;
     } catch (IOException e) {
       // ignore
     }
 
     // Try to read from classpath
     try {
-      ontologyReferencesList.addAll(SettingsFunctions.loadOntologyReferences(projectClassLoader()));
+      List<OntologyReference> ontologyReferences = SettingsFunctions.loadOntologyReferences(projectClassLoader());
+      OntologyReference ontologyReference = SettingsFunctions.mergeOntologyReferences(ontologyReferences);
+      Jaquarius.ontologyReference(ontologyReference);
     } catch (Exception e) {
       throw new MojoExecutionException("Could not to load ontology references", e);
     }
-
-    OntologyReferences ontologyReferences = SettingsFunctions.mergeOntologyReferences(ontologyReferencesList);
-    Jaquarius.ontologyReferences(ontologyReferences);
   }
 
   @SuppressWarnings("unchecked")
