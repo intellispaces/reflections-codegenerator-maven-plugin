@@ -41,8 +41,6 @@ import tech.intellispaces.jaquarius.traverse.MappingOfMovingTraverse;
 import tech.intellispaces.jaquarius.traverse.MappingTraverse;
 import tech.intellispaces.jaquarius.traverse.MovingTraverse;
 import tech.intellispaces.jaquarius.traverse.TraverseTypes;
-import tech.intellispaces.reflection.customtype.ImportLists;
-import tech.intellispaces.reflection.customtype.MutableImportList;
 import tech.intellispaces.specification.space.AllowedTraverseType;
 import tech.intellispaces.specification.space.AllowedTraverseTypes;
 import tech.intellispaces.specification.space.ChannelSideSpecification;
@@ -65,6 +63,8 @@ import tech.intellispaces.specification.space.traverse.TraversePathParseFunction
 import tech.intellispaces.specification.space.traverse.TraversePathSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionThruSpecification;
+import tech.intellispaces.statementsj.customtype.ImportLists;
+import tech.intellispaces.statementsj.customtype.MutableImportList;
 import tech.intellispaces.templateengine.template.Template;
 
 public class GenerationFunctions {
