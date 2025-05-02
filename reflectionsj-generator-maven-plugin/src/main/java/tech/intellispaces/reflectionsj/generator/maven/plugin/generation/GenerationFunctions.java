@@ -63,8 +63,8 @@ import tech.intellispaces.specification.space.traverse.TraversePathParseFunction
 import tech.intellispaces.specification.space.traverse.TraversePathSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionThruSpecification;
-import tech.intellispaces.statementsj.customtype.ImportLists;
-import tech.intellispaces.statementsj.customtype.MutableImportList;
+import tech.intellispaces.statementsj.dependencies.DependencySets;
+import tech.intellispaces.statementsj.dependencies.MutableDependencySet;
 import tech.intellispaces.templateengine.template.Template;
 
 public class GenerationFunctions {
@@ -121,7 +121,7 @@ public class GenerationFunctions {
       SpecificationContext context,
       Configuration cfg
   ) throws MojoExecutionException {
-    MutableImportList imports = ImportLists.get(canonicalName);
+    MutableDependencySet imports = DependencySets.get(canonicalName);
     imports.add(tech.intellispaces.reflectionsj.annotation.Domain.class);
 
     var vars = new HashMap<String, Object>();
@@ -148,7 +148,7 @@ public class GenerationFunctions {
       SpecificationContext context,
       Configuration cfg
   ) throws MojoExecutionException {
-    MutableImportList imports = ImportLists.get(canonicalName);
+    MutableDependencySet imports = DependencySets.get(canonicalName);
     imports.add(tech.intellispaces.reflectionsj.annotation.Channel.class);
 
     var vars = new HashMap<String, Object>();
@@ -166,7 +166,7 @@ public class GenerationFunctions {
     return vars;
   }
 
-  static List<String> buildChannelTypes(ChannelSpecification channelSpec, MutableImportList imports) {
+  static List<String> buildChannelTypes(ChannelSpecification channelSpec, MutableDependencySet imports) {
     List<String> channelTypes = new ArrayList<>();
     for (AllowedTraverseType allowedTraverseType : channelSpec.allowedTraverses()) {
       if (AllowedTraverseTypes.Mapping.is(allowedTraverseType)) {
@@ -183,7 +183,7 @@ public class GenerationFunctions {
   }
 
   static List<String> buildTypeParamDeclarations(
-      DomainSpecification domainSpec, MutableImportList imports
+      DomainSpecification domainSpec, MutableDependencySet imports
   ) {
     if (domainSpec.name() != null && Jaquarius.ontologyReference().isDomainOfDomains(domainSpec.name())) {
       return List.of("D");
@@ -195,7 +195,7 @@ public class GenerationFunctions {
   }
 
   static List<String> buildTypeParamDeclarations(
-      ChannelSpecification channelSpec, MutableImportList imports
+      ChannelSpecification channelSpec, MutableDependencySet imports
   ) {
     return channelSpec.qualifiers().stream()
         .filter(GenerationFunctions::isTypeRelatedChannel)
@@ -204,7 +204,7 @@ public class GenerationFunctions {
   }
 
   static String buildTypeParamDeclaration(
-      ChannelSpecification channelSpec, MutableImportList imports
+      ChannelSpecification channelSpec, MutableDependencySet imports
   ) {
     if (channelSpec.target().domainBounds() == null) {
       return channelSpec.target().alias();
@@ -224,7 +224,7 @@ public class GenerationFunctions {
   static List<Map<String, Object>> buildParentsTemplateVariables(
       DomainSpecification domainSpec,
       SpecificationContext context,
-      MutableImportList imports,
+      MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
     var parens = new ArrayList<Map<String, Object>>();
@@ -241,7 +241,7 @@ public class GenerationFunctions {
       SpaceReference destinationDomain,
       List<ConstraintSpecification> constraints,
       SpecificationContext context,
-      MutableImportList imports,
+      MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
     DomainSpecification destinationDomainSpec = findDomain(destinationDomain, cfg);
@@ -369,7 +369,7 @@ public class GenerationFunctions {
 
   static List<Map<String, Object>> buildDomainChannelTemplateVariables(
       DomainSpecification domainSpec,
-      MutableImportList imports,
+      MutableDependencySet imports,
       SpecificationContext parentContext,
       Configuration cfg
   ) throws MojoExecutionException {
@@ -414,7 +414,7 @@ public class GenerationFunctions {
 
   static List<Map<String, Object>> buildInheritedChannelTemplateVariables(
       DomainSpecification domainSpec,
-      MutableImportList imports,
+      MutableDependencySet imports,
       SpecificationContext parentContext,
       Configuration cfg
   ) throws MojoExecutionException {
@@ -474,7 +474,7 @@ public class GenerationFunctions {
   static String buildChannelSourceTypeDeclaration(
       ChannelSpecification channelSpec,
       SpecificationContext parentContext,
-      MutableImportList imports,
+      MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
     return buildChannelSideTypeDeclaration(channelSpec.source(), parentContext, imports, cfg, true);
@@ -484,7 +484,7 @@ public class GenerationFunctions {
       ChannelSpecification channelSpec,
       SpaceReference domainReference,
       SpecificationContext parentContext,
-      MutableImportList imports,
+      MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
     boolean enablePrimitives = !enablePrimitivesForChannelTarget(channelSpec, domainReference, cfg);
@@ -543,7 +543,7 @@ public class GenerationFunctions {
   static String buildChannelSideTypeDeclaration(
       ChannelSideSpecification channelSideSpec,
       SpecificationContext context,
-      MutableImportList imports,
+      MutableDependencySet imports,
       Configuration cfg,
       boolean enablePrimitives
   ) throws MojoExecutionException  {
@@ -602,7 +602,7 @@ public class GenerationFunctions {
   }
 
   static String buildInheritedTargetTypeDeclaration(
-      DomainSpecification domainSpec, MutableImportList imports
+      DomainSpecification domainSpec, MutableDependencySet imports
   ) {
     String domainName = domainSpec.name();
     String domainClassName = getDefaultDomainClassName(domainName, false);
@@ -612,7 +612,7 @@ public class GenerationFunctions {
   static String buildChannelDeclarationByConstraints(
       SpecificationContext context,
       List<ConstraintSpecification> constraints,
-      MutableImportList imports
+      MutableDependencySet imports
   ) throws MojoExecutionException {
     Map<TraversePathSpecification, Equivalence> equivalenceIndex = makeEquivalenceIndex(constraints);
     TraversePathSpecification pathFromThisToDomain = getPathFromThisToDomain();
@@ -647,7 +647,7 @@ public class GenerationFunctions {
   static List<Map<String, Object>> buildChannelQualifiers(
       ChannelSpecification channelSpec,
       SpecificationContext context,
-      MutableImportList imports,
+      MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
     return CollectionFunctions.mapEach(channelSpec.qualifiers(),
@@ -657,7 +657,7 @@ public class GenerationFunctions {
   static Map<String, Object> buildChannelQualifier(
       ChannelSpecification qualifierChannel,
       SpecificationContext context,
-      MutableImportList imports,
+      MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
     var map = new HashMap<String, Object>();
@@ -694,7 +694,7 @@ public class GenerationFunctions {
         .toList();
   }
 
-  static String buildAllowedTraverse(List<AllowedTraverseType> allowedTraverses, MutableImportList imports) {
+  static String buildAllowedTraverse(List<AllowedTraverseType> allowedTraverses, MutableDependencySet imports) {
     if (allowedTraverses == null) {
       return null;
     }
