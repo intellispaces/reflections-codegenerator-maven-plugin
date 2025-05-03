@@ -2,60 +2,61 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>tech.intellispaces</groupId>
+        <groupId>tech.intellispaces.commons</groupId>
         <artifactId>intellispaces-parent-pom</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>reflectionsj-generator-maven-plugin-parent</artifactId>
+    <groupId>tech.intellispaces.reflections</groupId>
+    <artifactId>intellispaces-reflections-generator-maven-plugin-parent</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>reflectionsj-generator-maven-plugin</module>
-        <module>reflectionsj-generator-maven-plugin-model</module>
-        <module>reflectionsj-generator-maven-plugin-testcases</module>
+        <module>intellispaces-reflections-generator-maven-plugin</module>
+        <module>intellispaces-reflections-generator-maven-plugin-model</module>
+        <module>intellispaces-reflections-generator-maven-plugin-testcases</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
             <!-- Intellispaces-->
             <dependency>
-                <groupId>tech.intellispaces</groupId>
-                <artifactId>reflectionsj-core</artifactId>
+                <groupId>tech.intellispaces.reflections</groupId>
+                <artifactId>intellispaces-reflections-core</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces</groupId>
-                <artifactId>reflectionsj-model</artifactId>
+                <groupId>tech.intellispaces.reflections</groupId>
+                <artifactId>intellispaces-reflections-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces</groupId>
+                <groupId>tech.intellispaces.core</groupId>
                 <artifactId>intellispaces-specification-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces</groupId>
+                <groupId>tech.intellispaces.core</groupId>
                 <artifactId>intellispaces-specification</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces</groupId>
-                <artifactId>intellispaces-statementsj</artifactId>
+                <groupId>tech.intellispaces.commons</groupId>
+                <artifactId>intellispaces-jstatements</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces</groupId>
+                <groupId>tech.intellispaces.commons</groupId>
                 <artifactId>intellispaces-templateengine</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces</groupId>
+                <groupId>tech.intellispaces.commons</groupId>
                 <artifactId>intellispaces-commons-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>tech.intellispaces</groupId>
+                <groupId>tech.intellispaces.commons</groupId>
                 <artifactId>intellispaces-commons</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
