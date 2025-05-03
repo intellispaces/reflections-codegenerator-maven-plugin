@@ -21,12 +21,12 @@
             <!-- Intellispaces-->
             <dependency>
                 <groupId>tech.intellispaces</groupId>
-                <artifactId>intellispaces-reflectionsj-core</artifactId>
+                <artifactId>reflectionsj-core</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.intellispaces</groupId>
-                <artifactId>intellispaces-reflectionsj-model</artifactId>
+                <artifactId>reflectionsj-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
