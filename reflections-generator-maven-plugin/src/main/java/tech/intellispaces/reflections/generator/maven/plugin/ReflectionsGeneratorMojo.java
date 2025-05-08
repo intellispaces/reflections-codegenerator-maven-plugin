@@ -39,7 +39,7 @@ import tech.intellispaces.specification.space.repository.SpaceRepository;
 import tech.intellispaces.specification.space.repository.UnitedSpaceRepository;
 
 @Mojo(
-    name = "intellispaces-reflections-generator",
+    name = "reflections-generator",
     defaultPhase = LifecyclePhase.GENERATE_SOURCES
 )
 public class ReflectionsGeneratorMojo extends AbstractMojo {
