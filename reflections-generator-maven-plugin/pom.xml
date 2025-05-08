@@ -3,11 +3,11 @@
 
     <parent>
         <groupId>tech.intellispaces.reflections</groupId>
-        <artifactId>intellispaces-reflections-generator-maven-plugin-parent</artifactId>
+        <artifactId>reflections-generator-maven-plugin-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>intellispaces-reflections-generator-maven-plugin</artifactId>
+    <artifactId>reflections-generator-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <version>0.0.1-SNAPSHOT</version>
 
@@ -24,12 +24,12 @@
         <!-- Intellispaces-->
         <dependency>
             <groupId>tech.intellispaces.reflections</groupId>
-            <artifactId>intellispaces-reflections-generator-maven-plugin-model</artifactId>
+            <artifactId>reflections-generator-maven-plugin-model</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.reflections</groupId>
-            <artifactId>intellispaces-reflections-core</artifactId>
+            <artifactId>reflections-core</artifactId>
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.core</groupId>

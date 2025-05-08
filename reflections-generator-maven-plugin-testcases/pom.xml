@@ -3,11 +3,11 @@
 
     <parent>
         <groupId>tech.intellispaces.reflections</groupId>
-        <artifactId>intellispaces-reflections-generator-maven-plugin-parent</artifactId>
+        <artifactId>reflections-generator-maven-plugin-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>intellispaces-reflections-generator-maven-plugin-testcases</artifactId>
+    <artifactId>reflections-generator-maven-plugin-testcases</artifactId>
     <packaging>jar</packaging>
     <version>0.0.1-SNAPSHOT</version>
 
@@ -15,7 +15,7 @@
         <plugins>
             <plugin>
                 <groupId>tech.intellispaces.reflections</groupId>
-                <artifactId>intellispaces-reflections-generator-maven-plugin</artifactId>
+                <artifactId>reflections-generator-maven-plugin</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
                 <executions>
                     <execution>
@@ -44,11 +44,11 @@
         <!-- Intellispaces reflectionsJ -->
         <dependency>
             <groupId>tech.intellispaces.reflections</groupId>
-            <artifactId>intellispaces-reflections-core</artifactId>
+            <artifactId>reflections-core</artifactId>
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.reflections</groupId>
-            <artifactId>intellispaces-reflections-model</artifactId>
+            <artifactId>reflections-model</artifactId>
         </dependency>
     </dependencies>
 </project>
