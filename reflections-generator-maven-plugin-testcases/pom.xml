@@ -20,7 +20,7 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>intellispaces-reflections-generator</goal>
+                            <goal>reflections-generator</goal>
                         </goals>
                     </execution>
                 </executions>
