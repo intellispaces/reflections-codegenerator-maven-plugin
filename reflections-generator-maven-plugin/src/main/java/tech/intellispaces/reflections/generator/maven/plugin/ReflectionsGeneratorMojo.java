@@ -1,5 +1,31 @@
 package tech.intellispaces.reflections.generator.maven.plugin;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+import tech.intellispaces.commons.collection.ArraysFunctions;
+import tech.intellispaces.commons.collection.CollectionFunctions;
+import tech.intellispaces.commons.exception.NotImplementedExceptions;
+import tech.intellispaces.commons.text.StringFunctions;
+import tech.intellispaces.reflections.framework.Jaquarius;
+import tech.intellispaces.reflections.framework.settings.OntologyReference;
+import tech.intellispaces.reflections.framework.settings.SettingsFunctions;
+import tech.intellispaces.reflections.generator.maven.plugin.configuration.Configuration;
+import tech.intellispaces.reflections.generator.maven.plugin.configuration.ConfigurationLoaderFunctions;
+import tech.intellispaces.reflections.generator.maven.plugin.configuration.Settings;
+import tech.intellispaces.reflections.generator.maven.plugin.configuration.SettingsProvider;
+import tech.intellispaces.reflections.generator.maven.plugin.generation.GenerationFunctions;
+import tech.intellispaces.reflections.generator.maven.plugin.specification.SpecificationReadFunctions;
+import tech.intellispaces.specification.space.FileSpecification;
+import tech.intellispaces.specification.space.Specification;
+import tech.intellispaces.specification.space.repository.InMemorySpaceRepository;
+import tech.intellispaces.specification.space.repository.SpaceRepository;
+import tech.intellispaces.specification.space.repository.UnitedSpaceRepository;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -10,33 +36,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
-
-import tech.intellispaces.commons.collection.ArraysFunctions;
-import tech.intellispaces.commons.collection.CollectionFunctions;
-import tech.intellispaces.commons.exception.NotImplementedExceptions;
-import tech.intellispaces.commons.text.StringFunctions;
-import tech.intellispaces.reflections.Jaquarius;
-import tech.intellispaces.reflections.generator.maven.plugin.configuration.Configuration;
-import tech.intellispaces.reflections.generator.maven.plugin.configuration.ConfigurationLoaderFunctions;
-import tech.intellispaces.reflections.generator.maven.plugin.configuration.Settings;
-import tech.intellispaces.reflections.generator.maven.plugin.configuration.SettingsProvider;
-import tech.intellispaces.reflections.generator.maven.plugin.generation.GenerationFunctions;
-import tech.intellispaces.reflections.generator.maven.plugin.specification.SpecificationReadFunctions;
-import tech.intellispaces.reflections.settings.OntologyReference;
-import tech.intellispaces.reflections.settings.SettingsFunctions;
-import tech.intellispaces.specification.space.FileSpecification;
-import tech.intellispaces.specification.space.Specification;
-import tech.intellispaces.specification.space.repository.InMemorySpaceRepository;
-import tech.intellispaces.specification.space.repository.SpaceRepository;
-import tech.intellispaces.specification.space.repository.UnitedSpaceRepository;
 
 @Mojo(
     name = "reflections-generator",

@@ -1,8 +1,8 @@
 package tech.intellispaces.reflections.generator.maven.plugin.specification;
 
-import java.util.HashMap;
-
 import tech.intellispaces.specification.space.SpecificationItem;
+
+import java.util.HashMap;
 
 public interface SpecificationContexts {
 

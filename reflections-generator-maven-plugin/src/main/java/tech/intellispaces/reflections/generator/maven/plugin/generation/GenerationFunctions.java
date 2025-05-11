@@ -1,20 +1,6 @@
 package tech.intellispaces.reflections.generator.maven.plugin.generation;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import org.apache.maven.plugin.MojoExecutionException;
-
 import tech.intellispaces.actions.runnable.RunnableAction;
 import tech.intellispaces.actions.text.StringActions;
 import tech.intellispaces.commons.collection.ArraysFunctions;
@@ -24,33 +10,26 @@ import tech.intellispaces.commons.text.StringFunctions;
 import tech.intellispaces.commons.type.ClassFunctions;
 import tech.intellispaces.commons.type.ClassNameFunctions;
 import tech.intellispaces.core.id.IdentifierFunctions;
-import tech.intellispaces.reflections.Jaquarius;
-import tech.intellispaces.reflections.annotation.Channel;
-import tech.intellispaces.reflections.annotation.Dataset;
-import tech.intellispaces.reflections.annotation.Movable;
-import tech.intellispaces.reflections.annotation.Unmovable;
+import tech.intellispaces.jstatements.dependencies.DependencySets;
+import tech.intellispaces.jstatements.dependencies.MutableDependencySet;
+import tech.intellispaces.reflections.framework.Jaquarius;
+import tech.intellispaces.reflections.framework.annotation.Channel;
+import tech.intellispaces.reflections.framework.annotation.Dataset;
+import tech.intellispaces.reflections.framework.annotation.Movable;
+import tech.intellispaces.reflections.framework.annotation.Unmovable;
+import tech.intellispaces.reflections.framework.id.RepetableUuidIdentifierGenerator;
+import tech.intellispaces.reflections.framework.naming.NameConventionFunctions;
+import tech.intellispaces.reflections.framework.settings.DomainReference;
+import tech.intellispaces.reflections.framework.settings.DomainTypes;
+import tech.intellispaces.reflections.framework.space.channel.ChannelFunctions;
+import tech.intellispaces.reflections.framework.traverse.MappingOfMovingTraverse;
+import tech.intellispaces.reflections.framework.traverse.MappingTraverse;
+import tech.intellispaces.reflections.framework.traverse.MovingTraverse;
+import tech.intellispaces.reflections.framework.traverse.TraverseTypes;
 import tech.intellispaces.reflections.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.reflections.generator.maven.plugin.specification.SpecificationContext;
 import tech.intellispaces.reflections.generator.maven.plugin.specification.SpecificationContexts;
-import tech.intellispaces.reflections.id.RepetableUuidIdentifierGenerator;
-import tech.intellispaces.reflections.naming.NameConventionFunctions;
-import tech.intellispaces.reflections.settings.DomainReference;
-import tech.intellispaces.reflections.settings.DomainTypes;
-import tech.intellispaces.reflections.space.channel.ChannelFunctions;
-import tech.intellispaces.reflections.traverse.MappingOfMovingTraverse;
-import tech.intellispaces.reflections.traverse.MappingTraverse;
-import tech.intellispaces.reflections.traverse.MovingTraverse;
-import tech.intellispaces.reflections.traverse.TraverseTypes;
-import tech.intellispaces.specification.space.AllowedTraverseType;
-import tech.intellispaces.specification.space.AllowedTraverseTypes;
-import tech.intellispaces.specification.space.ChannelSideSpecification;
-import tech.intellispaces.specification.space.ChannelSpecification;
-import tech.intellispaces.specification.space.DomainSpecification;
-import tech.intellispaces.specification.space.FileSpecification;
-import tech.intellispaces.specification.space.ImmobilityTypes;
-import tech.intellispaces.specification.space.SpecificationItem;
-import tech.intellispaces.specification.space.SpecificationItemTypes;
-import tech.intellispaces.specification.space.SuperDomainSpecification;
+import tech.intellispaces.specification.space.*;
 import tech.intellispaces.specification.space.constraint.ConstraintSpecification;
 import tech.intellispaces.specification.space.constraint.EquivalenceConstraintSpecification;
 import tech.intellispaces.specification.space.exception.SpecificationException;
@@ -63,9 +42,13 @@ import tech.intellispaces.specification.space.traverse.TraversePathParseFunction
 import tech.intellispaces.specification.space.traverse.TraversePathSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionThruSpecification;
-import tech.intellispaces.jstatements.dependencies.DependencySets;
-import tech.intellispaces.jstatements.dependencies.MutableDependencySet;
 import tech.intellispaces.templateengine.template.Template;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 public class GenerationFunctions {
 
@@ -122,7 +105,7 @@ public class GenerationFunctions {
       Configuration cfg
   ) throws MojoExecutionException {
     MutableDependencySet imports = DependencySets.get(canonicalName);
-    imports.add(tech.intellispaces.reflections.annotation.Domain.class);
+    imports.add( tech.intellispaces.reflections.framework.annotation.Domain.class);
 
     var vars = new HashMap<String, Object>();
     vars.put("id", IdentifierFunctions.convertToHexString(domainSpec.id()));
@@ -149,7 +132,7 @@ public class GenerationFunctions {
       Configuration cfg
   ) throws MojoExecutionException {
     MutableDependencySet imports = DependencySets.get(canonicalName);
-    imports.add(tech.intellispaces.reflections.annotation.Channel.class);
+    imports.add( tech.intellispaces.reflections.framework.annotation.Channel.class);
 
     var vars = new HashMap<String, Object>();
     vars.put("id", IdentifierFunctions.convertToHexString(channelSpec.id()));

@@ -22,12 +22,12 @@
             <!-- Intellispaces-->
             <dependency>
                 <groupId>tech.intellispaces.reflections</groupId>
-                <artifactId>reflections-core</artifactId>
+                <artifactId>reflections-framework</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.intellispaces.reflections</groupId>
-                <artifactId>reflections-model</artifactId>
+                <artifactId>reflections-framework-model</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>

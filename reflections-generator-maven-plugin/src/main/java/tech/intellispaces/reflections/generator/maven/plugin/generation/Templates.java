@@ -1,13 +1,13 @@
 package tech.intellispaces.reflections.generator.maven.plugin.generation;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import tech.intellispaces.commons.exception.UnexpectedExceptions;
 import tech.intellispaces.commons.function.Functions;
 import tech.intellispaces.commons.resource.ResourceFunctions;
 import tech.intellispaces.templateengine.TemplateEngine;
 import tech.intellispaces.templateengine.template.Template;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Templates {
   private static final Map<String, Template> TEMPLATE_CACHE = new HashMap<>();

@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.reflections</groupId>
-            <artifactId>reflections-model</artifactId>
+            <artifactId>reflections-framework-model</artifactId>
         </dependency>
         <dependency>
             <groupId>tech.intellispaces.core</groupId>
