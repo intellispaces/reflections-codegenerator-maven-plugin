@@ -11,7 +11,7 @@ import tech.intellispaces.commons.collection.ArraysFunctions;
 import tech.intellispaces.commons.collection.CollectionFunctions;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
 import tech.intellispaces.commons.text.StringFunctions;
-import tech.intellispaces.reflections.framework.Jaquarius;
+import tech.intellispaces.reflections.framework.ReflectionsFramework;
 import tech.intellispaces.reflections.framework.settings.OntologyReference;
 import tech.intellispaces.reflections.framework.settings.SettingsFunctions;
 import tech.intellispaces.reflections.generator.maven.plugin.configuration.Configuration;
@@ -155,7 +155,7 @@ public class ReflectionsGeneratorMojo extends AbstractMojo {
     }
 
     OntologyReference ontologyReference = SettingsFunctions.mergeOntologyReferences(ontologyReferences);
-    Jaquarius.ontologyReference(ontologyReference);
+    ReflectionsFramework.ontologyReference(ontologyReference);
   }
 
   @SuppressWarnings("unchecked")

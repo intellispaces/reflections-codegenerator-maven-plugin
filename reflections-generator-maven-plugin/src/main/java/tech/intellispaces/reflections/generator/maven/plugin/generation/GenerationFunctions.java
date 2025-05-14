@@ -12,7 +12,7 @@ import tech.intellispaces.commons.type.ClassNameFunctions;
 import tech.intellispaces.core.id.IdentifierFunctions;
 import tech.intellispaces.jstatements.dependencies.DependencySets;
 import tech.intellispaces.jstatements.dependencies.MutableDependencySet;
-import tech.intellispaces.reflections.framework.Jaquarius;
+import tech.intellispaces.reflections.framework.ReflectionsFramework;
 import tech.intellispaces.reflections.framework.annotation.Channel;
 import tech.intellispaces.reflections.framework.annotation.Dataset;
 import tech.intellispaces.reflections.framework.annotation.Movable;
@@ -29,7 +29,16 @@ import tech.intellispaces.reflections.framework.traverse.TraverseTypes;
 import tech.intellispaces.reflections.generator.maven.plugin.configuration.Configuration;
 import tech.intellispaces.reflections.generator.maven.plugin.specification.SpecificationContext;
 import tech.intellispaces.reflections.generator.maven.plugin.specification.SpecificationContexts;
-import tech.intellispaces.specification.space.*;
+import tech.intellispaces.specification.space.AllowedTraverseType;
+import tech.intellispaces.specification.space.AllowedTraverseTypes;
+import tech.intellispaces.specification.space.ChannelSideSpecification;
+import tech.intellispaces.specification.space.ChannelSpecification;
+import tech.intellispaces.specification.space.DomainSpecification;
+import tech.intellispaces.specification.space.FileSpecification;
+import tech.intellispaces.specification.space.ImmobilityTypes;
+import tech.intellispaces.specification.space.SpecificationItem;
+import tech.intellispaces.specification.space.SpecificationItemTypes;
+import tech.intellispaces.specification.space.SuperDomainSpecification;
 import tech.intellispaces.specification.space.constraint.ConstraintSpecification;
 import tech.intellispaces.specification.space.constraint.EquivalenceConstraintSpecification;
 import tech.intellispaces.specification.space.exception.SpecificationException;
@@ -168,7 +177,7 @@ public class GenerationFunctions {
   static List<String> buildTypeParamDeclarations(
       DomainSpecification domainSpec, MutableDependencySet imports
   ) {
-    if (domainSpec.name() != null && Jaquarius.ontologyReference().isDomainOfDomains(domainSpec.name())) {
+    if (domainSpec.name() != null && ReflectionsFramework.ontologyReference().isDomainOfDomains(domainSpec.name())) {
       return List.of("D");
     }
     return domainSpec.channels().stream()
@@ -260,11 +269,11 @@ public class GenerationFunctions {
           if (targetInstance.isCustomInstance()) {
             CustomInstanceSpecification customTargetInstance = targetInstance.asCustomInstance();
             String instanceDomainName = customTargetInstance.domain().name();
-            DomainReference instanceDomain = Jaquarius.ontologyReference().getDomainByName(instanceDomainName);
+            DomainReference instanceDomain = ReflectionsFramework.ontologyReference().getDomainByName(instanceDomainName);
             if (instanceDomain != null) {
               if (DomainTypes.Domain.is(instanceDomain.type())) {
                 String domainName = customTargetInstance.projections().get("name").asString();
-                DomainReference domain = Jaquarius.ontologyReference().getDomainByName(domainName);
+                DomainReference domain = ReflectionsFramework.ontologyReference().getDomainByName(domainName);
                 if (domain != null && DomainTypes.Notion.is(domain.type())) {
                   sb.append(imports.addAndGetSimpleName(Object.class));
                 } else if (domain != null && DomainTypes.String.is(domain.type())) {
@@ -535,7 +544,7 @@ public class GenerationFunctions {
       String domainName = domainReference.name();
       String domainClassName = getDefaultDomainClassName(domainName, enablePrimitives);
       String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
-      if (Jaquarius.ontologyReference().isDomainOfDomains(domainName)) {
+      if (ReflectionsFramework.ontologyReference().isDomainOfDomains(domainName)) {
         var sb = new StringBuilder();
         sb.append(domainClassSimpleName);
         sb.append("<");
@@ -615,7 +624,7 @@ public class GenerationFunctions {
               if (channel.target().alias() != null) {
                 return channel.target().alias();
               } else if (channel.target().instance() != null && channel.target().instance().isString()) {
-                if (Jaquarius.ontologyReference().isDomainOfDomains(channel.target().domain().name())) {
+                if (ReflectionsFramework.ontologyReference().isDomainOfDomains(channel.target().domain().name())) {
                   return imports.addAndGetSimpleName(getDefaultDomainClassName(channel.target().instance().asString(), false));
                 }
               }
@@ -651,7 +660,7 @@ public class GenerationFunctions {
 
   static boolean isDataset(DomainSpecification domainSpec) {
     for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
-      DomainReference domain = Jaquarius.ontologyReference().getDomainByName(superDomain.reference().name());
+      DomainReference domain = ReflectionsFramework.ontologyReference().getDomainByName(superDomain.reference().name());
       if (domain != null && DomainTypes.Dataset.is(domain.type())) {
         return true;
       }
@@ -661,7 +670,7 @@ public class GenerationFunctions {
 
   static boolean isTypeRelatedChannel(ChannelSpecification channelSpec) {
     if (channelSpec.target().domain() != null) {
-      if (Jaquarius.ontologyReference().isDomainOfDomains(channelSpec.target().domain().name())) {
+      if (ReflectionsFramework.ontologyReference().isDomainOfDomains(channelSpec.target().domain().name())) {
         return channelSpec.target().instance() == null;
       }
     }
@@ -742,7 +751,7 @@ public class GenerationFunctions {
   }
 
   static String getDefaultDomainClassName(String domainName, boolean enablePrimitives) {
-    DomainReference domain = Jaquarius.ontologyReference().getDomainByName(domainName);
+    DomainReference domain = ReflectionsFramework.ontologyReference().getDomainByName(domainName);
     if (domain != null && domain.delegateClassName() != null) {
       if (enablePrimitives) {
         if (DomainTypes.Boolean.is(domain.type())) {
@@ -771,11 +780,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainOfDomainsName() {
-    return Jaquarius.ontologyReference().getDomainByType(DomainTypes.Domain).domainName();
+    return ReflectionsFramework.ontologyReference().getDomainByType(DomainTypes.Domain).domainName();
   }
 
   static String getDomainOfDomainsClassCanonicalName() {
-    return Jaquarius.ontologyReference().getDomainByType(DomainTypes.Domain).delegateClassName();
+    return ReflectionsFramework.ontologyReference().getDomainByType(DomainTypes.Domain).delegateClassName();
   }
 
   static Map<TraversePathSpecification, Equivalence> makeEquivalenceIndex(List<ConstraintSpecification> constraints) {
