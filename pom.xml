@@ -8,13 +8,13 @@
     </parent>
 
     <groupId>tech.intellispaces.reflections</groupId>
-    <artifactId>reflections-generator-maven-plugin-parent</artifactId>
+    <artifactId>reflections-codegenerator-maven-plugin-parent</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>reflections-generator-maven-plugin</module>
-        <module>reflections-generator-maven-plugin-model</module>
-        <module>reflections-generator-maven-plugin-testcases</module>
+        <module>reflections-codegenerator-maven-plugin</module>
+        <module>reflections-codegenerator-maven-plugin-model</module>
+        <module>reflections-codegenerator-maven-plugin-testcases</module>
     </modules>
 
     <dependencyManagement>
@@ -42,7 +42,7 @@
             </dependency>
             <dependency>
                 <groupId>tech.intellispaces.commons</groupId>
-                <artifactId>intellispaces-jstatements</artifactId>
+                <artifactId>intellispaces-javareflection</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
