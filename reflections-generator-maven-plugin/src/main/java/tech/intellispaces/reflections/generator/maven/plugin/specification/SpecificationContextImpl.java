@@ -1,8 +1,8 @@
 package tech.intellispaces.reflections.generator.maven.plugin.specification;
 
-import tech.intellispaces.specification.space.SpecificationItem;
-
 import java.util.Map;
+
+import tech.intellispaces.specification.space.SpecificationItem;
 
 class SpecificationContextImpl implements SpecificationContext {
   private final SpecificationContext parentContext;

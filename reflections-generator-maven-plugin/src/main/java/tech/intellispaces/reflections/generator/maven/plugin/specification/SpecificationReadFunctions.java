@@ -1,16 +1,17 @@
 package tech.intellispaces.reflections.generator.maven.plugin.specification;
 
+import java.io.InputStream;
+import java.nio.file.Path;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
+
 import tech.intellispaces.commons.properties.PropertiesSet;
 import tech.intellispaces.commons.properties.PropertiesSets;
 import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.SpecificationParseFunctions;
 import tech.intellispaces.specification.space.exception.SpecificationException;
-
-import java.io.InputStream;
-import java.nio.file.Path;
 
 public class SpecificationReadFunctions {
 

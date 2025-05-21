@@ -1,5 +1,16 @@
 package tech.intellispaces.reflections.generator.maven.plugin;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -7,11 +18,12 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+
 import tech.intellispaces.commons.collection.ArraysFunctions;
 import tech.intellispaces.commons.collection.CollectionFunctions;
 import tech.intellispaces.commons.exception.NotImplementedExceptions;
 import tech.intellispaces.commons.text.StringFunctions;
-import tech.intellispaces.reflections.framework.ReflectionsFramework;
+import tech.intellispaces.reflections.framework.node.ReflectionsNodeFunctions;
 import tech.intellispaces.reflections.framework.settings.OntologyReference;
 import tech.intellispaces.reflections.framework.settings.SettingsFunctions;
 import tech.intellispaces.reflections.generator.maven.plugin.configuration.Configuration;
@@ -25,17 +37,6 @@ import tech.intellispaces.specification.space.Specification;
 import tech.intellispaces.specification.space.repository.InMemorySpaceRepository;
 import tech.intellispaces.specification.space.repository.SpaceRepository;
 import tech.intellispaces.specification.space.repository.UnitedSpaceRepository;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @Mojo(
     name = "reflections-generator",
@@ -155,7 +156,7 @@ public class ReflectionsGeneratorMojo extends AbstractMojo {
     }
 
     OntologyReference ontologyReference = SettingsFunctions.mergeOntologyReferences(ontologyReferences);
-    ReflectionsFramework.ontologyReference(ontologyReference);
+    ReflectionsNodeFunctions.ontologyReference(ontologyReference);
   }
 
   @SuppressWarnings("unchecked")

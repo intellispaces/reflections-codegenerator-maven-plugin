@@ -1,6 +1,20 @@
 package tech.intellispaces.reflections.generator.maven.plugin.generation;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.apache.maven.plugin.MojoExecutionException;
+
 import tech.intellispaces.actions.runnable.RunnableAction;
 import tech.intellispaces.actions.text.StringActions;
 import tech.intellispaces.commons.collection.ArraysFunctions;
@@ -12,13 +26,13 @@ import tech.intellispaces.commons.type.ClassNameFunctions;
 import tech.intellispaces.core.id.IdentifierFunctions;
 import tech.intellispaces.jstatements.dependencies.DependencySets;
 import tech.intellispaces.jstatements.dependencies.MutableDependencySet;
-import tech.intellispaces.reflections.framework.ReflectionsFramework;
 import tech.intellispaces.reflections.framework.annotation.Channel;
 import tech.intellispaces.reflections.framework.annotation.Dataset;
 import tech.intellispaces.reflections.framework.annotation.Movable;
 import tech.intellispaces.reflections.framework.annotation.Unmovable;
 import tech.intellispaces.reflections.framework.id.RepetableUuidIdentifierGenerator;
 import tech.intellispaces.reflections.framework.naming.NameConventionFunctions;
+import tech.intellispaces.reflections.framework.node.ReflectionsNodeFunctions;
 import tech.intellispaces.reflections.framework.settings.DomainReference;
 import tech.intellispaces.reflections.framework.settings.DomainTypes;
 import tech.intellispaces.reflections.framework.space.channel.ChannelFunctions;
@@ -52,12 +66,6 @@ import tech.intellispaces.specification.space.traverse.TraversePathSpecification
 import tech.intellispaces.specification.space.traverse.TraverseTransitionSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionThruSpecification;
 import tech.intellispaces.templateengine.template.Template;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
 
 public class GenerationFunctions {
 
@@ -177,7 +185,7 @@ public class GenerationFunctions {
   static List<String> buildTypeParamDeclarations(
       DomainSpecification domainSpec, MutableDependencySet imports
   ) {
-    if (domainSpec.name() != null && ReflectionsFramework.ontologyReference().isDomainOfDomains(domainSpec.name())) {
+    if (domainSpec.name() != null && ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(domainSpec.name())) {
       return List.of("D");
     }
     return domainSpec.channels().stream()
@@ -269,11 +277,11 @@ public class GenerationFunctions {
           if (targetInstance.isCustomInstance()) {
             CustomInstanceSpecification customTargetInstance = targetInstance.asCustomInstance();
             String instanceDomainName = customTargetInstance.domain().name();
-            DomainReference instanceDomain = ReflectionsFramework.ontologyReference().getDomainByName(instanceDomainName);
+            DomainReference instanceDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(instanceDomainName);
             if (instanceDomain != null) {
               if (DomainTypes.Domain.is(instanceDomain.type())) {
                 String domainName = customTargetInstance.projections().get("name").asString();
-                DomainReference domain = ReflectionsFramework.ontologyReference().getDomainByName(domainName);
+                DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(domainName);
                 if (domain != null && DomainTypes.Notion.is(domain.type())) {
                   sb.append(imports.addAndGetSimpleName(Object.class));
                 } else if (domain != null && DomainTypes.String.is(domain.type())) {
@@ -544,7 +552,7 @@ public class GenerationFunctions {
       String domainName = domainReference.name();
       String domainClassName = getDefaultDomainClassName(domainName, enablePrimitives);
       String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
-      if (ReflectionsFramework.ontologyReference().isDomainOfDomains(domainName)) {
+      if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(domainName)) {
         var sb = new StringBuilder();
         sb.append(domainClassSimpleName);
         sb.append("<");
@@ -624,7 +632,7 @@ public class GenerationFunctions {
               if (channel.target().alias() != null) {
                 return channel.target().alias();
               } else if (channel.target().instance() != null && channel.target().instance().isString()) {
-                if (ReflectionsFramework.ontologyReference().isDomainOfDomains(channel.target().domain().name())) {
+                if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(channel.target().domain().name())) {
                   return imports.addAndGetSimpleName(getDefaultDomainClassName(channel.target().instance().asString(), false));
                 }
               }
@@ -660,7 +668,7 @@ public class GenerationFunctions {
 
   static boolean isDataset(DomainSpecification domainSpec) {
     for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
-      DomainReference domain = ReflectionsFramework.ontologyReference().getDomainByName(superDomain.reference().name());
+      DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(superDomain.reference().name());
       if (domain != null && DomainTypes.Dataset.is(domain.type())) {
         return true;
       }
@@ -670,7 +678,7 @@ public class GenerationFunctions {
 
   static boolean isTypeRelatedChannel(ChannelSpecification channelSpec) {
     if (channelSpec.target().domain() != null) {
-      if (ReflectionsFramework.ontologyReference().isDomainOfDomains(channelSpec.target().domain().name())) {
+      if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(channelSpec.target().domain().name())) {
         return channelSpec.target().instance() == null;
       }
     }
@@ -751,7 +759,7 @@ public class GenerationFunctions {
   }
 
   static String getDefaultDomainClassName(String domainName, boolean enablePrimitives) {
-    DomainReference domain = ReflectionsFramework.ontologyReference().getDomainByName(domainName);
+    DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(domainName);
     if (domain != null && domain.delegateClassName() != null) {
       if (enablePrimitives) {
         if (DomainTypes.Boolean.is(domain.type())) {
@@ -780,11 +788,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainOfDomainsName() {
-    return ReflectionsFramework.ontologyReference().getDomainByType(DomainTypes.Domain).domainName();
+    return ReflectionsNodeFunctions.ontologyReference().getDomainByType(DomainTypes.Domain).domainName();
   }
 
   static String getDomainOfDomainsClassCanonicalName() {
-    return ReflectionsFramework.ontologyReference().getDomainByType(DomainTypes.Domain).delegateClassName();
+    return ReflectionsNodeFunctions.ontologyReference().getDomainByType(DomainTypes.Domain).delegateClassName();
   }
 
   static Map<TraversePathSpecification, Equivalence> makeEquivalenceIndex(List<ConstraintSpecification> constraints) {

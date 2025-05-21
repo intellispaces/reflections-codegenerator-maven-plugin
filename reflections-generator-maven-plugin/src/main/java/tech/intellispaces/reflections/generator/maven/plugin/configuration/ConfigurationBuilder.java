@@ -1,6 +1,7 @@
 package tech.intellispaces.reflections.generator.maven.plugin.configuration;
 
 import org.apache.maven.plugin.logging.Log;
+
 import tech.intellispaces.specification.space.repository.SpaceRepository;
 
 public class ConfigurationBuilder {
