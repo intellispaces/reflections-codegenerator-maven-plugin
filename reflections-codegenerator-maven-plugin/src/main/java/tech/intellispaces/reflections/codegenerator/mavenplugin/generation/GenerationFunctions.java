@@ -125,7 +125,7 @@ public class GenerationFunctions {
     imports.add( tech.intellispaces.reflections.framework.annotation.Domain.class);
 
     var vars = new HashMap<String, Object>();
-    vars.put("id", IdentifierFunctions.convertToHexString(domainSpec.id()));
+    vars.put("rid", domainSpec.rid().toString());
     if (isDataset(domainSpec)) {
       vars.put("isDataset", true);
       imports.add(Dataset.class);
@@ -152,7 +152,7 @@ public class GenerationFunctions {
     imports.add( tech.intellispaces.reflections.framework.annotation.Channel.class);
 
     var vars = new HashMap<String, Object>();
-    vars.put("id", IdentifierFunctions.convertToHexString(channelSpec.id()));
+    vars.put("rid", channelSpec.rid().toString());
     vars.put("methodName", StringFunctions.lowercaseFirstLetter(ClassNameFunctions.getSimpleName(channelSpec.name())));
     vars.put("channelKind", imports.addAndGetSimpleName(ChannelFunctions.getChannelClass(channelSpec.qualifiers().size())));
     vars.put("channelTypes", buildChannelTypes(channelSpec, imports));
@@ -383,7 +383,7 @@ public class GenerationFunctions {
 
         var map = new HashMap<String, Object>();
         map.put("alias", channelSpec.alias());
-        map.put("id", IdentifierFunctions.convertToHexString(channelSpec.id()));
+        map.put("rid", channelSpec.rid().toString());
         map.put("name", channelSpec.name());
         if (ImmobilityTypes.Unmovable.is(channelSpec.target().immobilityType())) {
           imports.add(Unmovable.class);
@@ -428,13 +428,13 @@ public class GenerationFunctions {
               "$" + channelSpec.alias(), channelSpec
           );
 
-          byte[] seed = ArraysFunctions.join(domainSpec.id(), channelSpec.id());
+          byte[] seed = ArraysFunctions.join(domainSpec.rid().raw(), channelSpec.rid().raw());
           var identifierGenerator = new RepetableUuidIdentifierGenerator(seed);
-          String id = IdentifierFunctions.convertToHexString(identifierGenerator.next());
+          String rid = IdentifierFunctions.convertToHexString(identifierGenerator.next());
 
           var map = new HashMap<String, Object>();
           map.put("alias", channelSpec.alias());
-          map.put("id", id);
+          map.put("rid", rid);
           map.put("typeParams", buildTypeParamDeclarations(channelSpec, imports));
           map.put("target", buildInheritedTargetTypeDeclaration(domainSpec, imports));
           map.put("qualifiers", buildChannelQualifiers(channelSpec, context, imports, cfg));
