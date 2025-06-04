@@ -2,13 +2,13 @@ package tech.intellispaces.reflections.codegenerator.mavenplugin.configuration;
 
 import org.apache.maven.plugin.logging.Log;
 
-import tech.intellispaces.specification.space.repository.SpaceRepository;
+import tech.intellispaces.specification.space.repository.SpecificationRepository;
 
 public interface ConfigurationLoaderFunctions {
 
   static Configuration loadConfiguration(
       Settings pluginSettings,
-      SpaceRepository repository,
+      SpecificationRepository repository,
       Log log
   ) {
     var builder = SettingsProvider.builder();

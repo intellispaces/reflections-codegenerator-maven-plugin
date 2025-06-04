@@ -34,9 +34,9 @@ import tech.intellispaces.reflections.framework.settings.OntologyReference;
 import tech.intellispaces.reflections.framework.settings.SettingsFunctions;
 import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.Specification;
-import tech.intellispaces.specification.space.repository.InMemorySpaceRepository;
-import tech.intellispaces.specification.space.repository.SpaceRepository;
-import tech.intellispaces.specification.space.repository.UnitedSpaceRepository;
+import tech.intellispaces.specification.space.repository.InMemorySpecificationRepository;
+import tech.intellispaces.specification.space.repository.SpecificationRepository;
+import tech.intellispaces.specification.space.repository.UnitedSpecificationRepository;
 
 @Mojo(
     name = "reflections-codegenerator",
@@ -80,13 +80,13 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
     try {
       Settings settings = createSettings();
 
-      var unitedRepository = new UnitedSpaceRepository();
+      var unitedRepository = new UnitedSpecificationRepository();
       Configuration cfg = createConfiguration(settings, unitedRepository);
       loadOntologyReferences();
 
       specPath = Paths.get(cfg.settings().specificationPath());
       FileSpecification spec = SpecificationReadFunctions.readSpecification(specPath);
-      unitedRepository.addRepository(new InMemorySpaceRepository(spec.ontology()));
+      unitedRepository.addRepository(new InMemorySpecificationRepository(spec.ontology()));
 
       addOntologyRepositories(unitedRepository, cfg);
 
@@ -103,7 +103,7 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
   }
 
   Configuration createConfiguration(
-      Settings settings, SpaceRepository repository
+      Settings settings, SpecificationRepository repository
   ) throws MojoExecutionException {
     return ConfigurationLoaderFunctions.loadConfiguration(
         settings,
@@ -122,7 +122,7 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
   }
 
   void addOntologyRepositories(
-      UnitedSpaceRepository unitedRepository, Configuration cfg
+      UnitedSpecificationRepository unitedRepository, Configuration cfg
   ) throws MojoExecutionException {
     if (ArraysFunctions.isNullOrEmpty(repositories)) {
       return;
@@ -137,12 +137,12 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
   }
 
   void addFileOntologyRepository(
-      UnitedSpaceRepository unitedRepository, String repositoryUrl, Configuration cfg
+      UnitedSpecificationRepository unitedRepository, String repositoryUrl, Configuration cfg
   ) throws MojoExecutionException {
       String normRepositoryUrl = repositoryUrl.replace('\\', '/');
       var specPath = Path.of(StringFunctions.removeHeadIfPresent(URI.create(normRepositoryUrl).getPath(), "/"));
       Specification spec = SpecificationReadFunctions.readSpecification(specPath);
-      unitedRepository.addRepository(new InMemorySpaceRepository(spec.ontology()));
+      unitedRepository.addRepository(new InMemorySpecificationRepository(spec.ontology()));
   }
 
   void loadOntologyReferences() throws MojoExecutionException {

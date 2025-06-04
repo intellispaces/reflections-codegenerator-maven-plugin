@@ -2,11 +2,11 @@ package tech.intellispaces.reflections.codegenerator.mavenplugin.configuration;
 
 import org.apache.maven.plugin.logging.Log;
 
-import tech.intellispaces.specification.space.repository.SpaceRepository;
+import tech.intellispaces.specification.space.repository.SpecificationRepository;
 
 public class ConfigurationBuilder {
   private Settings settings;
-  private SpaceRepository repository;
+  private SpecificationRepository repository;
   private Log log;
 
   public ConfigurationBuilder settings(Settings settings) {
@@ -19,7 +19,7 @@ public class ConfigurationBuilder {
     return this;
   }
 
-  public ConfigurationBuilder repository(SpaceRepository repository) {
+  public ConfigurationBuilder repository(SpecificationRepository repository) {
     this.repository = repository;
     return this;
   }
