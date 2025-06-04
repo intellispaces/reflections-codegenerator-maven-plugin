@@ -15,6 +15,7 @@ public interface ConfigurationLoaderFunctions {
     builder.projectPath(pluginSettings.projectPath());
     builder.specificationPath(pluginSettings.specificationPath());
     builder.outputDirectory(pluginSettings.outputDirectory());
+    builder.basePackage(pluginSettings.basePackage());
     Settings settings = builder.get();
     return Configurations.build()
         .settings(settings)

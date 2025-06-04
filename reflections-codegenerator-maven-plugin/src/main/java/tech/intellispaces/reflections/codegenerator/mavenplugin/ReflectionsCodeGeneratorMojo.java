@@ -53,7 +53,7 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
   /**
    * The external ontology repositories.
    */
-  @Parameter(property = "repositories", required = false)
+  @Parameter(property = "repositories")
   private String[] repositories;
 
   /**
@@ -64,6 +64,12 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
       defaultValue = "${project.build.directory}/generated-sources/reflections",
       required = true)
   private String outputDirectory;
+
+  /**
+   * The base package for generated Java classes.
+   */
+  @Parameter(property = "basePackage")
+  private String basePackage;
 
   @Parameter(defaultValue = "${project}", required = true)
   private MavenProject project;
@@ -111,6 +117,7 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
         .projectPath(project.getBasedir().toString())
         .specificationPath(inputSpec)
         .outputDirectory(outputDirectory)
+        .basePackage(basePackage != null ? basePackage : "")
         .get();
   }
 

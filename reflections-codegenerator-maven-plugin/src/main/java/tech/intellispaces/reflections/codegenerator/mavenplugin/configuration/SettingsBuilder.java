@@ -4,6 +4,7 @@ public class SettingsBuilder {
   private String projectPath;
   private String specificationPath;
   private String outputDirectory;
+  private String basePackage;
 
   public SettingsBuilder projectPath(String projectPath) {
     this.projectPath = projectPath;
@@ -20,11 +21,17 @@ public class SettingsBuilder {
     return this;
   }
 
+  public SettingsBuilder basePackage(String basePackage) {
+    this.basePackage = basePackage;
+    return this;
+  }
+
   public Settings get() {
     return new SettingsImpl(
         projectPath,
         specificationPath,
-        outputDirectory
+        outputDirectory,
+        basePackage
     );
   }
 }

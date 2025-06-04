@@ -4,7 +4,7 @@ package {{$packageName}};
 import {{$importedClass}};
 {{end}}
 
-@Domain("{{$rid}}")
+@{{$domainAnnotation}}(value = "{{$rid}}", name = "{{$name}}")
 {{when $isDataset}}
 @Dataset
 {{end}}
@@ -12,9 +12,9 @@ public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typePara
 
 {{for channel : $channels}}
 {{when eachOf($channel["name"].isEmpty(), $channel["allowedTraverse"].isEmpty()).isTrue()}}
-  @Channel("{{$channel["rid"]}}")
+  @{{$channelAnnotation}}("{{$channel["rid"]}}")
 {{else}}
-  @Channel(
+  @{{$channelAnnotation}}(
     value = "{{$channel["rid"]}}"
     {{when $channel["name"].isNotEmpty()}}, name = "{{$channel["name"]}}" {{end}}
     {{when $channel["allowedTraverse"].isNotEmpty()}}, allowedTraverse = {{$channel["allowedTraverse"]}} {{end}}
@@ -31,7 +31,7 @@ public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typePara
 {{end}}
 {{for channel : $inheritedChannels}}
   @Override
-  @Channel(value = "{{$channel["rid"]}}", allowedTraverse = TraverseTypes.Moving)
+  @{{$channelAnnotation}}(value = "{{$channel["rid"]}}", allowedTraverse = TraverseTypes.Moving)
   {{when $channel["typeParams"].isNotEmpty()}}<{{for typeParam : $channel["typeParams"]}}{{$typeParam}}{{end}}> {{end}}{{$channel["target"]}} {{$channel["alias"]}}({{for qualifier : $channel["qualifiers"]}}{{$qualifier["type"]}} {{$qualifier["alias"]}}{{when $qualifier.isNotLast()}}, {{end}}{{end}});
 
 {{end}}

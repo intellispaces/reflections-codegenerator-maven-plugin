@@ -10,4 +10,6 @@ public interface Settings {
   String specificationPath();
 
   String outputDirectory();
+
+  String basePackage();
 }
