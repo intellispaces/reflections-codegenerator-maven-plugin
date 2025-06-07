@@ -32,12 +32,11 @@ import tech.intellispaces.reflections.codegenerator.mavenplugin.specification.Sp
 import tech.intellispaces.reflections.framework.annotation.Channel;
 import tech.intellispaces.reflections.framework.annotation.Dataset;
 import tech.intellispaces.reflections.framework.annotation.Movable;
-import tech.intellispaces.reflections.framework.annotation.Unmovable;
 import tech.intellispaces.reflections.framework.id.RepetableUuidIdentifierGenerator;
 import tech.intellispaces.reflections.framework.naming.NameConventionFunctions;
 import tech.intellispaces.reflections.framework.node.ReflectionsNodeFunctions;
+import tech.intellispaces.reflections.framework.settings.DomainAssignments;
 import tech.intellispaces.reflections.framework.settings.DomainReference;
-import tech.intellispaces.reflections.framework.settings.DomainTypes;
 import tech.intellispaces.reflections.framework.space.channel.ChannelFunctions;
 import tech.intellispaces.reflections.framework.traverse.MappingOfMovingTraverse;
 import tech.intellispaces.reflections.framework.traverse.MappingTraverse;
@@ -126,7 +125,7 @@ public class GenerationFunctions {
     var vars = new HashMap<String, Object>();
     vars.put("rid", domainSpec.rid().toString());
     vars.put("name", domainSpec.name());
-    if (isDataset(domainSpec)) {
+    if (isDatasetDomain(domainSpec)) {
       vars.put("isDataset", true);
       imports.add(Dataset.class);
     } else {
@@ -140,6 +139,7 @@ public class GenerationFunctions {
     vars.put("simpleName", ClassNameFunctions.getSimpleName(canonicalName));
     vars.put("domainAnnotation", imports.addAndGetSimpleName(tech.intellispaces.reflections.framework.annotation.Domain.class));
     vars.put("channelAnnotation", imports.addAndGetSimpleName(tech.intellispaces.reflections.framework.annotation.Channel.class));
+    vars.put("reflectionAnnotation", imports.addAndGetSimpleName(tech.intellispaces.reflections.framework.annotation.Reflection.class));
     vars.put("importedClasses", imports.getImports());
     return vars;
   }
@@ -224,20 +224,19 @@ public class GenerationFunctions {
     return sb.toString();
   }
 
-  static List<Map<String, Object>> buildParentsTemplateVariables(
+  static List<String> buildParentsTemplateVariables(
       DomainSpecification domainSpec,
       SpecificationContext context,
       MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
-    var parens = new ArrayList<Map<String, Object>>();
+    var parents = new ArrayList<String>();
     for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
-      parens.add(Map.of(
-          "name", imports.addAndGetSimpleName(getDomainClassName(superDomain.reference(), cfg)),
-          "typeParams", buildTypeParamsDeclaration(superDomain.reference(), superDomain.constraints(), context, imports, cfg)
-      ));
+      parents.add(imports.addAndGetSimpleName(getDomainClassName(superDomain.reference(), cfg)) +
+          buildTypeParamsDeclaration(superDomain.reference(), superDomain.constraints(), context, imports, cfg)
+      );
     }
-    return parens;
+    return parents;
   }
 
   static String buildTypeParamsDeclaration(
@@ -282,18 +281,18 @@ public class GenerationFunctions {
             String instanceDomainName = customTargetInstance.domain().name();
             DomainReference instanceDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(instanceDomainName);
             if (instanceDomain != null) {
-              if (DomainTypes.Domain.is(instanceDomain.type())) {
+              if (DomainAssignments.Domain.is(instanceDomain.assignment())) {
                 String domainName = customTargetInstance.projections().get("name").asString();
                 DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(domainName);
-                if (domain != null && DomainTypes.Notion.is(domain.type())) {
+                if (domain != null && DomainAssignments.Notion.is(domain.assignment())) {
                   sb.append(imports.addAndGetSimpleName(Object.class));
-                } else if (domain != null && DomainTypes.String.is(domain.type())) {
+                } else if (domain != null && DomainAssignments.String.is(domain.assignment())) {
                   sb.append(imports.addAndGetSimpleName(String.class));
-                } else if (domain != null && DomainTypes.Byte.is(domain.type())) {
+                } else if (domain != null && DomainAssignments.Byte.is(domain.assignment())) {
                   sb.append(imports.addAndGetSimpleName(Byte.class));
-                } else if (domain != null && DomainTypes.Integer.is(domain.type())) {
+                } else if (domain != null && DomainAssignments.Integer.is(domain.assignment())) {
                   sb.append(imports.addAndGetSimpleName(Integer.class));
-                } else if (domain != null && DomainTypes.Double.is(domain.type())) {
+                } else if (domain != null && DomainAssignments.Double.is(domain.assignment())) {
                   sb.append(imports.addAndGetSimpleName(Double.class));
                 } else {
                   sb.append("? extends ");
@@ -388,17 +387,16 @@ public class GenerationFunctions {
         map.put("alias", channelSpec.alias());
         map.put("rid", channelSpec.rid().toString());
         map.put("name", channelSpec.name());
-        if (ImmobilityTypes.Unmovable.is(channelSpec.target().immobilityType())) {
-          imports.add(Unmovable.class);
+        if (ImmobilityTypes.General.is(channelSpec.target().immobilityType())) {
           map.put("movable", false);
-          map.put("unmovable", true);
+          map.put("unmovable", false);
         } else if (ImmobilityTypes.Movable.is(channelSpec.target().immobilityType())) {
           imports.add(Movable.class);
           map.put("movable", true);
           map.put("unmovable", false);
         } else {
           map.put("movable", false);
-          map.put("unmovable", false);
+          map.put("unmovable", true);
         }
         map.put("typeParams", buildTypeParamDeclarations(channelSpec, imports, cfg));
         map.put("target", buildChannelTargetTypeDeclaration(channelSpec, SpaceReferences.withName(domainSpec.name()), context, imports, cfg));
@@ -670,10 +668,10 @@ public class GenerationFunctions {
     return map;
   }
 
-  static boolean isDataset(DomainSpecification domainSpec) {
+  static boolean isDatasetDomain(DomainSpecification domainSpec) {
     for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
       DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(superDomain.reference().name());
-      if (domain != null && DomainTypes.Dataset.is(domain.type())) {
+      if (domain != null && DomainAssignments.Dataset.is(domain.assignment())) {
         return true;
       }
     }
@@ -770,19 +768,19 @@ public class GenerationFunctions {
     DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(domainName);
     if (domain != null && domain.delegateClassName() != null) {
       if (enablePrimitives) {
-        if (DomainTypes.Boolean.is(domain.type())) {
+        if (DomainAssignments.Boolean.is(domain.assignment())) {
           return boolean.class.getCanonicalName();
-        } else if (DomainTypes.Byte.is(domain.type())) {
+        } else if (DomainAssignments.Byte.is(domain.assignment())) {
           return byte.class.getCanonicalName();
-        } else if (DomainTypes.Short.is(domain.type())) {
+        } else if (DomainAssignments.Short.is(domain.assignment())) {
           return short.class.getCanonicalName();
-        } else if (DomainTypes.Integer.is(domain.type())) {
+        } else if (DomainAssignments.Integer.is(domain.assignment())) {
           return int.class.getCanonicalName();
-        } else if (DomainTypes.Long.is(domain.type())) {
+        } else if (DomainAssignments.Long.is(domain.assignment())) {
           return long.class.getCanonicalName();
-        } else if (DomainTypes.Float.is(domain.type())) {
+        } else if (DomainAssignments.Float.is(domain.assignment())) {
           return float.class.getCanonicalName();
-        } else if (DomainTypes.Double.is(domain.type())) {
+        } else if (DomainAssignments.Double.is(domain.assignment())) {
           return double.class.getCanonicalName();
         }
       }
@@ -792,11 +790,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainOfDomainsName() {
-    return ReflectionsNodeFunctions.ontologyReference().getDomainByType(DomainTypes.Domain).domainName();
+    return ReflectionsNodeFunctions.ontologyReference().getDomainByType(DomainAssignments.Domain).domainName();
   }
 
   static String getDomainOfDomainsClassCanonicalName() {
-    return ReflectionsNodeFunctions.ontologyReference().getDomainByType(DomainTypes.Domain).delegateClassName();
+    return ReflectionsNodeFunctions.ontologyReference().getDomainByType(DomainAssignments.Domain).delegateClassName();
   }
 
   static Map<TraversePathSpecification, Equivalence> makeEquivalenceIndex(List<ConstraintSpecification> constraints) {

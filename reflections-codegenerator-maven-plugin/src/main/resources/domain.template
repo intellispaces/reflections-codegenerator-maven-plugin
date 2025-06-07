@@ -8,7 +8,7 @@ import {{$importedClass}};
 {{when $isDataset}}
 @Dataset
 {{end}}
-public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typeParam : $typeParams}}{{$typeParam}}{{when $typeParam.isNotLast()}}, {{end}}{{end}}>{{end}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent["name"]}}{{$parent["typeParams"]}}{{when $parent.isNotLast()}}, {{end}}{{end}}{{end}} {
+public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typeParam : $typeParams}}{{$typeParam}}{{when $typeParam.isNotLast()}}, {{end}}{{end}}>{{end}}{{when $parents.isNotEmpty()}} extends {{for parent : $parents}}{{$parent}}{{when $parent.isNotLast()}}, {{end}}{{end}}{{end}} {
 
 {{for channel : $channels}}
 {{when eachOf($channel["name"].isEmpty(), $channel["allowedTraverse"].isEmpty()).isTrue()}}
@@ -19,9 +19,6 @@ public interface {{$simpleName}}{{when $typeParams.isNotEmpty()}}<{{for typePara
     {{when $channel["name"].isNotEmpty()}}, name = "{{$channel["name"]}}" {{end}}
     {{when $channel["allowedTraverse"].isNotEmpty()}}, allowedTraverse = {{$channel["allowedTraverse"]}} {{end}}
   )
-{{end}}
-{{when $channel["unmovable"]}}
-  @Unmovable
 {{end}}
 {{when $channel["movable"]}}
   @Movable

@@ -14,13 +14,13 @@ public class ConfigurationBuilder {
     return this;
   }
 
-  public ConfigurationBuilder log(Log log) {
-    this.log = log;
+  public ConfigurationBuilder repository(SpecificationRepository repository) {
+    this.repository = repository;
     return this;
   }
 
-  public ConfigurationBuilder repository(SpecificationRepository repository) {
-    this.repository = repository;
+  public ConfigurationBuilder log(Log log) {
+    this.log = log;
     return this;
   }
 
