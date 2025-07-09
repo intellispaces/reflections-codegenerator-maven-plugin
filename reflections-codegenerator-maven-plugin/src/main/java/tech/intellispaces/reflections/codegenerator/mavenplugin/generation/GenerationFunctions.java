@@ -125,7 +125,7 @@ public class GenerationFunctions {
     var vars = new HashMap<String, Object>();
     vars.put("rid", domainSpec.rid().toString());
     vars.put("name", domainSpec.name());
-    if (isDatasetDomain(domainSpec)) {
+    if (isDatasetDomain(domainSpec, cfg)) {
       vars.put("isDataset", true);
       imports.add(Dataset.class);
     } else {
@@ -668,10 +668,16 @@ public class GenerationFunctions {
     return map;
   }
 
-  static boolean isDatasetDomain(DomainSpecification domainSpec) {
-    for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
-      DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(superDomain.reference().name());
-      if (domain != null && DomainAssignments.Dataset.is(domain.assignment())) {
+  static boolean isDatasetDomain(
+      DomainSpecification domainSpec, Configuration cfg
+  ) throws MojoExecutionException {
+    for (SuperDomainSpecification superDomainSpec : domainSpec.superDomains()) {
+      String superDomainName = superDomainSpec.reference().name();
+      DomainReference referenceDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(superDomainName);
+      if (referenceDomain != null && DomainAssignments.Dataset.is(referenceDomain.assignment())) {
+          return true;
+      }
+      if (isDatasetDomain(findDomain(SpaceReferences.withName(superDomainName), cfg), cfg)) {
         return true;
       }
     }
