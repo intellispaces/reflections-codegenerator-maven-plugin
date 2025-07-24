@@ -11,8 +11,8 @@ public class SettingsBuilder {
     return this;
   }
 
-  public SettingsBuilder specificationPath(String inputSpec) {
-    this.specificationPath = inputSpec;
+  public SettingsBuilder specificationPath(String specificationPath) {
+    this.specificationPath = specificationPath;
     return this;
   }
 

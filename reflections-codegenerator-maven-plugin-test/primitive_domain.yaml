@@ -1,0 +1,12 @@
+intellispaces: "0.1"
+info:
+  title: The primitive domain samples
+ontology:
+  domains:
+    intellispaces.plugin.sample.domain.Primitive:
+      description: The primitive domain sample
+      rid: cf2db025-febc-427e-ad15-b8df0b98c4ea
+      channels:
+        - length:
+          rid: fb17bec4-0d1a-4c1d-b311-23bd9cde2f45
+          target.domain: test.IntegerNumber

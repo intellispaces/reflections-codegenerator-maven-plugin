@@ -1,0 +1,5 @@
+domainDomain.name = test.Domain
+domainDomain.class = test.DomainDomain
+
+integerDomain.name = test.IntegerNumber
+integerDomain.class = test.IntegerNumberDomain

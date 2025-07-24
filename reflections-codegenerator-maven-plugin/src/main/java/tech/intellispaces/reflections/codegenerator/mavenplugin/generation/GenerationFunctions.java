@@ -246,6 +246,14 @@ public class GenerationFunctions {
       MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
+    DomainReference standardDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(destinationDomain.name());
+    if (standardDomain != null
+        && !DomainAssignments.Domain.is(standardDomain.assignment())
+          && !DomainAssignments.Dataset.is(standardDomain.assignment())
+    ) {
+      return "";
+    }
+
     DomainSpecification destinationDomainSpec = findDomain(destinationDomain, cfg);
     List<ChannelSpecification> domainTypeRelatedChannels = getTypeRelatedChannels(destinationDomainSpec, cfg);
     if (domainTypeRelatedChannels.isEmpty()) {

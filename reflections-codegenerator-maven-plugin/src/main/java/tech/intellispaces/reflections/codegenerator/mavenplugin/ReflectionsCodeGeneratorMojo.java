@@ -47,8 +47,8 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
   /**
    * The specification file path.
    */
-  @Parameter(property = "inputSpec", required = true)
-  private String inputSpec;
+  @Parameter(property = "specificationPath", required = true)
+  private String specificationPath;
 
   /**
    * External ontology repositories.
@@ -114,7 +114,7 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
   Settings createSettings() {
     return SettingsProvider.builder()
         .projectPath(project.getBasedir().toString())
-        .specificationPath(inputSpec)
+        .specificationPath(specificationPath)
         .outputDirectory(outputDirectory)
         .basePackage(basePackage != null ? basePackage : "")
         .get();
