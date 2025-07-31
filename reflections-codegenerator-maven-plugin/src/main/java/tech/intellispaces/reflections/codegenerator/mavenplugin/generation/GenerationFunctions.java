@@ -208,11 +208,11 @@ public class GenerationFunctions {
       ChannelSpecification channelSpec, MutableDependencySet imports, Configuration cfg
   ) {
     if (channelSpec.target().domainBounds() == null) {
-      return channelSpec.target().alias();
+      return channelSpec.target().sideAlias();
     }
 
     var sb = new StringBuilder();
-    sb.append(channelSpec.target().alias());
+    sb.append(channelSpec.target().sideAlias());
     sb.append(" extends ");
     RunnableAction commaAppender = StringActions.skipFirstTimeCommaAppender(sb);
     for (String extendedDomain : channelSpec.target().domainBounds().superDomainAliases()) {
@@ -266,8 +266,8 @@ public class GenerationFunctions {
       ChannelSpecification contextChannel = findEquivalentBaseChannel(domainTypeRelatedChannel, equivalenceIndex, context);
       commaAppender.run();
       if (contextChannel != null) {
-        if (contextChannel.target().alias() != null) {
-          sb.append(contextChannel.target().alias());
+        if (contextChannel.target().sideAlias() != null) {
+          sb.append(contextChannel.target().sideAlias());
         } else if (contextChannel.target().instance() != null) {
           if (contextChannel.target().instance().isStringInstance()) {
             sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(contextChannel.target().instance().asString(), false, cfg)));
@@ -561,13 +561,16 @@ public class GenerationFunctions {
         var sb = new StringBuilder();
         sb.append(domainClassSimpleName);
         sb.append("<");
-        if (channelSideSpec.alias() != null) {
-          sb.append(channelSideSpec.alias());
-        } else if (channelSideSpec.instance() != null) {
-          if (channelSideSpec.instance().isStringInstance()) {
-            sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(channelSideSpec.instance().asString(), false, cfg)));
-          } else {
-            throw NotImplementedExceptions.withCode("bwPPqkJ9");
+        if (channelSideSpec.sideAlias() != null) {
+          sb.append(channelSideSpec.sideAlias());
+        } else if (channelSideSpec.isTargetSide()) {
+          InstanceSpecification instance = channelSideSpec.asTargetSide().instance();
+          if (instance != null) {
+            if (instance.isStringInstance()) {
+              sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(instance.asString(), false, cfg)));
+            } else {
+              throw NotImplementedExceptions.withCode("bwPPqkJ9");
+            }
           }
         } else {
           sb.append("?");
@@ -582,21 +585,24 @@ public class GenerationFunctions {
       var sb = new StringBuilder();
       sb.append(imports.addAndGetSimpleName(getDomainOfDomainsClassCanonicalName()));
       sb.append("<");
-      if (channelSideSpec.alias() != null) {
-        sb.append(channelSideSpec.alias());
-      } else if (channelSideSpec.instance() != null) {
-        if (channelSideSpec.instance().isStringInstance()) {
-          sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(channelSideSpec.instance().asString(), false, cfg)));
-        } else {
-          throw NotImplementedExceptions.withCode("bwPPqkJ9");
+      if (channelSideSpec.sideAlias() != null) {
+        sb.append(channelSideSpec.sideAlias());
+      } else if (channelSideSpec.isTargetSide()) {
+        InstanceSpecification instance = channelSideSpec.asTargetSide().instance();
+        if (instance != null) {
+          if (instance.isStringInstance()) {
+            sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(instance.asString(), false, cfg)));
+          } else {
+            throw NotImplementedExceptions.withCode("bwPPqkJ9");
+          }
         }
       } else {
         throw NotImplementedExceptions.withCode("dAA4NgvI");
       }
       sb.append(">");
       return sb.toString();
-    } else if (channelSideSpec.alias() != null) {
-      return channelSideSpec.alias();
+    } else if (channelSideSpec.sideAlias() != null) {
+      return channelSideSpec.sideAlias();
     } else if (!CollectionFunctions.isNullOrEmpty(channelSideSpec.constraints())) {
       String targetDeclaration = buildChannelDeclarationByConstraints(context, channelSideSpec.constraints(), imports, cfg);
       if (targetDeclaration != null) {
@@ -635,8 +641,8 @@ public class GenerationFunctions {
               ChannelSpecification channel = channels.stream()
                   .filter(c -> thruTransition.channelAlias().equals(c.alias()))
                   .collect(tech.intellispaces.commons.stream.Collectors.one());
-              if (channel.target().alias() != null) {
-                return channel.target().alias();
+              if (channel.target().sideAlias() != null) {
+                return channel.target().sideAlias();
               } else if (channel.target().instance() != null && channel.target().instance().isStringInstance()) {
                 if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(channel.target().domainAlias())) {
                   return imports.addAndGetSimpleName(getDefaultDomainClassName(channel.target().instance().asString(), false, cfg));
