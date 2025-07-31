@@ -58,8 +58,6 @@ import tech.intellispaces.specification.space.exception.SpecificationException;
 import tech.intellispaces.specification.space.exception.TraversePathSpecificationException;
 import tech.intellispaces.specification.space.instance.CustomInstanceSpecification;
 import tech.intellispaces.specification.space.instance.InstanceSpecification;
-import tech.intellispaces.specification.space.reference.SpaceReference;
-import tech.intellispaces.specification.space.reference.SpaceReferences;
 import tech.intellispaces.specification.space.traverse.TraversePathParseFunctions;
 import tech.intellispaces.specification.space.traverse.TraversePathSpecification;
 import tech.intellispaces.specification.space.traverse.TraverseTransitionSpecification;
@@ -160,7 +158,7 @@ public class GenerationFunctions {
     vars.put("channelTypes", buildChannelTypes(channelSpec, imports));
     vars.put("typeParams", buildTypeParamDeclarations(channelSpec, imports, cfg));
     vars.put("sourceDomain", buildChannelSourceTypeDeclaration(channelSpec, context, imports, cfg));
-    vars.put("targetDomain", buildChannelTargetTypeDeclaration(channelSpec, channelSpec.source().domain(), context, imports, cfg));
+    vars.put("targetDomain", buildChannelTargetTypeDeclaration(channelSpec, channelSpec.source().domainAlias(), context, imports, cfg));
     vars.put("qualifiers", buildChannelQualifiers(channelSpec, context, imports, cfg));
     vars.put("packageName", ClassNameFunctions.getPackageName(canonicalName));
     vars.put("simpleName", ClassNameFunctions.getSimpleName(canonicalName));
@@ -217,7 +215,7 @@ public class GenerationFunctions {
     sb.append(channelSpec.target().alias());
     sb.append(" extends ");
     RunnableAction commaAppender = StringActions.skipFirstTimeCommaAppender(sb);
-    for (SpaceReference extendedDomain : channelSpec.target().domainBounds().superDomains()) {
+    for (String extendedDomain : channelSpec.target().domainBounds().superDomainAliases()) {
       commaAppender.run();
       sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(extendedDomain, false, cfg)));
     }
@@ -232,21 +230,21 @@ public class GenerationFunctions {
   ) throws MojoExecutionException {
     var parents = new ArrayList<String>();
     for (SuperDomainSpecification superDomain : domainSpec.superDomains()) {
-      parents.add(imports.addAndGetSimpleName(getDomainClassName(superDomain.reference(), cfg)) +
-          buildTypeParamsDeclaration(superDomain.reference(), superDomain.constraints(), context, imports, cfg)
+      parents.add(imports.addAndGetSimpleName(getDomainClassName(superDomain.alias(), cfg)) +
+          buildTypeParamsDeclaration(superDomain.alias(), superDomain.constraints(), context, imports, cfg)
       );
     }
     return parents;
   }
 
   static String buildTypeParamsDeclaration(
-      SpaceReference destinationDomain,
+      String destinationDomainAlias,
       List<ConstraintSpecification> constraints,
       SpecificationContext context,
       MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
-    DomainReference standardDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(destinationDomain.name());
+    DomainReference standardDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(destinationDomainAlias);
     if (standardDomain != null
         && !DomainAssignments.Domain.is(standardDomain.assignment())
           && !DomainAssignments.Dataset.is(standardDomain.assignment())
@@ -254,7 +252,7 @@ public class GenerationFunctions {
       return "";
     }
 
-    DomainSpecification destinationDomainSpec = findDomain(destinationDomain, cfg);
+    DomainSpecification destinationDomainSpec = findDomain(destinationDomainAlias, cfg);
     List<ChannelSpecification> domainTypeRelatedChannels = getTypeRelatedChannels(destinationDomainSpec, cfg);
     if (domainTypeRelatedChannels.isEmpty()) {
       return "";
@@ -271,7 +269,7 @@ public class GenerationFunctions {
         if (contextChannel.target().alias() != null) {
           sb.append(contextChannel.target().alias());
         } else if (contextChannel.target().instance() != null) {
-          if (contextChannel.target().instance().isString()) {
+          if (contextChannel.target().instance().isStringInstance()) {
             sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(contextChannel.target().instance().asString(), false, cfg)));
           } else {
             throw NotImplementedExceptions.withCode("H7Nnygs");
@@ -286,7 +284,7 @@ public class GenerationFunctions {
         if (targetInstance != null) {
           if (targetInstance.isCustomInstance()) {
             CustomInstanceSpecification customTargetInstance = targetInstance.asCustomInstance();
-            String instanceDomainName = customTargetInstance.domain().name();
+            String instanceDomainName = customTargetInstance.domainAlias();
             DomainReference instanceDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(instanceDomainName);
             if (instanceDomain != null) {
               if (DomainAssignments.Domain.is(instanceDomain.assignment())) {
@@ -306,9 +304,8 @@ public class GenerationFunctions {
                   sb.append("? extends ");
                   sb.append(imports.addAndGetSimpleName(getDomainClassCanonicalName(domainName, cfg)));
 
-                  SpaceReference domainRef = SpaceReferences.build().name(domainName).build();
                   String nestedDeclaration = buildTypeParamsDeclaration(
-                      domainRef, customTargetInstance.constraints(), context, imports, cfg
+                      domainName, customTargetInstance.constraints(), context, imports, cfg
                   );
                   sb.append(nestedDeclaration);
                 }
@@ -346,10 +343,10 @@ public class GenerationFunctions {
           if (transition.isThruTransition()) {
             TraverseTransitionThruSpecification thruTransition = transition.asThruTransition();
 
-            String source = equivalentPath.sourceDomain().name();
+            String source = equivalentPath.sourceDomainAlias();
             List<ChannelSpecification> contextChannels = getContextChannels(context, source);
             for (ChannelSpecification contextChannel : contextChannels) {
-              if (Objects.equals(contextChannel.alias(),  thruTransition.channel().name())) {
+              if (Objects.equals(contextChannel.alias(), thruTransition.channelAlias())) {
                 return contextChannel;
               }
             }
@@ -407,7 +404,7 @@ public class GenerationFunctions {
           map.put("unmovable", true);
         }
         map.put("typeParams", buildTypeParamDeclarations(channelSpec, imports, cfg));
-        map.put("target", buildChannelTargetTypeDeclaration(channelSpec, SpaceReferences.withName(domainSpec.name()), context, imports, cfg));
+        map.put("target", buildChannelTargetTypeDeclaration(channelSpec, domainSpec.name(), context, imports, cfg));
         map.put("qualifiers", buildChannelQualifiers(channelSpec, context, imports, cfg));
         map.put("allowedTraverse", buildAllowedTraverse(channelSpec.allowedTraverses(), imports));
         variables.add(map);
@@ -474,7 +471,7 @@ public class GenerationFunctions {
       DomainSpecification domainSpec, List<ChannelSpecification> inheritedChannels, Configuration cfg
   ) throws SpecificationException {
     for (SuperDomainSpecification superDomainSpec : domainSpec.superDomains()) {
-      DomainSpecification superDomain = cfg.repository().findDomain(superDomainSpec.reference().name());
+      DomainSpecification superDomain = cfg.repository().findDomain(superDomainSpec.alias());
       inheritedChannels.addAll(superDomain.channels());
       findInheritedChannels(superDomain, inheritedChannels, cfg);
     }
@@ -491,33 +488,33 @@ public class GenerationFunctions {
 
   static String buildChannelTargetTypeDeclaration(
       ChannelSpecification channelSpec,
-      SpaceReference domainReference,
+      String domainAlias,
       SpecificationContext parentContext,
       MutableDependencySet imports,
       Configuration cfg
   ) throws MojoExecutionException {
-    boolean enablePrimitives = !enablePrimitivesForChannelTarget(channelSpec, domainReference, cfg);
+    boolean enablePrimitives = !enablePrimitivesForChannelTarget(channelSpec, domainAlias, cfg);
     return buildChannelSideTypeDeclaration(channelSpec.target(), parentContext, imports, cfg, enablePrimitives);
   }
 
   static boolean enablePrimitivesForChannelTarget(
-      ChannelSpecification channelSpec, SpaceReference domainReference, Configuration cfg
+      ChannelSpecification channelSpec, String domainAlias, Configuration cfg
   ) throws MojoExecutionException {
-    if (channelSpec.target().domain() == null) {
+    if (channelSpec.target().domainAlias() == null) {
       return false;
     }
-    String domainClassName = getDefaultDomainClassName(channelSpec.target().domain(), true, cfg);
+    String domainClassName = getDefaultDomainClassName(channelSpec.target().domainAlias(), true, cfg);
     if (!ClassFunctions.isPrimitiveClass(domainClassName)) {
       return false;
     }
 
-    DomainSpecification domain = findDomain(domainReference, cfg);
+    DomainSpecification domain = findDomain(domainAlias, cfg);
     for (SuperDomainSpecification superDomainSpec : domain.superDomains()) {
-      DomainSpecification superDomain = findDomain(superDomainSpec.reference(), cfg);
+      DomainSpecification superDomain = findDomain(superDomainSpec.alias(), cfg);
       for (ChannelSpecification superChannelSpec : superDomain.channels()) {
         if (Objects.equals(superChannelSpec.alias(), channelSpec.alias()) && superChannelSpec.qualifiers().size() == channelSpec.qualifiers().size()) {
           if (channelSpec.qualifiers().isEmpty()) {
-            return (superChannelSpec.target().domain() == null);
+            return (superChannelSpec.target().domainAlias() == null);
           } else {
             boolean sameQualifiers = true;
             Iterator<ChannelSpecification> channelQualifierIterator = channelSpec.qualifiers().iterator();
@@ -525,10 +522,10 @@ public class GenerationFunctions {
             while (channelQualifierIterator.hasNext()) {
               ChannelSpecification channelQualifier = channelQualifierIterator.next();
               ChannelSpecification superChannelQualifier = superChannelQualifierIterator.next();
-              if (channelQualifier.target().domain() != null && channelQualifier.target().domain().name() != null &&
-                  superChannelQualifier.target().domain() != null && superChannelQualifier.target().domain().name() !=null
+              if (channelQualifier.target().domainAlias() != null && channelQualifier.target().domainAlias() != null &&
+                  superChannelQualifier.target().domainAlias() != null && superChannelQualifier.target().domainAlias() !=null
               ) {
-                if (!Objects.equals(channelQualifier.target().domain().name(), superChannelQualifier.target().domain().name())) {
+                if (!Objects.equals(channelQualifier.target().domainAlias(), superChannelQualifier.target().domainAlias())) {
                   sameQualifiers = false;
                   break;
                 }
@@ -537,12 +534,12 @@ public class GenerationFunctions {
               };
             }
             if (sameQualifiers) {
-              return (superChannelSpec.target().domain() == null);
+              return (superChannelSpec.target().domainAlias() == null);
             }
           }
         }
       }
-      if (enablePrimitivesForChannelTarget(channelSpec, superDomainSpec.reference(), cfg)) {
+      if (enablePrimitivesForChannelTarget(channelSpec, superDomainSpec.alias(), cfg)) {
         return true;
       }
     }
@@ -556,19 +553,18 @@ public class GenerationFunctions {
       Configuration cfg,
       boolean enablePrimitives
   ) throws MojoExecutionException  {
-    SpaceReference domainReference = channelSideSpec.domain();
-    if (domainReference != null && domainReference.name() != null) {
-      String domainName = domainReference.name();
-      String domainClassName = getDefaultDomainClassName(domainName, enablePrimitives, cfg);
+    String domainAlias = channelSideSpec.domainAlias();
+    if (domainAlias != null) {
+      String domainClassName = getDefaultDomainClassName(domainAlias, enablePrimitives, cfg);
       String domainClassSimpleName = imports.addAndGetSimpleName(domainClassName);
-      if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(domainName)) {
+      if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(domainAlias)) {
         var sb = new StringBuilder();
         sb.append(domainClassSimpleName);
         sb.append("<");
         if (channelSideSpec.alias() != null) {
           sb.append(channelSideSpec.alias());
         } else if (channelSideSpec.instance() != null) {
-          if (channelSideSpec.instance().isString()) {
+          if (channelSideSpec.instance().isStringInstance()) {
             sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(channelSideSpec.instance().asString(), false, cfg)));
           } else {
             throw NotImplementedExceptions.withCode("bwPPqkJ9");
@@ -580,7 +576,7 @@ public class GenerationFunctions {
         return sb.toString();
       }
       return domainClassSimpleName + buildTypeParamsDeclaration(
-          domainReference, channelSideSpec.constraints(), context, imports, cfg
+          domainAlias, channelSideSpec.constraints(), context, imports, cfg
       );
     } else if (channelSideSpec.domainBounds() != null) {
       var sb = new StringBuilder();
@@ -589,7 +585,7 @@ public class GenerationFunctions {
       if (channelSideSpec.alias() != null) {
         sb.append(channelSideSpec.alias());
       } else if (channelSideSpec.instance() != null) {
-        if (channelSideSpec.instance().isString()) {
+        if (channelSideSpec.instance().isStringInstance()) {
           sb.append(imports.addAndGetSimpleName(getDefaultDomainClassName(channelSideSpec.instance().asString(), false, cfg)));
         } else {
           throw NotImplementedExceptions.withCode("bwPPqkJ9");
@@ -629,7 +625,7 @@ public class GenerationFunctions {
     Equivalence equivalence = equivalenceIndex.get(pathFromThisToDomain);
     if (equivalence != null) {
       for (TraversePathSpecification equivalentPath : equivalence.equivalentPaths()) {
-        String source = equivalentPath.sourceDomain().name();
+        String source = equivalentPath.sourceDomainAlias();
         List<ChannelSpecification> channels = getContextChannels(context, source);
         if (!channels.isEmpty()) {
           if (equivalentPath.transitions().size() == 1) {
@@ -637,12 +633,12 @@ public class GenerationFunctions {
             if (transition.isThruTransition()) {
               TraverseTransitionThruSpecification thruTransition = transition.asThruTransition();
               ChannelSpecification channel = channels.stream()
-                  .filter(c -> thruTransition.channel().name().equals(c.alias()))
+                  .filter(c -> thruTransition.channelAlias().equals(c.alias()))
                   .collect(tech.intellispaces.commons.stream.Collectors.one());
               if (channel.target().alias() != null) {
                 return channel.target().alias();
-              } else if (channel.target().instance() != null && channel.target().instance().isString()) {
-                if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(channel.target().domain().name())) {
+              } else if (channel.target().instance() != null && channel.target().instance().isStringInstance()) {
+                if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(channel.target().domainAlias())) {
                   return imports.addAndGetSimpleName(getDefaultDomainClassName(channel.target().instance().asString(), false, cfg));
                 }
               }
@@ -680,12 +676,12 @@ public class GenerationFunctions {
       DomainSpecification domainSpec, Configuration cfg
   ) throws MojoExecutionException {
     for (SuperDomainSpecification superDomainSpec : domainSpec.superDomains()) {
-      String superDomainName = superDomainSpec.reference().name();
-      DomainReference referenceDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(superDomainName);
+      String superDomainAlias = superDomainSpec.alias();
+      DomainReference referenceDomain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(superDomainAlias);
       if (referenceDomain != null && DomainAssignments.Dataset.is(referenceDomain.assignment())) {
           return true;
       }
-      if (isDatasetDomain(findDomain(SpaceReferences.withName(superDomainName), cfg), cfg)) {
+      if (isDatasetDomain(findDomain(superDomainAlias, cfg), cfg)) {
         return true;
       }
     }
@@ -693,8 +689,8 @@ public class GenerationFunctions {
   }
 
   static boolean isTypeRelatedChannel(ChannelSpecification channelSpec) {
-    if (channelSpec.target().domain() != null) {
-      if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(channelSpec.target().domain().name())) {
+    if (channelSpec.target().domainAlias() != null) {
+      if (ReflectionsNodeFunctions.ontologyReference().isDomainOfDomains(channelSpec.target().domainAlias())) {
         return channelSpec.target().instance() == null;
       }
     }
@@ -732,12 +728,12 @@ public class GenerationFunctions {
   }
 
   static DomainSpecification findDomain(
-      SpaceReference domainReference, Configuration cfg
+      String domainAlias, Configuration cfg
   ) throws MojoExecutionException {
     try {
-      return cfg.repository().findDomain(domainReference.name());
+      return cfg.repository().findDomain(domainAlias);
     } catch (SpecificationException e) {
-      throw new MojoExecutionException("Could not find domain by name '" + domainReference.name() + "'", e);
+      throw new MojoExecutionException("Could not find domain by alias '" + domainAlias + "'", e);
     }
   }
 
@@ -762,8 +758,8 @@ public class GenerationFunctions {
     return getDomainClassCanonicalName(domainSpec.name(), cfg);
   }
 
-  static String getDomainClassName(SpaceReference domainReference, Configuration cfg) {
-    return getDomainClassCanonicalName(domainReference.name(), cfg);
+  static String getDomainClassName(String domainAlias, Configuration cfg) {
+    return getDomainClassCanonicalName(domainAlias, cfg);
   }
 
   static String getDomainClassCanonicalName(String domainName, Configuration cfg) {
@@ -774,12 +770,8 @@ public class GenerationFunctions {
     return NameConventionFunctions.convertToChannelClassName(cfg.settings().basePackage() + channelSpec.name());
   }
 
-  static String getDefaultDomainClassName(SpaceReference domainReference, boolean enablePrimitives, Configuration cfg) {
-    return getDefaultDomainClassName(domainReference.name(), enablePrimitives, cfg);
-  }
-
-  static String getDefaultDomainClassName(String domainName, boolean enablePrimitives, Configuration cfg) {
-    DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(domainName);
+  static String getDefaultDomainClassName(String domainAlias, boolean enablePrimitives, Configuration cfg) {
+    DomainReference domain = ReflectionsNodeFunctions.ontologyReference().getDomainByName(domainAlias);
     if (domain != null && domain.delegateClassName() != null) {
       if (enablePrimitives) {
         if (DomainAssignments.Boolean.is(domain.assignment())) {
@@ -800,7 +792,7 @@ public class GenerationFunctions {
       }
       return domain.delegateClassName();
     }
-    return getDomainClassCanonicalName(domainName, cfg);
+    return getDomainClassCanonicalName(domainAlias, cfg);
   }
 
   static String getDomainOfDomainsName() {
