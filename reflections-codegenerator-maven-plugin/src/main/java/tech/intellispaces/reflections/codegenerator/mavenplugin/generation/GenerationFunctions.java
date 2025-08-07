@@ -802,7 +802,7 @@ public class GenerationFunctions {
   }
 
   static String getDomainOfDomainsName() {
-    return ReflectionsNodeFunctions.ontologyReference().getDomainByType(DomainAssignments.Domain).domainName();
+    return ReflectionsNodeFunctions.ontologyReference().getDomainByType(DomainAssignments.Domain).domainAlias();
   }
 
   static String getDomainOfDomainsClassCanonicalName() {
