@@ -26,7 +26,7 @@
                 </executions>
                 <configuration>
                     <specificationPath>${project.basedir}/test.yaml</specificationPath>
-                    <packageName>tech</packageName>
+                    <basePackage>tech.test</basePackage>
                 </configuration>
             </plugin>
             <plugin>

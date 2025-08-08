@@ -51,6 +51,12 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
   private String specificationPath;
 
   /**
+   * The base package for generated Java classes.
+   */
+  @Parameter(property = "basePackage", required = true)
+  private String basePackage;
+
+  /**
    * External ontology repositories.
    */
   @Parameter(property = "repositories")
@@ -60,16 +66,19 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
    * The directory for generated Java source files.
    */
   @Parameter(
-      property = "outputDirectory",
-      defaultValue = "${project.build.directory}/generated-sources/reflections",
-      required = true)
-  private String outputDirectory;
+      property = "generatedSourcesDirectory",
+      required = true,
+      defaultValue = "${project.build.directory}/generated-sources/reflections")
+  private String generatedSourcesDirectory;
 
   /**
-   * The base package for generated Java classes.
+   * The directory for generated resources files.
    */
-  @Parameter(property = "basePackage")
-  private String basePackage;
+  @Parameter(
+      property = "generatedResourcesDirectory",
+      required = true,
+      defaultValue = "${project.build.directory}/generated-resources/reflections")
+  private String generatedResourcesDirectory;
 
   @Parameter(defaultValue = "${project}", required = true)
   private MavenProject project;
@@ -81,7 +90,7 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
       Settings settings = createSettings();
       var unitedRepository = new UnitedSpecificationRepository();
       Configuration cfg = createConfiguration(settings, unitedRepository);
-      loadOntologyReferences();
+      loadOntologyReferencePoints();
 
       specPath = Paths.get(cfg.settings().specificationPath());
       FileSpecification spec = SpecificationReadFunctions.readSpecification(specPath);
@@ -91,7 +100,7 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
 
       GenerationFunctions.generateArtifacts(spec, cfg);
 
-      project.addCompileSourceRoot(cfg.settings().outputDirectory());
+      project.addCompileSourceRoot(cfg.settings().generatedSourcesDirectory());
     } catch (MojoExecutionException e) {
       getLog().error("Failed to execute reflectionsJ Generator plugin. Source specification: " + specPath, e);
       throw e;
@@ -115,8 +124,9 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
     return SettingsProvider.builder()
         .projectPath(project.getBasedir().toString())
         .specificationPath(specificationPath)
-        .outputDirectory(outputDirectory)
-        .basePackage(basePackage != null ? basePackage : "")
+        .basePackage(basePackage)
+        .generatedSourcesDirectory(generatedSourcesDirectory)
+        .generatedResourcesDirectory(generatedResourcesDirectory)
         .get();
   }
 
@@ -142,7 +152,7 @@ public class ReflectionsCodeGeneratorMojo extends AbstractMojo {
       unitedRepository.addRepository(new InMemorySpecificationRepository(spec.ontology()));
   }
 
-  void loadOntologyReferences() throws MojoExecutionException {
+  void loadOntologyReferencePoints() throws MojoExecutionException {
     List<OntologyReferences> ontologyReferences = new ArrayList<>();
 
     // Try to direct read

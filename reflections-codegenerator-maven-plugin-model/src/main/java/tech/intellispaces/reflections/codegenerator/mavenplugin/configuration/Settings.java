@@ -9,7 +9,9 @@ public interface Settings {
 
   String specificationPath();
 
-  String outputDirectory();
-
   String basePackage();
+
+  String generatedSourcesDirectory();
+
+  String generatedResourcesDirectory();
 }

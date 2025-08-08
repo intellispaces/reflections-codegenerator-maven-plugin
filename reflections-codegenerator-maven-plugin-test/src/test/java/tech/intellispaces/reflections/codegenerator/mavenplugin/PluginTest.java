@@ -17,7 +17,7 @@ public class PluginTest {
 
   @Test
   public void testEmptyDomain() throws Exception {
-    Class<?> emptyDomainClass = Class.forName("intellispaces.plugin.sample.domain.EmptyDomain");
+    Class<?> emptyDomainClass = Class.forName("tech.test.intellispaces.plugin.sample.domain.EmptyDomain");
 
     assertThat(emptyDomainClass.isInterface()).isTrue();
     assertThat(emptyDomainClass.getAnnotation(Domain.class).value()).isEqualTo("9938abbf-2778-402b-8699-61afb0497e80");
@@ -27,7 +27,7 @@ public class PluginTest {
 
   @Test
   public void testPrimitiveDomain() throws Exception {
-    Class<?> emptyDomainClass = Class.forName("intellispaces.plugin.sample.domain.PrimitiveDomain");
+    Class<?> emptyDomainClass = Class.forName("tech.test.intellispaces.plugin.sample.domain.PrimitiveDomain");
 
     assertThat(emptyDomainClass.isInterface()).isTrue();
     assertThat(emptyDomainClass.getAnnotation(Domain.class).value()).isEqualTo("cf2db025-febc-427e-ad15-b8df0b98c4ea");

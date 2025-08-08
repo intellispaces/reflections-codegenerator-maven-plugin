@@ -3,8 +3,9 @@ package tech.intellispaces.reflections.codegenerator.mavenplugin.configuration;
 public class SettingsBuilder {
   private String projectPath;
   private String specificationPath;
-  private String outputDirectory;
   private String basePackage;
+  private String generatedSourcesDirectory;
+  private String generatedResourcesDirectory;
 
   public SettingsBuilder projectPath(String projectPath) {
     this.projectPath = projectPath;
@@ -16,13 +17,18 @@ public class SettingsBuilder {
     return this;
   }
 
-  public SettingsBuilder outputDirectory(String outputDirectory) {
-    this.outputDirectory = outputDirectory;
+  public SettingsBuilder basePackage(String basePackage) {
+    this.basePackage = basePackage;
     return this;
   }
 
-  public SettingsBuilder basePackage(String basePackage) {
-    this.basePackage = basePackage;
+  public SettingsBuilder generatedSourcesDirectory(String generatedSourcesDirectory) {
+    this.generatedSourcesDirectory = generatedSourcesDirectory;
+    return this;
+  }
+
+  public SettingsBuilder generatedResourcesDirectory(String generatedResourcesDirectory) {
+    this.generatedResourcesDirectory = generatedResourcesDirectory;
     return this;
   }
 
@@ -30,8 +36,9 @@ public class SettingsBuilder {
     return new SettingsImpl(
         projectPath,
         specificationPath,
-        outputDirectory,
-        basePackage
+        basePackage,
+        generatedSourcesDirectory,
+        generatedResourcesDirectory
     );
   }
 }

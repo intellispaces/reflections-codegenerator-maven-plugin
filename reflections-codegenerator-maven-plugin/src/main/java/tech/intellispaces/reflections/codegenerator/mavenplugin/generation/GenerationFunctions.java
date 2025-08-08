@@ -2,8 +2,10 @@ package tech.intellispaces.reflections.codegenerator.mavenplugin.generation;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,11 +70,12 @@ public class GenerationFunctions {
 
   public static void generateArtifacts(FileSpecification spec, Configuration cfg) throws MojoExecutionException {
     cfg.log().info("Process specification " + spec.specPath());
-    generateDomains(spec.ontology().domains(), cfg);
-    generateChannels(spec.ontology().channels(), cfg);
+    createDomainClasses(spec.ontology().domains(), cfg);
+    createChannelClasses(spec.ontology().channels(), cfg);
+    createOntologyResource(cfg);
   }
 
-  static void generateDomains(
+  static void createDomainClasses(
       List<DomainSpecification> domainSpecs, Configuration cfg
   ) throws MojoExecutionException {
     Template template = Templates.get("/domain.template");
@@ -85,14 +88,14 @@ public class GenerationFunctions {
         );
         Map<String, Object> templateVars = buildDomainTemplateVariables(domainSpec, canonicalName, curContext, cfg);
         String source = template.resolve(templateVars);
-        write(cfg, canonicalName, source);
+        writeClass(cfg, canonicalName, source);
       } catch (Exception e) {
         throw new MojoExecutionException("Could not process domain specification " + domainSpec.name(), e);
       }
     }
   }
 
-  static void generateChannels(
+  static void createChannelClasses(
       List<ChannelSpecification> channelSpecs, Configuration cfg
   ) throws MojoExecutionException {
     Template template = Templates.get("/channel.template");
@@ -105,11 +108,23 @@ public class GenerationFunctions {
         );
         Map<String, Object> templateVars = buildChannelTemplateVariables(channelSpec, canonicalName, curContext, cfg);
         String source = template.resolve(templateVars);
-        write(cfg, canonicalName, source);
+        writeClass(cfg, canonicalName, source);
       } catch (Exception e) {
         throw new MojoExecutionException("Could not process channel specification " + channelSpec.name(), e);
       }
     }
+  }
+
+  static void createOntologyResource(Configuration cfg) throws MojoExecutionException {
+    String resourceName = cfg.settings().basePackage() + ".ontology.yaml";
+    Path specPath = Paths.get(cfg.settings().specificationPath());
+    final String resourceContent;
+    try {
+      resourceContent = Files.readString(specPath, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new MojoExecutionException("Unable to read specification file " + specPath, e);
+    }
+    writeResource(cfg, resourceName, resourceContent);
   }
 
   static Map<String, Object> buildDomainTemplateVariables(
@@ -769,11 +784,11 @@ public class GenerationFunctions {
   }
 
   static String getDomainClassCanonicalName(String domainName, Configuration cfg) {
-    return cfg.settings().basePackage() + domainName + "Domain";
+    return cfg.settings().basePackage() + "." + domainName + "Domain";
   }
 
   static String getChannelClassName(ChannelSpecification channelSpec, Configuration cfg) {
-    return NameConventionFunctions.convertToChannelClassName(cfg.settings().basePackage() + channelSpec.name());
+    return NameConventionFunctions.convertToChannelClassName(cfg.settings().basePackage() + "." + channelSpec.name());
   }
 
   static String getDefaultDomainClassName(String domainAlias, boolean enablePrimitives, Configuration cfg) {
@@ -841,11 +856,11 @@ public class GenerationFunctions {
     return PATH_FROM_THIS_TO_DOMAIN;
   }
 
-  static void write(
+  static void writeClass(
       Configuration cfg, String canonicalName, String sourceCode
   ) throws MojoExecutionException {
     Path path = new File(StringFunctions.join(
-        cfg.settings().outputDirectory(),
+        cfg.settings().generatedSourcesDirectory(),
         canonicalName.replace(".", File.separator),
         File.separator
     ) + ".java").toPath();
@@ -853,7 +868,21 @@ public class GenerationFunctions {
       Files.createDirectories(path.getParent());
       Files.writeString(path, sourceCode);
     } catch (IOException e) {
-      throw new MojoExecutionException("Could not write file " + path, e);
+      throw new MojoExecutionException("Could not write class file " + path, e);
+    }
+  }
+
+  public static void writeResource(
+      Configuration cfg, String resourceName, String resourceContent
+  ) throws MojoExecutionException {
+    Path path = new File(StringFunctions.join(
+        cfg.settings().generatedResourcesDirectory(), resourceName, File.separator
+    )).toPath();
+    try {
+      Files.createDirectories(path.getParent());
+      Files.writeString(path, resourceContent);
+    } catch (IOException e) {
+      throw new MojoExecutionException("Could not write resource file " + path, e);
     }
   }
 
