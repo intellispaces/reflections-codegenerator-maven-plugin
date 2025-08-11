@@ -788,7 +788,7 @@ public class GenerationFunctions {
   }
 
   static String getChannelClassName(ChannelSpecification channelSpec, Configuration cfg) {
-    return NameConventionFunctions.convertToChannelClassName(cfg.settings().basePackage() + channelSpec.name());
+    return NameConventionFunctions.convertToChannelClassName(cfg.settings().basePackage() + "." + channelSpec.name());
   }
 
   static String getDefaultDomainClassName(String domainAlias, boolean enablePrimitives, Configuration cfg) {
