@@ -4,11 +4,10 @@ import java.io.InputStream;
 import java.nio.file.Path;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
-import tech.intellispaces.commons.properties.PropertiesSet;
 import tech.intellispaces.commons.properties.PropertiesSets;
+import tech.intellispaces.commons.properties.TraversablePropertiesSet;
 import tech.intellispaces.specification.space.FileSpecification;
 import tech.intellispaces.specification.space.SpecificationParseFunctions;
 import tech.intellispaces.specification.space.exception.SpecificationException;
@@ -30,8 +29,8 @@ public class SpecificationReadFunctions {
     }
   }
 
-  private static @NotNull PropertiesSet parseYaml(InputStream is) {
-    return PropertiesSets.createFlowing(YAML.load(is), PROPERTY_DELIMITER);
+  private static TraversablePropertiesSet parseYaml(InputStream is) {
+    return PropertiesSets.createFlowingTraversable(YAML.load(is), PROPERTY_DELIMITER);
   }
 
   private SpecificationReadFunctions() {}
